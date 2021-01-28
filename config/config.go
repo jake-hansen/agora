@@ -7,7 +7,8 @@ import (
 
 var config *viper.Viper
 
-// Init is used to initialize the configuration for Agora in the specified environment
+// Init is used to initialize the configuration for Agora in the specified environment. Configuration files are searched
+// for in the following locations: /etc/agora, $HOME/agora, and the directory the executable is run from.
 func Init(env string) {
 	config = viper.New()
 	config.SetConfigType("yaml")
@@ -26,6 +27,7 @@ func Init(env string) {
 	}
 }
 
+// GetConfig returns a pointer to the Viper instance for the application.
 func GetConfig() *viper.Viper {
 	return config
 }
