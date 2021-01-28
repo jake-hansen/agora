@@ -1,5 +1,5 @@
-LAST_COMMIT_SHA := $(shell git rev-parse --short HEAD)
-GIT_STATUS = $(shell git status --porcelain)
+LAST_COMMIT_SHA = $(shell git rev-parse --short HEAD)
+GIT_TREE_STATE = $(shell (git status --porcelain | grep -q .) && echo dirty || echo clean)
 
 all: bin/agora
 
@@ -28,6 +28,6 @@ build-image:
 	@docker build . --target build-image --platform linux/amd64 \
 	-t agora:latest
 
-ifeq ($(GIT_STATUS), 0)
+ifeq ($(GIT_TREE_STATE), clean)
 	@docker tag agora:latest agora:$(LAST_COMMIT_SHA)
 endif
