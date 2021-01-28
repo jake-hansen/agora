@@ -14,6 +14,7 @@ func Init(env string) {
 	config.SetConfigName(env)
 	config.AddConfigPath("/etc/agora/")
 	config.AddConfigPath("$HOME/agora")
+	config.AddConfigPath(".")
 
 	config.SetEnvPrefix("agora")
 	config.AutomaticEnv()
