@@ -1,4 +1,5 @@
-LAST_COMMIT_SHA := $(shell git rev-parse --short HEAD)
+LAST_COMMIT_SHA = $(shell git rev-parse --short HEAD)
+GIT_TREE_STATE = $(shell (git status --porcelain | grep -q .) && echo dirty || echo clean)
 
 all: bin/agora
 
@@ -25,4 +26,8 @@ lint:
 .PHONY: build-image
 build-image:
 	@docker build . --target build-image --platform linux/amd64 \
-	-t agora:$(LAST_COMMIT_SHA) -t agora:latest
+	-t agora:latest
+
+ifeq ($(GIT_TREE_STATE), clean)
+	@docker tag agora:latest agora:$(LAST_COMMIT_SHA)
+endif

@@ -38,6 +38,7 @@ COPY --from=unit-test /out/cover.out /cover.out
 FROM base AS build-image
 WORKDIR /app
 COPY --from=build /out/agora .
+COPY config/*.yaml .
 ENTRYPOINT [ "/app/agora" ]
 
 FROM scratch AS bin-unix
