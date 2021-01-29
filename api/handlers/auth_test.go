@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api/domain"
 	"github.com/jake-hansen/agora/api/handlers"
@@ -15,18 +16,18 @@ import (
 	"testing"
 )
 
+var mockCredentials = domain.Auth{
+	Credentials: &domain.User{
+		Username:  "test",
+		Password:  "test",
+	},
+}
+var mockToken = domain.Auth{
+	Token: "test-token",
+}
+
 func TestAuthHandler_Login(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		var mockCredentials = domain.Auth{
-			Credentials: &domain.User{
-				Username:  "test",
-				Password:  "test",
-			},
-		}
-		var mockToken = domain.Auth{
-			Token: "test-token",
-		}
-
 		mockSimpleAuthService := new(mocks.SimpleAuthService)
 		mockSimpleAuthService.On("Authenticate").Return(mockToken, nil)
 
@@ -88,5 +89,26 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		badRequest = `{"credentials": {"usernames": "test", "password": "test"}`
 		testBadRequest(router, badRequest, "{\"error\":\"could not parse request body\"}")
+	})
+
+	t.Run("invalid-credentials", func(t *testing.T) {
+		mockSimpleAuthService := new(mocks.SimpleAuthService)
+		mockSimpleAuthService.On("Authenticate").Return(nil,
+			errors.New("username or password not correct"))
+
+		router := gin.Default()
+		router.Use(middleware.PublicErrorHandler())
+		handlers.NewAuthHandler(router.Group("test"), mockSimpleAuthService)
+
+		payloadBuf := new(bytes.Buffer)
+		json.NewEncoder(payloadBuf).Encode(mockCredentials)
+		req, err := http.NewRequest("POST", "/test/auth", payloadBuf)
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
+		assert.Equal(t, "{\"error\":\"the provided credentials could not be validated\"}", w.Body.String())
 	})
 }
