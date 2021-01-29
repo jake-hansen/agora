@@ -54,7 +54,7 @@ func TestJWTService_ValidateToken(t *testing.T) {
 
 		assert.NoError(t, err)
 
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1 * time.Second)
 		_, err = jwt.ValidateToken(token)
 		assert.Error(t, err)
 	})
