@@ -7,11 +7,11 @@ import (
 )
 
 type AuthHandler struct {
-	AuthService domain.AuthService
+	AuthService *domain.AuthService
 }
 
 func NewAuthHandler(parentGroup *gin.RouterGroup, service domain.AuthService) {
-	handler := &AuthHandler{AuthService: service}
+	handler := &AuthHandler{AuthService: &service}
 
 	authGroup := parentGroup.Group("auth")
 	{
@@ -33,19 +33,19 @@ func (a *AuthHandler) Login(c *gin.Context) {
 	credentials := getCredentials(c)
 
 	// Retrieve token
-	token, err := a.AuthService.Authenticate(credentials)
+	token, err := (*a.AuthService).Authenticate(credentials)
 
 	if err != nil {
-		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		c.AbortWithError(http.StatusInternalServerError, err)
+	} else {
+		c.JSON(http.StatusOK, token)
 	}
-
-	c.JSON(http.StatusOK, token)
 }
 
 func (a *AuthHandler) Logout(c *gin.Context) {
 	credentials := getCredentials(c)
 
-	err := a.AuthService.Deauthenticate(credentials)
+	err := (*a.AuthService).Deauthenticate(credentials)
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 	}

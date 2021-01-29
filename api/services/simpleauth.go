@@ -6,11 +6,15 @@ import (
 )
 
 type SimpleAuth struct {
-	TokenService JWTService
+	tokenService *JWTService
+}
+
+func NewSimpleAuthService(tokenService JWTService) *SimpleAuth {
+	return &SimpleAuth{tokenService: &tokenService}
 }
 
 func (s *SimpleAuth) IsAuthenticated(auth domain.Auth) (bool, error) {
-	_, err := s.TokenService.ValidateToken(auth.Token)
+	_, err := s.tokenService.ValidateToken(auth.Token)
 	if err != nil {
 		return false, err
 	}
@@ -19,9 +23,9 @@ func (s *SimpleAuth) IsAuthenticated(auth domain.Auth) (bool, error) {
 
 func (s *SimpleAuth) Authenticate(auth domain.Auth) (interface{}, error) {
 	// Validate credentials with database
-	if auth.User.Username == "test" && auth.User.Password == "test" {
+	if auth.Credentials.Username == "test" && auth.Credentials.Password == "test" {
 		// Generate JWT
-		token, err := s.TokenService.GenerateToken(auth.User)
+		token, err := s.tokenService.GenerateToken(*auth.Credentials)
 		if err != nil {
 			return nil, err
 		}

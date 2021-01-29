@@ -1,8 +1,8 @@
 package domain
 
 type Auth struct {
-	User	User	`json:"user,omitempty"`
-	Token	string	`json:"token,omitempty"`
+	Credentials *User  `json:"credentials,omitempty"`
+	Token       string `json:"token,omitempty"`
 }
 
 type AuthService interface {
