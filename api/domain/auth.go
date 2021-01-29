@@ -1,7 +1,7 @@
 package domain
 
 type Auth struct {
-	Credentials *User  `json:"credentials,omitempty"`
+	Credentials *User  `json:"credentials,omitempty" binding:"required"`
 	Token       string `json:"token,omitempty"`
 }
 

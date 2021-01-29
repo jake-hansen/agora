@@ -4,8 +4,8 @@ package domain
 type User struct {
 	Firstname	string	`json:"firstname"`
 	Lastname	string	`json:"lastname"`
-	Username	string	`json:"username"`
-	Password	string	`json:"password"`
+	Username	string	`json:"username" binding:"required"`
+	Password	string	`json:"password" binding:"required"`
 }
 
 // NewUser returns a pointer to a User which contains the given parameters.

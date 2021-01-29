@@ -2,7 +2,9 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/handlers"
+	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/api/services"
 	"time"
 )
@@ -14,6 +16,8 @@ func NewRouter(env string) *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Use(middleware.PublicErrorHandler())
+	api.RegisterCustomValidation()
 
 	v1 := router.Group("v1")
 	dur, _ := time.ParseDuration("15m")
