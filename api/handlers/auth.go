@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/domain"
 	"net/http"
@@ -27,6 +29,10 @@ func NewAuthHandler(parentGroup *gin.RouterGroup, service domain.AuthService) {
 func getCredentials(c *gin.Context) (*domain.Auth, error) {
 	var credentials domain.Auth
 	err := c.ShouldBind(&credentials)
+	var verr validator.ValidationErrors
+	if !errors.As(err, &verr) {
+		err = api.NewAPIError(http.StatusBadRequest, err, "could not parse request body")
+	}
 	return &credentials, err
 }
 
