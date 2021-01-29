@@ -46,6 +46,6 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
 func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
-	panic("implement me")
+	return nil
 }
 
