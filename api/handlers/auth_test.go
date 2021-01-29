@@ -81,7 +81,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		badRequest = `{"credentials": {"username": "test", "passwords": "test"}}`
 		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Password\",\"reason\":" +
 			"\"required\"}]}")
-		
+
 		badRequest = `{"credentials": {"usernames": "test", "password": "test"}}`
 		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Username\",\"reason\":" +
 			"\"required\"}]}")

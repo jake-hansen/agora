@@ -30,7 +30,7 @@ func getCredentials(c *gin.Context) (*domain.Auth, error) {
 	var credentials domain.Auth
 	err := c.ShouldBind(&credentials)
 	var verr validator.ValidationErrors
-	if !errors.As(err, &verr) {
+	if err != nil && !errors.As(err, &verr) {
 		err = api.NewAPIError(http.StatusBadRequest, err, "could not parse request body")
 	}
 	return &credentials, err
