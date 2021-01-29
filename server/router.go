@@ -6,6 +6,7 @@ import (
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/api/services"
+	"github.com/jake-hansen/agora/config"
 	"time"
 )
 
@@ -20,7 +21,10 @@ func NewRouter(env string) *gin.Engine {
 	api.RegisterCustomValidation()
 
 	v1 := router.Group("v1")
-	dur, _ := time.ParseDuration("15m")
+	properties := config.GetConfig()
+
+	// Create auth handler
+	dur, _ := time.ParseDuration(properties.GetString("api.auth.jwtduration"))
 	handlers.NewAuthHandler(v1, services.NewSimpleAuthService(services.NewJWTService("agora", "test", dur)))
 
 	return router
