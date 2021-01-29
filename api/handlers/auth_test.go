@@ -133,4 +133,41 @@ func TestAuthHandler_Logout(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
+
+	t.Run("failure", func(t *testing.T) {
+		mockAuthService := new(mocks.AuthService)
+		mockAuthService.On("Deauthenticate").Return(errors.New("test error"))
+
+		router := gin.Default()
+		router.Use(middleware.PublicErrorHandler())
+		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+
+		payloadBuf := new(bytes.Buffer)
+		json.NewEncoder(payloadBuf).Encode(mockToken)
+		req, err := http.NewRequest("DELETE", "/test/auth", payloadBuf)
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+	})
+
+	t.Run("token-missing", func(t *testing.T) {
+		mockAuthService := new(mocks.AuthService)
+
+		router := gin.Default()
+		router.Use(middleware.PublicErrorHandler())
+		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+
+		badRequest := `{}`
+		req, err := http.NewRequest("DELETE", "/test/auth", strings.NewReader(badRequest))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, "{\"validation errors\":[{\"field\":\"Value\",\"reason\":\"required\"}]}", w.Body.String())
+	})
 }
