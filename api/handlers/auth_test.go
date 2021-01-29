@@ -22,18 +22,18 @@ var mockCredentials = domain.Auth{
 		Password:  "test",
 	},
 }
-var mockToken = domain.Auth{
-	Token: "test-token",
+var mockToken = domain.Token{
+	Value: "test-token",
 }
 
 func TestAuthHandler_Login(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		mockSimpleAuthService := new(mocks.SimpleAuthService)
-		mockSimpleAuthService.On("Authenticate").Return(mockToken, nil)
+		mockAuthService := new(mocks.AuthService)
+		mockAuthService.On("Authenticate").Return(&mockToken, nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockSimpleAuthService)
+		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
 
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(mockCredentials)
@@ -42,7 +42,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		var retrievedToken domain.Auth
+		var retrievedToken domain.Token
 		json.Unmarshal(w.Body.Bytes(), &retrievedToken)
 
 		assert.NoError(t, err)
@@ -61,11 +61,11 @@ func TestAuthHandler_Login(t *testing.T) {
 			assert.Equal(t, validationError, w.Body.String())
 		}
 
-		mockSimpleAuthService := new(mocks.SimpleAuthService)
+		mockAuthService := new(mocks.AuthService)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockSimpleAuthService)
+		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
 
 		badRequest := `{}`
 		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Credentials\"," +
@@ -92,13 +92,14 @@ func TestAuthHandler_Login(t *testing.T) {
 	})
 
 	t.Run("invalid-credentials", func(t *testing.T) {
-		mockSimpleAuthService := new(mocks.SimpleAuthService)
-		mockSimpleAuthService.On("Authenticate").Return(nil,
+		mockAuthService := new(mocks.AuthService)
+		var token *domain.Token = nil
+		mockAuthService.On("Authenticate").Return(token,
 			errors.New("username or password not correct"))
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockSimpleAuthService)
+		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
 
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(mockCredentials)
@@ -110,5 +111,26 @@ func TestAuthHandler_Login(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusUnauthorized, w.Code)
 		assert.Equal(t, "{\"error\":\"the provided credentials could not be validated\"}", w.Body.String())
+	})
+}
+
+func TestAuthHandler_Logout(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		mockAuthService := new(mocks.AuthService)
+		mockAuthService.On("Deauthenticate").Return(nil)
+
+		router := gin.Default()
+		router.Use(middleware.PublicErrorHandler())
+		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+
+		payloadBuf := new(bytes.Buffer)
+		json.NewEncoder(payloadBuf).Encode(mockToken)
+		req, err := http.NewRequest("DELETE", "/test/auth", payloadBuf)
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.NoError(t, err)
+		assert.Equal(t, http.StatusOK, w.Code)
 	})
 }

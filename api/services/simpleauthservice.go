@@ -19,8 +19,8 @@ func NewSimpleAuthService(tokenService JWTService) *SimpleAuthService {
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
 // if the contained JWT is valid.
-func (s *SimpleAuthService) IsAuthenticated(auth domain.Auth) (bool, error) {
-	_, err := s.tokenService.ValidateToken(auth.Token)
+func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
+	_, err := s.tokenService.ValidateToken(token.Value)
 	if err != nil {
 		return false, err
 	}
@@ -30,7 +30,7 @@ func (s *SimpleAuthService) IsAuthenticated(auth domain.Auth) (bool, error) {
 // Authenticate attempts to authenticate the given Auth. If authenticated, returns a JWT. Otherwise,
 // an error is returned.
 // TODO: implement database to validate username/password
-func (s *SimpleAuthService) Authenticate(auth domain.Auth) (interface{}, error) {
+func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error) {
 	// Validate credentials with database
 
 	if auth.Credentials.Username == "test" && auth.Credentials.Password == "test" {
@@ -39,13 +39,13 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (interface{}, error) 
 		if err != nil {
 			return nil, err
 		}
-		return domain.Auth{Token: token}, nil
+		return &domain.Token{Value: token}, nil
 	}
 	return nil, errors.New("username or password is not correct")
 }
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
-func (s *SimpleAuthService) Deauthenticate(auth domain.Auth) error {
+func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	panic("implement me")
 }
 

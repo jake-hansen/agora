@@ -26,26 +26,26 @@ func NewAuthHandler(parentGroup *gin.RouterGroup, service domain.AuthService) {
 	}
 }
 
-func getCredentials(c *gin.Context) (*domain.Auth, error) {
-	var credentials domain.Auth
-	err := c.ShouldBind(&credentials)
+func validateHelper(err error) error {
 	var verr validator.ValidationErrors
 	if err != nil && !errors.As(err, &verr) {
 		err = api.NewAPIError(http.StatusBadRequest, err, "could not parse request body")
 	}
-	return &credentials, err
+	return err
 }
 
 // Login attempts to authenticate the given credentials retrieved from the body as JSON.
 func (a *AuthHandler) Login(c *gin.Context) {
-	credentials, err := getCredentials(c)
+	var credentials domain.Auth
+	err := c.ShouldBind(&credentials)
+	err = validateHelper(err)
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
 
 	// Retrieve token
-	token, err := (*a.AuthService).Authenticate(*credentials)
+	token, err := (*a.AuthService).Authenticate(credentials)
 
 	if err != nil {
 		apiError := api.NewAPIError(http.StatusUnauthorized, err, "the provided credentials could not be validated")
@@ -57,13 +57,15 @@ func (a *AuthHandler) Login(c *gin.Context) {
 
 // Logout attempts to unauthenticate the given credentials retrieved from the body as JSON.
 func (a *AuthHandler) Logout(c *gin.Context) {
-	credentials, err := getCredentials(c)
+	var token domain.Token
+	err := c.ShouldBind(&token)
+	err = validateHelper(err)
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
 
-	err = (*a.AuthService).Deauthenticate(*credentials)
+	err = (*a.AuthService).Deauthenticate(token)
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 	}
