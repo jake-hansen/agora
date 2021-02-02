@@ -2,10 +2,10 @@ package domain
 
 // User represents information about a user.
 type User struct {
-	Firstname	string
-	Lastname	string
-	Username	string
-	Password	string
+	Firstname	string	`json:"firstname,omitempty"`
+	Lastname	string	`json:"lastname,omitempty"`
+	Username	string	`json:"username,omitempty" binding:"required"`
+	Password	string	`json:"password,omitempty" binding:"required"`
 }
 
 // NewUser returns a pointer to a User which contains the given parameters.
