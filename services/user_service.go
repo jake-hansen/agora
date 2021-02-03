@@ -1,9 +1,9 @@
 package services
 
-import "github.com/jake-hansen/agora/database/domain"
+import "github.com/jake-hansen/agora/domain"
 
 type userService struct {
-	repo	domain.UserRepository
+	repo domain.UserRepository
 }
 
 func NewUserService(repository domain.UserRepository) domain.UserService {

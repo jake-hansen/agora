@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"fmt"
-	"github.com/jake-hansen/agora/database/domain"
+	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
 )
 
