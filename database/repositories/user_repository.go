@@ -15,7 +15,7 @@ func NewUserRepository(DB *gorm.DB) domain.UserRepository {
 }
 
 func (u *UserRepository) Create(user *domain.User) (uint, error) {
-	if err := u.DB.Save(&user).Error; err != nil {
+	if err := u.DB.Create(&user).Error; err != nil {
 		return 0, fmt.Errorf("error creating user: %w", err)
 	}
 	return user.ID, nil
