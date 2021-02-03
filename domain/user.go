@@ -19,7 +19,7 @@ type UserRepository interface {
 }
 
 type UserService interface {
-	Create(user *User) (uint, error)
+	Register(user *User) (uint, error)
 	GetAll() ([]*User, error)
 	GetByID(ID uint) (*User, error)
 	Update(user *User) error

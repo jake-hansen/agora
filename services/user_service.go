@@ -1,6 +1,10 @@
 package services
 
-import "github.com/jake-hansen/agora/domain"
+import (
+	"fmt"
+	"github.com/jake-hansen/agora/domain"
+	"golang.org/x/crypto/bcrypt"
+)
 
 type userService struct {
 	repo domain.UserRepository
@@ -10,8 +14,18 @@ func NewUserService(repository domain.UserRepository) domain.UserService {
 	return &userService{repo: repository}
 }
 
-func (u *userService) Create(user *domain.User) (uint, error) {
-	return u.repo.Create(user)
+// Register creates a new User in the database. Note that the given User's password
+// is first hashed before being saved in the repository.
+func (u *userService) Register(user *domain.User) (uint, error) {
+	pHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return 0, fmt.Errorf("error registering user: %w", err)
+	}
+
+	newUser := *user
+	newUser.Password = string(pHash)
+
+	return u.repo.Create(&newUser)
 }
 
 func (u *userService) GetAll() ([]*domain.User, error) {

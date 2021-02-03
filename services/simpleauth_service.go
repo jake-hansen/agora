@@ -6,7 +6,8 @@ import (
 )
 
 // SimpleAuthService is an AuthenticationService which authenticates credentials based on a username
-// and password combination. SimpleAuthService uses a JWT as a token.
+// and password combination. SimpleAuthService uses a JWT as a token which is not stored or persisted
+// in any way. It is up to the consumer to reauthenticate upon JWT expiry to ensure continued access.
 type SimpleAuthService struct {
 	tokenService *JWTService
 }
