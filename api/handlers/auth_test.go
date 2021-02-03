@@ -8,6 +8,7 @@ import (
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/middleware"
+	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/mocks"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -16,27 +17,38 @@ import (
 	"testing"
 )
 
-var mockCredentials = dto.Auth{
+var domainMockCredentials = domain.Auth{
+	Credentials: &domain.User{
+		Username:  "test",
+		Password:  "test",
+	},
+}
+var domainMockToken = domain.Token{
+	Value: "test-token",
+}
+
+var DTOMockCredentials = dto.Auth{
 	Credentials: &dto.User{
 		Username:  "test",
 		Password:  "test",
 	},
 }
-var mockToken = dto.Token{
+
+var DTOMockToken = dto.Token{
 	Value: "test-token",
 }
 
 func TestAuthHandler_Login(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockAuthService := new(mocks.AuthService)
-		mockAuthService.On("Authenticate").Return(&mockToken, nil)
+		mockAuthService.On("Authenticate").Return(&domainMockToken, nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
 
 		payloadBuf := new(bytes.Buffer)
-		json.NewEncoder(payloadBuf).Encode(mockCredentials)
+		json.NewEncoder(payloadBuf).Encode(DTOMockCredentials)
 		req, err := http.NewRequest("POST", "/test/auth", payloadBuf)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
@@ -47,7 +59,7 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, mockToken, retrievedToken)
+		assert.Equal(t, DTOMockToken, retrievedToken)
 	})
 
 	t.Run("bad-request", func(t *testing.T) {
@@ -93,7 +105,7 @@ func TestAuthHandler_Login(t *testing.T) {
 
 	t.Run("invalid-credentials", func(t *testing.T) {
 		mockAuthService := new(mocks.AuthService)
-		var token *dto.Token = nil
+		var token *domain.Token = nil
 		mockAuthService.On("Authenticate").Return(token,
 			errors.New("username or password not correct"))
 
@@ -102,7 +114,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
 
 		payloadBuf := new(bytes.Buffer)
-		json.NewEncoder(payloadBuf).Encode(mockCredentials)
+		json.NewEncoder(payloadBuf).Encode(domainMockCredentials)
 		req, err := http.NewRequest("POST", "/test/auth", payloadBuf)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
@@ -124,7 +136,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
 
 		payloadBuf := new(bytes.Buffer)
-		json.NewEncoder(payloadBuf).Encode(mockToken)
+		json.NewEncoder(payloadBuf).Encode(DTOMockToken)
 		req, err := http.NewRequest("DELETE", "/test/auth", payloadBuf)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
@@ -143,7 +155,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
 
 		payloadBuf := new(bytes.Buffer)
-		json.NewEncoder(payloadBuf).Encode(mockToken)
+		json.NewEncoder(payloadBuf).Encode(DTOMockToken)
 		req, err := http.NewRequest("DELETE", "/test/auth", payloadBuf)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()

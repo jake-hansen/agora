@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/jake-hansen/agora/adapter"
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/domain"
@@ -46,13 +47,13 @@ func (a *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Retrieve token
-	token, err := (*a.AuthService).Authenticate(credentials)
+	token, err := (*a.AuthService).Authenticate(*adapter.AuthDTOToDomain(&credentials))
 
 	if err != nil {
 		apiError := api.NewAPIError(http.StatusUnauthorized, err, "the provided credentials could not be validated")
 		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
 	} else {
-		c.JSON(http.StatusOK, token)
+		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(token))
 	}
 }
 
@@ -66,7 +67,7 @@ func (a *AuthHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	err = (*a.AuthService).Deauthenticate(token)
+	err = (*a.AuthService).Deauthenticate(*adapter.TokenDTOToDomain(&token))
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 	}

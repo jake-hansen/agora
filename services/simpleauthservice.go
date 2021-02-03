@@ -2,7 +2,7 @@ package services
 
 import (
 	"errors"
-	"github.com/jake-hansen/agora/api/dto"
+	"github.com/jake-hansen/agora/domain"
 )
 
 // SimpleAuthService is an AuthenticationService which authenticates credentials based on a username
@@ -19,7 +19,7 @@ func NewSimpleAuthService(tokenService JWTService) *SimpleAuthService {
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
 // if the contained JWT is valid.
-func (s *SimpleAuthService) IsAuthenticated(token dto.Token) (bool, error) {
+func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
 	_, err := s.tokenService.ValidateToken(token.Value)
 	if err != nil {
 		return false, err
@@ -30,7 +30,7 @@ func (s *SimpleAuthService) IsAuthenticated(token dto.Token) (bool, error) {
 // Authenticate attempts to authenticate the given Auth. If authenticated, returns a JWT. Otherwise,
 // an error is returned.
 // TODO: implement database to validate username/password
-func (s *SimpleAuthService) Authenticate(auth dto.Auth) (*dto.Token, error) {
+func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error) {
 	// Validate credentials with database
 
 	if auth.Credentials.Username == "test" && auth.Credentials.Password == "test" {
@@ -39,13 +39,13 @@ func (s *SimpleAuthService) Authenticate(auth dto.Auth) (*dto.Token, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &dto.Token{Value: token}, nil
+		return &domain.Token{Value: token}, nil
 	}
 	return nil, errors.New("username or password is not correct")
 }
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
-func (s *SimpleAuthService) Deauthenticate(token dto.Token) error {
+func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
 }
 
