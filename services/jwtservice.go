@@ -3,7 +3,7 @@ package services
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/jake-hansen/agora/api/domain"
+	"github.com/jake-hansen/agora/api/dto"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func NewJWTService(issuer string, signingKey string, jwtDuration time.Duration) 
 }
 
 // GenerateToken creates a JWT for the specified user and returns the token as a string.
-func (j *JWTService) GenerateToken(user domain.User) (string, error) {
+func (j *JWTService) GenerateToken(user dto.User) (string, error) {
 	now := time.Now()
 
 	claims := &claims{

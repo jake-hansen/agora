@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
-	"github.com/jake-hansen/agora/api/domain"
+	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/services/mocks"
@@ -16,13 +16,13 @@ import (
 	"testing"
 )
 
-var mockCredentials = domain.Auth{
-	Credentials: &domain.User{
+var mockCredentials = dto.Auth{
+	Credentials: &dto.User{
 		Username:  "test",
 		Password:  "test",
 	},
 }
-var mockToken = domain.Token{
+var mockToken = dto.Token{
 	Value: "test-token",
 }
 
@@ -42,7 +42,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
-		var retrievedToken domain.Token
+		var retrievedToken dto.Token
 		json.Unmarshal(w.Body.Bytes(), &retrievedToken)
 
 		assert.NoError(t, err)
@@ -93,7 +93,7 @@ func TestAuthHandler_Login(t *testing.T) {
 
 	t.Run("invalid-credentials", func(t *testing.T) {
 		mockAuthService := new(mocks.AuthService)
-		var token *domain.Token = nil
+		var token *dto.Token = nil
 		mockAuthService.On("Authenticate").Return(token,
 			errors.New("username or password not correct"))
 

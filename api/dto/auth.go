@@ -1,4 +1,4 @@
-package domain
+package dto
 
 type Auth struct {
 	Credentials *User  `json:"credentials,omitempty" binding:"required"`

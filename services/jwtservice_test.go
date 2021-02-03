@@ -1,14 +1,14 @@
 package services_test
 
 import (
-	"github.com/jake-hansen/agora/api/domain"
+	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/services"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
-var testUser domain.User = domain.User{
+var testUser dto.User = dto.User{
 	Firstname: "john",
 	Lastname:  "doe",
 	Username:  "jdoe",

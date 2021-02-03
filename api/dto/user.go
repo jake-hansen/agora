@@ -1,4 +1,4 @@
-package domain
+package dto
 
 // User represents information about a user.
 type User struct {

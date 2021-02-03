@@ -1,7 +1,7 @@
 package services_test
 
 import (
-	"github.com/jake-hansen/agora/api/domain"
+	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/services"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -10,7 +10,7 @@ import (
 
 var dur, _ = time.ParseDuration("5m")
 var jwtService = services.NewJWTService("test", "test", dur)
-var testAuth = domain.Auth{Credentials: &domain.User{
+var testAuth = dto.Auth{Credentials: &dto.User{
 	Username:  "test",
 	Password:  "test",
 }}
@@ -28,7 +28,7 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 	})
 	
 	t.Run("test-invalid-token", func(t *testing.T) {
-		invalidToken := domain.Token{Value: "invalid"}
+		invalidToken := dto.Token{Value: "invalid"}
 		authService := services.NewSimpleAuthService(jwtService)
 
 		valid, err := authService.IsAuthenticated(invalidToken)
@@ -43,7 +43,7 @@ func TestSimpleAuthService_Authenticate(t *testing.T) {
 }
 
 func TestSimpleAuthService_Deauthenticate(t *testing.T) {
-	invalidToken := domain.Token{Value: "invalid"}
+	invalidToken := dto.Token{Value: "invalid"}
 	authService := services.NewSimpleAuthService(jwtService)
 	err := authService.Deauthenticate(invalidToken)
 

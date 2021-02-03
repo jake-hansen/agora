@@ -5,18 +5,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/api"
-	"github.com/jake-hansen/agora/api/domain"
+	"github.com/jake-hansen/agora/api/dto"
 	"net/http"
 )
 
 // AuthHandler is the handler that manages authentication for the API.
 type AuthHandler struct {
-	AuthService *domain.AuthService
+	AuthService *dto.AuthService
 }
 
 // NewAuthHandler registers a new AuthHandler on the specified RouterGroup. The AuthHandler uses
 // the specified AuthService.
-func NewAuthHandler(parentGroup *gin.RouterGroup, service domain.AuthService) {
+func NewAuthHandler(parentGroup *gin.RouterGroup, service dto.AuthService) {
 	handler := &AuthHandler{AuthService: &service}
 
 	authGroup := parentGroup.Group("auth")
@@ -36,7 +36,7 @@ func validateHelper(err error) error {
 
 // Login attempts to authenticate the given credentials retrieved from the body as JSON.
 func (a *AuthHandler) Login(c *gin.Context) {
-	var credentials domain.Auth
+	var credentials dto.Auth
 	err := c.ShouldBind(&credentials)
 	err = validateHelper(err)
 	if err != nil {
@@ -57,7 +57,7 @@ func (a *AuthHandler) Login(c *gin.Context) {
 
 // Logout attempts to unauthenticate the given credentials retrieved from the body as JSON.
 func (a *AuthHandler) Logout(c *gin.Context) {
-	var token domain.Token
+	var token dto.Token
 	err := c.ShouldBind(&token)
 	err = validateHelper(err)
 	if err != nil {

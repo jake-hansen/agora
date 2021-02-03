@@ -1,9 +1,9 @@
-package domain_test
+package dto_test
 
 import (
 	"github.com/stretchr/testify/assert"
 
-	"github.com/jake-hansen/agora/api/domain"
+	"github.com/jake-hansen/agora/api/dto"
 	"testing"
 )
 
@@ -14,7 +14,7 @@ func TestNewUser(t *testing.T) {
 		fname := "test"
 		lname := "test"
 
-		user := domain.NewUser(fname, lname, username, password)
+		user := dto.NewUser(fname, lname, username, password)
 
 		assert.Equal(t, username, user.Username)
 		assert.Equal(t, password, user.Password)
