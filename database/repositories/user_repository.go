@@ -32,7 +32,7 @@ func (u *UserRepository) GetAll() ([]*domain.User, error) {
 
 func (u *UserRepository) GetByUsername(username string) (*domain.User, error) {
 	// Need to put constraint on username to ensure it is unique
-	var user *domain.User
+	user := new(domain.User)
 	if err := u.DB.Where("username = ?", username).First(user).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving user by username %s: %w", username, err)
 	}
@@ -40,15 +40,15 @@ func (u *UserRepository) GetByUsername(username string) (*domain.User, error) {
 }
 
 func (u *UserRepository) GetByID(ID uint) (*domain.User, error) {
-	var user *domain.User
-	if err := u.DB.Find(user, ID).Error; err != nil {
+	user := new(domain.User)
+	if err := u.DB.First(user, ID).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving user with id %d: %w", ID, err)
 	}
 	return user, nil
 }
 
 func (u *UserRepository) Update(user *domain.User) error {
-	if err := u.DB.Model(&user).Updates(domain.User{
+	if err := u.DB.Model(user).Updates(domain.User{
 		Firstname: user.Firstname,
 		Lastname:  user.Lastname,
 		Username:  user.Username,
