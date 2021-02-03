@@ -44,3 +44,17 @@ func (u *userService) Delete(ID uint) error {
 	return u.repo.Delete(ID)
 }
 
+func (u *userService) Validate(user *domain.User) error {
+	errMsg := "could not validate user: %w"
+	foundUser, err := u.repo.GetByUsername(user.Username)
+	if err != nil {
+		return fmt.Errorf(errMsg, err)
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(foundUser.Password), []byte(user.Password))
+	if err != nil {
+		return fmt.Errorf(errMsg, err)
+	}
+	return nil
+}
+

@@ -30,6 +30,15 @@ func (u *UserRepository) GetAll() ([]*domain.User, error) {
 	return users, nil
 }
 
+func (u *UserRepository) GetByUsername(username string) (*domain.User, error) {
+	// Need to put constraint on username to ensure it is unique
+	var user *domain.User
+	if err := u.DB.Where("username = ?", username).First(user).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving user by username %s: %w", username, err)
+	}
+	return user, nil
+}
+
 func (u *UserRepository) GetByID(ID uint) (*domain.User, error) {
 	var user *domain.User
 	if err := u.DB.Find(user, ID).Error; err != nil {
@@ -56,6 +65,3 @@ func (u *UserRepository) Delete(ID uint) error {
 	}
 	return nil
 }
-
-
-
