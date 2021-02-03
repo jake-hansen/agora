@@ -6,17 +6,18 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/dto"
+	"github.com/jake-hansen/agora/domain"
 	"net/http"
 )
 
 // AuthHandler is the handler that manages authentication for the API.
 type AuthHandler struct {
-	AuthService *dto.AuthService
+	AuthService *domain.AuthService
 }
 
 // NewAuthHandler registers a new AuthHandler on the specified RouterGroup. The AuthHandler uses
 // the specified AuthService.
-func NewAuthHandler(parentGroup *gin.RouterGroup, service dto.AuthService) {
+func NewAuthHandler(parentGroup *gin.RouterGroup, service domain.AuthService) {
 	handler := &AuthHandler{AuthService: &service}
 
 	authGroup := parentGroup.Group("auth")
