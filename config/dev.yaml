@@ -3,3 +3,11 @@ server:
 api:
   auth:
     jwtduration: 30m
+database:
+  type:
+  user:
+  password:
+  protocol:
+  host:
+  port:
+  name:

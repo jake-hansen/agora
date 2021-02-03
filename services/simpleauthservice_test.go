@@ -2,7 +2,7 @@ package services_test
 
 import (
 	"github.com/jake-hansen/agora/api/domain"
-	"github.com/jake-hansen/agora/api/services"
+	"github.com/jake-hansen/agora/services"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

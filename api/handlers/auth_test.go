@@ -8,7 +8,7 @@ import (
 	"github.com/jake-hansen/agora/api/domain"
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/middleware"
-	"github.com/jake-hansen/agora/api/services/mocks"
+	"github.com/jake-hansen/agora/services/mocks"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"

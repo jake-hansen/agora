@@ -5,8 +5,8 @@ import (
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/middleware"
-	"github.com/jake-hansen/agora/api/services"
 	"github.com/jake-hansen/agora/config"
+	"github.com/jake-hansen/agora/services"
 	"time"
 )
 
