@@ -19,7 +19,7 @@ func NewUserService(repository domain.UserRepository) domain.UserService {
 func (u *userService) Register(user *domain.User) (uint, error) {
 	pHash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return 0, fmt.Errorf("error registering user: %w", err)
+		return 0, fmt.Errorf("error hashing password during registration: %w", err)
 	}
 
 	newUser := *user
