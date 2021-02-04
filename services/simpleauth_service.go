@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
 )
 
@@ -10,12 +11,13 @@ import (
 // in any way. It is up to the consumer to reauthenticate upon JWT expiry to ensure continued access.
 type SimpleAuthService struct {
 	tokenService *JWTService
+	userService	 domain.UserService
 }
 
-// NewSimpleAuthService returns a new SimpleAuthService which uses the given JWTService for generating and validating
+// ProvideSimpleAuthService returns a new SimpleAuthService which uses the given JWTService for generating and validating
 // JWTs.
-func NewSimpleAuthService(tokenService JWTService) *SimpleAuthService {
-	return &SimpleAuthService{tokenService: &tokenService}
+func ProvideSimpleAuthService(tokenService *JWTService, userService domain.UserService) *SimpleAuthService {
+	return &SimpleAuthService{tokenService: tokenService, userService: userService}
 }
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
@@ -49,4 +51,8 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error
 func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
 }
+
+var (
+	SimpleAuthServiceSet = wire.NewSet(ProvideSimpleAuthService, JWTServiceSet)
+)
 

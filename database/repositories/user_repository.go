@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"fmt"
+	"github.com/google/wire"
+	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
 )
@@ -10,7 +12,7 @@ type UserRepository struct {
 	DB *gorm.DB
 }
 
-func NewUserRepository(DB *gorm.DB) domain.UserRepository {
+func ProvideUserRepository(DB *gorm.DB) *UserRepository {
 	return &UserRepository{DB: DB}
 }
 
@@ -65,3 +67,7 @@ func (u *UserRepository) Delete(ID uint) error {
 	}
 	return nil
 }
+
+var (
+	UserRepositorySet = wire.NewSet(ProvideUserRepository, wire.Bind(new(domain.UserRepository), new(*UserRepository)), database.ProvideDB)
+)

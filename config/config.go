@@ -27,6 +27,25 @@ func Init(env string) {
 	}
 }
 
+func ProvideViper() *viper.Viper {
+	cfg := viper.New()
+	cfg.SetConfigType("yaml")
+	cfg.SetConfigName("config")
+	cfg.AddConfigPath("/etc/agora/")
+	cfg.AddConfigPath("$HOME/agora")
+	cfg.AddConfigPath(".")
+
+	cfg.SetEnvPrefix("agora")
+	cfg.AutomaticEnv()
+	replacer := strings.NewReplacer(".", "_")
+	cfg.SetEnvKeyReplacer(replacer)
+
+	if err := cfg.ReadInConfig(); err != nil {
+		panic(err)
+	}
+	return cfg
+}
+
 // GetConfig returns a pointer to the Viper instance for the application.
 func GetConfig() *viper.Viper {
 	return config

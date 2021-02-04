@@ -9,7 +9,7 @@ import (
 )
 
 var dur, _ = time.ParseDuration("5m")
-var jwtService = services.NewJWTService("test", "test", dur)
+var jwtService = services.ProvideJWTService(&testConfig)
 var testAuth = domain.Auth{Credentials: &domain.User{
 	Username:  "test",
 	Password:  "test",
@@ -17,7 +17,7 @@ var testAuth = domain.Auth{Credentials: &domain.User{
 
 func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 	t.Run("test-valid-token", func(t *testing.T) {
-		authService := services.NewSimpleAuthService(jwtService)
+		authService := services.ProvideSimpleAuthService(jwtService)
 		token, err := authService.Authenticate(testAuth)
 
 		assert.NoError(t, err)
@@ -29,7 +29,7 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 	
 	t.Run("test-invalid-token", func(t *testing.T) {
 		invalidToken := domain.Token{Value: "invalid"}
-		authService := services.NewSimpleAuthService(jwtService)
+		authService := services.ProvideSimpleAuthService(jwtService)
 
 		valid, err := authService.IsAuthenticated(invalidToken)
 		assert.Error(t, err)
@@ -44,7 +44,7 @@ func TestSimpleAuthService_Authenticate(t *testing.T) {
 
 func TestSimpleAuthService_Deauthenticate(t *testing.T) {
 	invalidToken := domain.Token{Value: "invalid"}
-	authService := services.NewSimpleAuthService(jwtService)
+	authService := services.ProvideSimpleAuthService(jwtService)
 	err := authService.Deauthenticate(invalidToken)
 
 	assert.NoError(t, err)

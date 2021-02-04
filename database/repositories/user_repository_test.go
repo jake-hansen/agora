@@ -45,7 +45,7 @@ func (s *Suite) SetupSuite() {
 
 	s.DB = gormDB
 	s.mock = mock
-	s.repo = repositories.NewUserRepository(s.DB)
+	s.repo = repositories.ProvideUserRepository(s.DB)
 }
 
 func (s *Suite) TestUserRepository_Create() {

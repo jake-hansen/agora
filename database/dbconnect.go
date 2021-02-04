@@ -3,19 +3,17 @@ package database
 import (
 	"errors"
 	"fmt"
-	"github.com/jake-hansen/agora/config"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
-// Connect connects to a MYSQL database using the parameters specified in a properties file.
+// ProvideDB connects to a MYSQL database using the parameters specified in a properties file.
 // If the connection is successful, returns a pointer to gorm.DB. Otherwise, panics.
-func Connect() *gorm.DB {
-	c := config.GetConfig()
+func ProvideDB(v *viper.Viper) *gorm.DB {
 
-	if c.GetString("database.type") == "mysql" {
-		return newMySQL(c)
+	if v.GetString("database.type") == "mysql" {
+		return newMySQL(v)
 	} else {
 		panic(errors.New("database type not specified"))
 	}

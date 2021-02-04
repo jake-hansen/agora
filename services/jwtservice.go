@@ -3,27 +3,44 @@ package services
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
+	"github.com/spf13/viper"
 	"time"
 )
 
 type JWTService struct {
-	issuer		string
-	signingKey	string
-	jwtDuration	time.Duration
+	config JWTConfig
+}
+
+type JWTConfig struct {
+	Issuer     string
+	SigningKey string
+	Duration   time.Duration
+}
+
+func ProvideJWTConfig(v *viper.Viper) (*JWTConfig, error) {
+	dur, err := time.ParseDuration(v.GetString("jwtservice.duration"))
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := &JWTConfig{
+		Issuer:     v.GetString("jwtservice.issuer"),
+		SigningKey: v.GetString("jwtservice.signingkey"),
+		Duration:   dur,
+	}
+
+	return cfg, nil
 }
 
 type claims struct {
 	jwt.StandardClaims
 }
 
-// NewJWTService returns a new JWTService with the specified parameters.
-func NewJWTService(issuer string, signingKey string, jwtDuration time.Duration) JWTService {
-	return JWTService{
-		issuer:     	issuer,
-		signingKey: 	signingKey,
-		jwtDuration: 	jwtDuration,
-	}
+// ProvideJWTService returns a new JWTService with the specified config.
+func ProvideJWTService(config *JWTConfig) *JWTService {
+	return &JWTService{*config}
 }
 
 // GenerateToken creates a JWT for the specified user and returns the token as a string.
@@ -32,9 +49,9 @@ func (j *JWTService) GenerateToken(user domain.User) (string, error) {
 
 	claims := &claims{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: now.Add(j.jwtDuration).Unix(),
+			ExpiresAt: now.Add(j.config.Duration).Unix(),
 			IssuedAt:  now.Unix(),
-			Issuer:    j.issuer,
+			Issuer:    j.config.Issuer,
 			NotBefore: now.Unix(),
 			Subject:   user.Username,
 		},
@@ -42,7 +59,7 @@ func (j *JWTService) GenerateToken(user domain.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	t, err := token.SignedString([]byte(j.signingKey))
+	t, err := token.SignedString([]byte(j.config.SigningKey))
 	if err != nil {
 		return "", err
 	}
@@ -58,8 +75,12 @@ func (j *JWTService) ValidateToken(token string) (*jwt.Token, error) {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 
-		return []byte(j.signingKey), nil
+		return []byte(j.config.SigningKey), nil
 	})
 
 	return t, err
 }
+
+var (
+	JWTServiceSet = wire.NewSet(ProvideJWTService, ProvideJWTConfig)
+)

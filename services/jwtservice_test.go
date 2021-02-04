@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+var testConfig = services.JWTConfig{
+	Issuer:     "agora-test",
+	SigningKey: "testkey",
+	Duration:   0,
+}
+
 var testUser domain.User = domain.User{
 	Firstname: "john",
 	Lastname:  "doe",
@@ -21,7 +27,9 @@ func TestJWTService_GenerateToken(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		jwt := services.NewJWTService("agora-test", "testkey", dur)
+		cfg := testConfig
+		cfg.Duration = dur
+		jwt := services.ProvideJWTService(&cfg)
 		_, err = jwt.GenerateToken(testUser)
 
 		assert.NoError(t, err)
@@ -34,7 +42,9 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		jwt := services.NewJWTService("agora-test", "testkey", dur)
+		cfg := testConfig
+		cfg.Duration = dur
+		jwt := services.ProvideJWTService(&cfg)
 		token, err := jwt.GenerateToken(testUser)
 
 		assert.NoError(t, err)
@@ -49,7 +59,9 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		if err != nil {
 			panic(err)
 		}
-		jwt := services.NewJWTService("agora-test", "testkey", dur)
+		cfg := testConfig
+		cfg.Duration = dur
+		jwt := services.ProvideJWTService(&cfg)
 		token, err := jwt.GenerateToken(testUser)
 
 		assert.NoError(t, err)
