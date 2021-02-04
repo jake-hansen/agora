@@ -11,7 +11,7 @@ import (
 var testConfig = jwt.Config{
 	Issuer:     "agora-test",
 	SigningKey: "testkey",
-	Duration:   0,
+	Duration:   300000000000,
 }
 
 var testUser domain.User = domain.User{
@@ -23,51 +23,36 @@ var testUser domain.User = domain.User{
 
 func TestJWTService_GenerateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		dur, err := time.ParseDuration("5m")
-		if err != nil {
-			panic(err)
-		}
-		cfg := testConfig
-		cfg.Duration = dur
-		jwt := jwt.ProvideJWTService(&cfg)
-		_, err = jwt.GenerateToken(testUser)
-
+		service, err := jwt.BuildTest(testConfig)
+		assert.NoError(t, err)
+		_, err = service.GenerateToken(testUser)
 		assert.NoError(t, err)
 	})
 }
 
 func TestJWTService_ValidateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		dur, err := time.ParseDuration("5m")
-		if err != nil {
-			panic(err)
-		}
-		cfg := testConfig
-		cfg.Duration = dur
-		jwt := jwt.ProvideJWTService(&cfg)
-		token, err := jwt.GenerateToken(testUser)
-
+		service, err := jwt.BuildTest(testConfig)
+		assert.NoError(t, err)
+		token, err := service.GenerateToken(testUser)
 		assert.NoError(t, err)
 
-		parsedToken, err := jwt.ValidateToken(token)
+		parsedToken, err := service.ValidateToken(token)
 		assert.NoError(t, err)
 		assert.Equal(t, token, parsedToken.Raw)
 	})
 
 	t.Run("fail-expired", func(t *testing.T) {
-		dur, err := time.ParseDuration("1µs")
-		if err != nil {
-			panic(err)
-		}
-		cfg := testConfig
-		cfg.Duration = dur
-		jwt := jwt.ProvideJWTService(&cfg)
-		token, err := jwt.GenerateToken(testUser)
+		c := testConfig
+		c.Duration = 1
+		service, err := jwt.BuildTest(c)
+		assert.NoError(t, err)
+		token, err := service.GenerateToken(testUser)
 
 		assert.NoError(t, err)
 
-		time.Sleep(1 * time.Second)
-		_, err = jwt.ValidateToken(token)
+		time.Sleep(1000000000)
+		_, err = service.ValidateToken(token)
 		assert.Error(t, err)
 	})
 }

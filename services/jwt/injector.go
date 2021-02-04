@@ -11,6 +11,6 @@ func Build() (*Service, error) {
 	panic(wire.Build(ProviderProductionSet, providers.ProductionSet))
 }
 
-func BuildTest() (*Service, error) {
+func BuildTest(cfg Config) (*Service, error) {
 	panic(wire.Build(ProviderTestSet))
 }

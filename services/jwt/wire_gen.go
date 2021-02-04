@@ -12,7 +12,7 @@ import (
 // Injectors from injector.go:
 
 func Build() (*Service, error) {
-	viper := config.ProvideViper()
+	viper := config.Provide()
 	jwtConfig, err := Cfg(viper)
 	if err != nil {
 		return nil, err
@@ -21,8 +21,8 @@ func Build() (*Service, error) {
 	return service, nil
 }
 
-func BuildTest() (*Service, error) {
-	jwtConfig, err := CfgTest()
+func BuildTest(cfg Config) (*Service, error) {
+	jwtConfig, err := CfgTest(cfg)
 	if err != nil {
 		return nil, err
 	}

@@ -21,8 +21,8 @@ func Cfg(v *viper.Viper) (*Config, error) {
 	return cfg, nil
 }
 
-func CfgTest() (*Config, error) {
-	return &Config{}, nil
+func CfgTest(cfg Config) (*Config, error) {
+	return &cfg, nil
 }
 
 // Provider returns a new JWTService with the specified config.
