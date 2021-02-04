@@ -3,13 +3,14 @@ package services_test
 import (
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services"
+	"github.com/jake-hansen/agora/services/jwt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
 var dur, _ = time.ParseDuration("5m")
-var jwtService = services.ProvideJWTService(&testConfig)
+var jwtService = jwt.ProvideJWTService(&jwt.testConfig)
 var testAuth = domain.Auth{Credentials: &domain.User{
 	Username:  "test",
 	Password:  "test",

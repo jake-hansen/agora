@@ -1,14 +1,14 @@
-package services_test
+package jwt_test
 
 import (
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/services"
+	"github.com/jake-hansen/agora/services/jwt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
-var testConfig = services.JWTConfig{
+var testConfig = jwt.Config{
 	Issuer:     "agora-test",
 	SigningKey: "testkey",
 	Duration:   0,
@@ -29,7 +29,7 @@ func TestJWTService_GenerateToken(t *testing.T) {
 		}
 		cfg := testConfig
 		cfg.Duration = dur
-		jwt := services.ProvideJWTService(&cfg)
+		jwt := jwt.ProvideJWTService(&cfg)
 		_, err = jwt.GenerateToken(testUser)
 
 		assert.NoError(t, err)
@@ -44,7 +44,7 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		}
 		cfg := testConfig
 		cfg.Duration = dur
-		jwt := services.ProvideJWTService(&cfg)
+		jwt := jwt.ProvideJWTService(&cfg)
 		token, err := jwt.GenerateToken(testUser)
 
 		assert.NoError(t, err)
@@ -61,7 +61,7 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		}
 		cfg := testConfig
 		cfg.Duration = dur
-		jwt := services.ProvideJWTService(&cfg)
+		jwt := jwt.ProvideJWTService(&cfg)
 		token, err := jwt.GenerateToken(testUser)
 
 		assert.NoError(t, err)
