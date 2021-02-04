@@ -53,8 +53,13 @@ func ProvideGORM(cfg *Config) (*gorm.DB, func(), error) {
 	return db, cleanup, err
 }
 
-func ProvideGORMTest() (*gorm.DB, func(), error) {
-	db, _, err := sqlmock.New()
+func Provide(cfg *Config, db *gorm.DB) (*Manager, error) {
+	g := New(*cfg, db)
+	return g, nil
+}
+
+func ProvideMock(cfg *Config) (*MockManager, func(), error) {
+	db, mock, err := sqlmock.New()
 	if err != nil {
 		return nil, nil, err
 	}
@@ -70,15 +75,17 @@ func ProvideGORMTest() (*gorm.DB, func(), error) {
 		}
 	}
 
-	return gormDB, cleanup, nil
-}
+	g := New(*cfg, gormDB)
 
-func Provide(cfg *Config, db *gorm.DB) (*Manager, error) {
-	g := New(*cfg, db)
-	return g, nil
+	manager := MockManager{
+		Manager: *g,
+		Mock: &mock,
+	}
+
+	return &manager, cleanup, nil
 }
 
 var (
 	ProviderProductionSet = wire.NewSet(Provide, ProvideGORM, Cfg)
-	ProviderTestSet       = wire.NewSet(Provide, ProvideGORMTest, CfgTest)
+	ProviderTestSet       = wire.NewSet(Provide, ProvideMock, CfgTest)
 )

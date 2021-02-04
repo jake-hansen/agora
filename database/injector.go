@@ -11,6 +11,6 @@ func Build() (*Manager, func(), error) {
 	panic(wire.Build(ProviderProductionSet, providers.ProductionSet))
 }
 
-func BuildTest(cfg Config) (*Manager, func(), error) {
+func BuildTest(cfg Config) (*MockManager, func(), error) {
 	panic(wire.Build(ProviderTestSet))
 }

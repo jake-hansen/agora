@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,6 +22,11 @@ type Manager struct {
 	ctx context.Context
 	cfg Config
 	DB  *gorm.DB
+}
+
+type MockManager struct {
+	Manager
+	Mock *sqlmock.Sqlmock
 }
 
 func New(cfg Config, db *gorm.DB) *Manager {

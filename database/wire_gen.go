@@ -31,21 +31,16 @@ func Build() (*Manager, func(), error) {
 	}, nil
 }
 
-func BuildTest(cfg Config) (*Manager, func(), error) {
+func BuildTest(cfg Config) (*MockManager, func(), error) {
 	databaseConfig, err := CfgTest(cfg)
 	if err != nil {
 		return nil, nil, err
 	}
-	db, cleanup, err := ProvideGORMTest()
+	mockManager, cleanup, err := ProvideMock(databaseConfig)
 	if err != nil {
 		return nil, nil, err
 	}
-	manager, err := Provide(databaseConfig, db)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	return manager, func() {
+	return mockManager, func() {
 		cleanup()
 	}, nil
 }

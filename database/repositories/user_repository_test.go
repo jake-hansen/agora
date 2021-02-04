@@ -3,6 +3,7 @@ package repositories_test
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/stretchr/testify/assert"
@@ -29,22 +30,18 @@ var mockUser = domain.User{
 
 type Suite struct {
 	suite.Suite
-	DB *gorm.DB
 	mock sqlmock.Sqlmock
 	repo domain.UserRepository
 }
 
 func (s *Suite) SetupSuite() {
-	db, mock, err := sqlmock.New()
-	require.NoError(s.T(), err)
+	manager, _, err := database.BuildTest(database.Config{})
+	s.Require().NoError(err)
 
-	mock.ExpectQuery("SELECT VERSION()").WillReturnRows(sqlmock.NewRows([]string{"VERSION()"}).AddRow("8.0.23"))
+	s.mock = *manager.Mock
 
-	gormDB, err := gorm.Open(mysql.New(mysql.Config{Conn: db}), &gorm.Config{})
-	require.NoError(s.T(), err)
+	s.mock.ExpectQuery("SELECT VERSION()").WillReturnRows(sqlmock.NewRows([]string{"VERSION()"}).AddRow("8.0.23"))
 
-	s.DB = gormDB
-	s.mock = mock
 	s.repo = repositories.ProvideUserRepository(s.DB)
 }
 
