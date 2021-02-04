@@ -1,23 +1,23 @@
-package services
+package simpleauthservice
 
 import (
 	"errors"
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/services/jwt"
+	"github.com/jake-hansen/agora/services/jwtservice"
 )
 
 // SimpleAuthService is an AuthenticationService which authenticates credentials based on a username
 // and password combination. SimpleAuthService uses a JWT as a token which is not stored or persisted
 // in any way. It is up to the consumer to reauthenticate upon JWT expiry to ensure continued access.
 type SimpleAuthService struct {
-	tokenService *jwt.Service
+	tokenService *jwtservice.Service
 	userService	 domain.UserService
 }
 
 // ProvideSimpleAuthService returns a new SimpleAuthService which uses the given JWTService for generating and validating
 // JWTs.
-func ProvideSimpleAuthService(tokenService *jwt.Service, userService domain.UserService) *SimpleAuthService {
+func ProvideSimpleAuthService(tokenService *jwtservice.Service, userService domain.UserService) *SimpleAuthService {
 	return &SimpleAuthService{tokenService: tokenService, userService: userService}
 }
 
@@ -54,6 +54,6 @@ func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 }
 
 var (
-	SimpleAuthServiceSet = wire.NewSet(ProvideSimpleAuthService, jwt.JWTServiceSet)
+	SimpleAuthServiceSet = wire.NewSet(ProvideSimpleAuthService, jwtservice.JWTServiceSet)
 )
 

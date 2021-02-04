@@ -1,14 +1,14 @@
-package jwt_test
+package jwtservice_test
 
 import (
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/services/jwt"
+	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
-var testConfig = jwt.Config{
+var testConfig = jwtservice.Config{
 	Issuer:     "agora-test",
 	SigningKey: "testkey",
 	Duration:   300000000000,
@@ -23,7 +23,7 @@ var testUser domain.User = domain.User{
 
 func TestJWTService_GenerateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		service, err := jwt.BuildTest(testConfig)
+		service, err := jwtservice.BuildTest(testConfig)
 		assert.NoError(t, err)
 		_, err = service.GenerateToken(testUser)
 		assert.NoError(t, err)
@@ -32,7 +32,7 @@ func TestJWTService_GenerateToken(t *testing.T) {
 
 func TestJWTService_ValidateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		service, err := jwt.BuildTest(testConfig)
+		service, err := jwtservice.BuildTest(testConfig)
 		assert.NoError(t, err)
 		token, err := service.GenerateToken(testUser)
 		assert.NoError(t, err)
@@ -45,7 +45,7 @@ func TestJWTService_ValidateToken(t *testing.T) {
 	t.Run("fail-expired", func(t *testing.T) {
 		c := testConfig
 		c.Duration = 1
-		service, err := jwt.BuildTest(c)
+		service, err := jwtservice.BuildTest(c)
 		assert.NoError(t, err)
 		token, err := service.GenerateToken(testUser)
 

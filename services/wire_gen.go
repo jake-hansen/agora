@@ -9,21 +9,23 @@ import (
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
-	"github.com/jake-hansen/agora/services/jwt"
+	"github.com/jake-hansen/agora/services/jwtservice"
+	"github.com/jake-hansen/agora/services/simpleauthservice"
+	"github.com/jake-hansen/agora/services/userservice"
 )
 
 // Injectors from wire.go:
 
-func BuildSimpleAuthService() (*SimpleAuthService, error) {
+func BuildSimpleAuthService() (*simpleauthservice.SimpleAuthService, error) {
 	viper := config.ProvideViper()
-	jwtConfig, err := jwt.ProvideJWTConfig(viper)
+	jwtConfig, err := jwtservice.ProvideJWTConfig(viper)
 	if err != nil {
 		return nil, err
 	}
-	jwtService := jwt.ProvideJWTService(jwtConfig)
+	jwtService := jwtservice.ProvideJWTService(jwtConfig)
 	db := database.ProvideDB(viper)
 	userRepository := userrepo.ProvideUserRepository(db)
-	userService := ProvideUserService(userRepository)
-	simpleAuthService := ProvideSimpleAuthService(jwtService, userService)
+	userService := userservice.ProvideUserService(userRepository)
+	simpleAuthService := simpleauthservice.ProvideSimpleAuthService(jwtService, userService)
 	return simpleAuthService, nil
 }

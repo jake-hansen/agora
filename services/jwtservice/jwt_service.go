@@ -1,4 +1,4 @@
-package jwt
+package jwtservice
 
 import (
 	"fmt"
@@ -45,7 +45,7 @@ func (j *Service) GenerateToken(user domain.User) (string, error) {
 	return t, nil
 }
 
-// ValidateToken validates the given token string. If the token is valid, the token string is return as a jwt.Token.
+// ValidateToken validates the given token string. If the token is valid, the token string is return as a jwtservice.Token.
 // Otherwise, a nil token is returned along with an error.
 func (j *Service) ValidateToken(token string) (*jwt.Token, error) {
 	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {

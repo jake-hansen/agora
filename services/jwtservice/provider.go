@@ -1,4 +1,4 @@
-package jwt
+package jwtservice
 
 import (
 	"github.com/google/wire"
@@ -7,14 +7,14 @@ import (
 )
 
 func Cfg(v *viper.Viper) (*Config, error) {
-	dur, err := time.ParseDuration(v.GetString("jwt.duration"))
+	dur, err := time.ParseDuration(v.GetString("jwtservice.duration"))
 	if err != nil {
 		return nil, err
 	}
 
 	cfg := &Config{
-		Issuer:     v.GetString("jwt.issuer"),
-		SigningKey: v.GetString("jwt.signingkey"),
+		Issuer:     v.GetString("jwtservice.issuer"),
+		SigningKey: v.GetString("jwtservice.signingkey"),
 		Duration:   dur,
 	}
 

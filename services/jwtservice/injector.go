@@ -1,6 +1,6 @@
 // +build wireinject
 
-package jwt
+package jwtservice
 
 import (
 	"github.com/google/wire"
