@@ -7,13 +7,45 @@ package database
 
 import (
 	"github.com/jake-hansen/agora/config"
-	"gorm.io/gorm"
 )
 
-// Injectors from wire.go:
+// Injectors from injector.go:
 
-func BuildDB() *gorm.DB {
-	viper := config.ProvideViper()
-	db := ProvideDB(viper)
-	return db
+func Build() (*Manager, func(), error) {
+	viper := config.Provide()
+	databaseConfig, err := Cfg(viper)
+	if err != nil {
+		return nil, nil, err
+	}
+	db, cleanup, err := ProvideGORM(databaseConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	manager, err := Provide(databaseConfig, db)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	return manager, func() {
+		cleanup()
+	}, nil
+}
+
+func BuildTest(cfg Config) (*Manager, func(), error) {
+	databaseConfig, err := CfgTest(cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+	db, cleanup, err := ProvideGORMTest()
+	if err != nil {
+		return nil, nil, err
+	}
+	manager, err := Provide(databaseConfig, db)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	return manager, func() {
+		cleanup()
+	}, nil
 }
