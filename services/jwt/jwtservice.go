@@ -21,7 +21,7 @@ type claims struct {
 	jwt.StandardClaims
 }
 
-// GenerateToken creates a JWT for the specified user and returns the token as a string.
+// GenerateToken creates a JWT for the specified userrepo and returns the token as a string.
 func (j *Service) GenerateToken(user domain.User) (string, error) {
 	now := time.Now()
 

@@ -1,6 +1,6 @@
 package dto
 
-// User represents information about a user.
+// User represents information about a userrepo.
 type User struct {
 	Firstname	string	`json:"firstname,omitempty"`
 	Lastname	string	`json:"lastname,omitempty"`

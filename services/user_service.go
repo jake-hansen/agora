@@ -46,7 +46,7 @@ func (u *UserService) Delete(ID uint) error {
 }
 
 func (u *UserService) Validate(user *domain.User) error {
-	errMsg := "could not validate user: %w"
+	errMsg := "could not validate userrepo: %w"
 	foundUser, err := u.repo.GetByUsername(user.Username)
 	if err != nil {
 		return fmt.Errorf(errMsg, err)

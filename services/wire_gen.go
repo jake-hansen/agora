@@ -8,7 +8,7 @@ package services
 import (
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
-	"github.com/jake-hansen/agora/database/repositories"
+	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/services/jwt"
 )
 
@@ -22,7 +22,7 @@ func BuildSimpleAuthService() (*SimpleAuthService, error) {
 	}
 	jwtService := jwt.ProvideJWTService(jwtConfig)
 	db := database.ProvideDB(viper)
-	userRepository := repositories.ProvideUserRepository(db)
+	userRepository := userrepo.ProvideUserRepository(db)
 	userService := ProvideUserService(userRepository)
 	simpleAuthService := ProvideSimpleAuthService(jwtService, userService)
 	return simpleAuthService, nil

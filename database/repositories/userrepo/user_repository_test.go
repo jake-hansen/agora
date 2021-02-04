@@ -1,15 +1,14 @@
-package repositories_test
+package userrepo_test
 
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jake-hansen/agora/database"
-	"github.com/jake-hansen/agora/database/repositories"
+	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"regexp"
 	"testing"
@@ -39,10 +38,7 @@ func (s *Suite) SetupSuite() {
 	s.Require().NoError(err)
 
 	s.mock = *manager.Mock
-
-	s.mock.ExpectQuery("SELECT VERSION()").WillReturnRows(sqlmock.NewRows([]string{"VERSION()"}).AddRow("8.0.23"))
-
-	s.repo = repositories.ProvideUserRepository(s.DB)
+	s.repo = userrepo.Provide(manager.Manager)
 }
 
 func (s *Suite) TestUserRepository_Create() {

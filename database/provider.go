@@ -64,6 +64,7 @@ func ProvideMock(cfg *Config) (*MockManager, func(), error) {
 		return nil, nil, err
 	}
 
+	mock.ExpectQuery("SELECT VERSION()").WillReturnRows(sqlmock.NewRows([]string{"VERSION()"}).AddRow("8.0.23"))
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{Conn: db}), &gorm.Config{})
 	if err != nil {
 		return nil, nil, err
@@ -78,7 +79,7 @@ func ProvideMock(cfg *Config) (*MockManager, func(), error) {
 	g := New(*cfg, gormDB)
 
 	manager := MockManager{
-		Manager: *g,
+		Manager: g,
 		Mock: &mock,
 	}
 
@@ -87,5 +88,5 @@ func ProvideMock(cfg *Config) (*MockManager, func(), error) {
 
 var (
 	ProviderProductionSet = wire.NewSet(Provide, ProvideGORM, Cfg)
-	ProviderTestSet       = wire.NewSet(Provide, ProvideMock, CfgTest)
+	ProviderTestSet       = wire.NewSet(ProvideMock, CfgTest)
 )

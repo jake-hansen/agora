@@ -25,7 +25,7 @@ type Manager struct {
 }
 
 type MockManager struct {
-	Manager
+	Manager *Manager
 	Mock *sqlmock.Sqlmock
 }
 
@@ -39,7 +39,7 @@ func New(cfg Config, db *gorm.DB) *Manager {
 func mySQLDialector(v *viper.Viper) *gorm.Dialector {
 	mysqlConfig := fmt.Sprintf(
 		"%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
-		v.GetString("database.user"),
+		v.GetString("database.userrepo"),
 		v.GetString("database.password"),
 		v.GetString("database.protocol"),
 		v.GetString("database.host"),
