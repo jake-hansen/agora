@@ -9,9 +9,10 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Injectors from wire.go:
+// Injectors from injector.go:
 
-func BuildConfig() *viper.Viper {
-	viperViper := ProvideViper()
-	return viperViper
+func Build() (*viper.Viper, func(), error) {
+	viperViper := Provide()
+	return viperViper, func() {
+	}, nil
 }

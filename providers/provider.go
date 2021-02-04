@@ -6,5 +6,5 @@ import (
 )
 
 var (
-	ProductionSet = wire.NewSet(config.ProvideViper)
+	ProductionSet = wire.NewSet(config.ProviderSet)
 )
