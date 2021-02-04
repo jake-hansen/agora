@@ -2,17 +2,12 @@ package userservice
 
 import (
 	"fmt"
-	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
 	repo domain.UserRepository
-}
-
-func ProvideUserService(repository domain.UserRepository) *UserService {
-	return &UserService{repo: repository}
 }
 
 // Register creates a new User in the database. Note that the given User's password
@@ -58,8 +53,3 @@ func (u *UserService) Validate(user *domain.User) error {
 	}
 	return nil
 }
-
-var (
-	UserServiceSet = wire.NewSet(ProvideUserService, wire.Bind(new(domain.UserService), new(*UserService)))
-)
-

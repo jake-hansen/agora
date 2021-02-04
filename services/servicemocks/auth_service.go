@@ -1,4 +1,4 @@
-package mocks
+package servicemocks
 
 import (
 	"github.com/jake-hansen/agora/domain"
@@ -10,19 +10,19 @@ type AuthService struct {
 	mock.Mock
 }
 
-// IsAuthenticated mocks AuthService's IsAuthenticated function.
+// IsAuthenticated servicemocks AuthService's IsAuthenticated function.
 func (s *AuthService) IsAuthenticated(token domain.Token) (bool, error) {
 	args := s.Called()
 	return args.Bool(0), args.Error(1)
 }
 
-// Authenticate mocks AuthService's Authenticate function.
+// Authenticate servicemocks AuthService's Authenticate function.
 func (s *AuthService) Authenticate(auth domain.Auth) (*domain.Token, error) {
 	args := s.Called()
 	return args.Get(0).(*domain.Token), args.Error(1)
 }
 
-// Deauthenticate mocks AuthService's Deauthenticate function.
+// Deauthenticate servicemocks AuthService's Deauthenticate function.
 func (s *AuthService) Deauthenticate(token domain.Token) error {
 	args := s.Called()
 	return args.Error(0)

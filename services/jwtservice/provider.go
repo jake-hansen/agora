@@ -25,12 +25,13 @@ func CfgTest(cfg Config) (*Config, error) {
 	return &cfg, nil
 }
 
-// Provider returns a new JWTService with the specified config.
-func Provider(config *Config) *Service {
+// Provide returns a new JWTService with the specified config.
+func Provide(config *Config) *Service {
 	return &Service{*config}
 }
 
 var (
-	ProviderProductionSet = wire.NewSet(Provider, Cfg)
-	ProviderTestSet		  = wire.NewSet(Provider, CfgTest)
+	ProviderProductionSet = wire.NewSet(Provide, Cfg)
+	ProviderTestSet		  = wire.NewSet(Provide, CfgTest)
+	ProviderMockSet		  = wire.NewSet(Provide, CfgTest)
 )

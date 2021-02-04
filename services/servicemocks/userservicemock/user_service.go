@@ -1,4 +1,4 @@
-package mocks
+package userservicemock
 
 import (
 	"github.com/jake-hansen/agora/domain"

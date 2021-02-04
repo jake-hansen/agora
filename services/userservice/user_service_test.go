@@ -24,7 +24,7 @@ func TestUserService_Register(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("Create", mock.AnythingOfType("*domain.User")).Return(1, nil)
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		id, err := uService.Register(&mockUser)
 
@@ -36,7 +36,7 @@ func TestUserService_Register(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("Create", mock.AnythingOfType("*domain.User")).Return(0, errors.New("unknown error"))
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		id, err := uService.Register(&mockUser)
 
@@ -52,7 +52,7 @@ func TestUserService_GetAll(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("GetAll").Return(mockUsers, nil)
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		users, err := uService.GetAll()
 
@@ -64,7 +64,7 @@ func TestUserService_GetAll(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("GetAll").Return([]*domain.User{}, errors.New("unknown error"))
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		users, err := uService.GetAll()
 
@@ -78,7 +78,7 @@ func TestUserService_GetByID(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("GetByID", mock.AnythingOfType("uint")).Return(&mockUser, nil)
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		user, err := uService.GetByID(0)
 
@@ -90,7 +90,7 @@ func TestUserService_GetByID(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("GetByID", mock.AnythingOfType("uint")).Return(&domain.User{}, errors.New("unknown error"))
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		user, err := uService.GetByID(0)
 
@@ -104,7 +104,7 @@ func TestUserService_Update(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("Update", mock.AnythingOfType("*domain.User")).Return(nil)
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		err := uService.Update(&mockUser)
 
@@ -115,7 +115,7 @@ func TestUserService_Update(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("Update", mock.AnythingOfType("*domain.User")).Return(errors.New("unknown error"))
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		err := uService.Update(&mockUser)
 
@@ -128,7 +128,7 @@ func TestUserService_Delete(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("Delete", mock.AnythingOfType("uint")).Return(nil)
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		err := uService.Delete(0)
 
@@ -139,7 +139,7 @@ func TestUserService_Delete(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("Delete", mock.AnythingOfType("uint")).Return(errors.New("unknown error"))
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		err := uService.Delete(0)
 
@@ -157,7 +157,7 @@ func TestUserService_Validate(t *testing.T) {
 		returnUser.Password = mockUserHash
 		r.On("GetByUsername", mock.AnythingOfType("string")).Return(&returnUser, nil)
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		vUser := &domain.User{
 			Username: mockUser.Username,
@@ -173,7 +173,7 @@ func TestUserService_Validate(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("GetByUsername", mock.AnythingOfType("string")).Return(&returnUser, nil)
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		vUser := &domain.User{
 			Username: mockUser.Username,
@@ -189,7 +189,7 @@ func TestUserService_Validate(t *testing.T) {
 		r := new(repositorymocks.UserRepository)
 		r.On("GetByUsername", mock.AnythingOfType("string")).Return(&domain.User{}, errors.New("unknown error"))
 
-		uService := userservice.ProvideUserService(r)
+		uService := userservice.Provide(r)
 
 		vUser := &domain.User{
 			Username: mockUser.Username,

@@ -3,6 +3,7 @@ package userrepo
 import (
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/database"
+	"github.com/jake-hansen/agora/domain"
 )
 
 func Provide(manager *database.Manager) *UserRepository {
@@ -10,6 +11,6 @@ func Provide(manager *database.Manager) *UserRepository {
 }
 
 var (
-	ProviderProductionSet = wire.NewSet(Provide)
-	ProviderTestSet       = wire.NewSet(Provide)
+	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(domain.UserRepository), new(*UserRepository)))
+	ProviderTestSet       = wire.NewSet(Provide, wire.Bind(new(domain.UserRepository), new(*UserRepository)))
 )

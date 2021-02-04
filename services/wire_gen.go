@@ -26,6 +26,6 @@ func BuildSimpleAuthService() (*simpleauthservice.SimpleAuthService, error) {
 	db := database.ProvideDB(viper)
 	userRepository := userrepo.ProvideUserRepository(db)
 	userService := userservice.ProvideUserService(userRepository)
-	simpleAuthService := simpleauthservice.ProvideSimpleAuthService(jwtService, userService)
+	simpleAuthService := simpleauthservice.Provide(jwtService, userService)
 	return simpleAuthService, nil
 }

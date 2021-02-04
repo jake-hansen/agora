@@ -17,7 +17,7 @@ func Build() (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	service := Provider(jwtConfig)
+	service := Provide(jwtConfig)
 	return service, nil
 }
 
@@ -26,6 +26,6 @@ func BuildTest(cfg Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	service := Provider(jwtConfig)
+	service := Provide(jwtConfig)
 	return service, nil
 }

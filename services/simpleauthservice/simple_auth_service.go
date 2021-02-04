@@ -2,7 +2,6 @@ package simpleauthservice
 
 import (
 	"errors"
-	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
 )
@@ -13,12 +12,6 @@ import (
 type SimpleAuthService struct {
 	tokenService *jwtservice.Service
 	userService	 domain.UserService
-}
-
-// ProvideSimpleAuthService returns a new SimpleAuthService which uses the given JWTService for generating and validating
-// JWTs.
-func ProvideSimpleAuthService(tokenService *jwtservice.Service, userService domain.UserService) *SimpleAuthService {
-	return &SimpleAuthService{tokenService: tokenService, userService: userService}
 }
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
@@ -52,8 +45,4 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error
 func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
 }
-
-var (
-	SimpleAuthServiceSet = wire.NewSet(ProvideSimpleAuthService, jwtservice.JWTServiceSet)
-)
 
