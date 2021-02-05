@@ -26,19 +26,18 @@ func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
 
 // Authenticate attempts to authenticate the given Auth. If authenticated, returns a JWT. Otherwise,
 // an error is returned.
-// TODO: implement database to validate username/password
 func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error) {
 	// Validate credentials with database
 
-	if auth.Credentials.Username == "test" && auth.Credentials.Password == "test" {
-		// Generate JWT
-		token, err := s.jwtService.GenerateToken(*auth.Credentials)
-		if err != nil {
-			return nil, err
-		}
-		return &domain.Token{Value: token}, nil
+	if err := s.userService.Validate(auth.Credentials); err != nil {
+		return nil, errors.New("username or password is not correct")
 	}
-	return nil, errors.New("username or password is not correct")
+
+	token, err := s.jwtService.GenerateToken(*auth.Credentials)
+	if err != nil {
+		return nil, err
+	}
+	return &domain.Token{Value: token}, nil
 }
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.

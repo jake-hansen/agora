@@ -35,8 +35,9 @@ func buildTest(t *testing.T) (*simpleauthservice.SimpleAuthService, *jwtservicem
 
 func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 	t.Run("test-valid-token", func(t *testing.T) {
-		as, js, _ := buildTest(t)
+		as, js, us := buildTest(t)
 		js.On("GenerateToken", mock.Anything).Return("test-token", nil)
+		us.On("Validate", mock.Anything).Return(nil)
 		token, err := as.Authenticate(testAuth)
 
 		assert.NoError(t, err)
