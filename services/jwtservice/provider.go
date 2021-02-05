@@ -1,6 +1,7 @@
 package jwtservice
 
 import (
+	"fmt"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"time"
@@ -9,7 +10,7 @@ import (
 func Cfg(v *viper.Viper) (*Config, error) {
 	dur, err := time.ParseDuration(v.GetString("jwtservice.duration"))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("jwtservice: %w", err)
 	}
 
 	cfg := &Config{
