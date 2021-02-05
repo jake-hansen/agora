@@ -8,8 +8,8 @@ import (
 
 // Provide returns a new SimpleAuthService which uses the given JWTService for generating and validating
 // JWTs.
-func Provide(tokenService *jwtservice.Service, userService domain.UserService) *SimpleAuthService {
-	return &SimpleAuthService{tokenService: tokenService, userService: userService}
+func Provide(jwtService jwtservice.JWTService, userService domain.UserService) *SimpleAuthService {
+	return &SimpleAuthService{jwtService: jwtService, userService: userService}
 }
 
 var (

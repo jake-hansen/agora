@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+type JWTService interface {
+	GenerateToken(user domain.User) (string, error)
+	ValidateToken(token string) (*jwt.Token, error)
+}
+
 type Config struct {
 	Issuer     string
 	SigningKey string

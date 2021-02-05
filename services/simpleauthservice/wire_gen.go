@@ -9,8 +9,8 @@ import (
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
+	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
-	"github.com/jake-hansen/agora/services/mocks/userservicemock"
 	"github.com/jake-hansen/agora/services/userservice"
 )
 
@@ -44,13 +44,7 @@ func Build() (*SimpleAuthService, func(), error) {
 	}, nil
 }
 
-func BuildTest(jwtCfg jwtservice.Config) (*SimpleAuthService, error) {
-	jwtserviceConfig, err := jwtservice.CfgTest(jwtCfg)
-	if err != nil {
-		return nil, err
-	}
-	service := jwtservice.Provide(jwtserviceConfig)
-	userService := userservicemock.Provide()
-	simpleAuthService := Provide(service, userService)
+func BuildTest(jwtService jwtservice.JWTService, userService domain.UserService) (*SimpleAuthService, error) {
+	simpleAuthService := Provide(jwtService, userService)
 	return simpleAuthService, nil
 }

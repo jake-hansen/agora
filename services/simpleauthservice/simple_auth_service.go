@@ -10,14 +10,14 @@ import (
 // and password combination. SimpleAuthService uses a JWT as a token which is not stored or persisted
 // in any way. It is up to the consumer to reauthenticate upon JWT expiry to ensure continued access.
 type SimpleAuthService struct {
-	tokenService *jwtservice.Service
-	userService	 domain.UserService
+	jwtService  jwtservice.JWTService
+	userService domain.UserService
 }
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
 // if the contained JWT is valid.
 func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
-	_, err := s.tokenService.ValidateToken(token.Value)
+	_, err := s.jwtService.ValidateToken(token.Value)
 	if err != nil {
 		return false, err
 	}
@@ -32,7 +32,7 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error
 
 	if auth.Credentials.Username == "test" && auth.Credentials.Password == "test" {
 		// Generate JWT
-		token, err := s.tokenService.GenerateToken(*auth.Credentials)
+		token, err := s.jwtService.GenerateToken(*auth.Credentials)
 		if err != nil {
 			return nil, err
 		}

@@ -5,7 +5,7 @@ import (
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/middleware"
-	"github.com/jake-hansen/agora/services"
+	"github.com/jake-hansen/agora/services/simpleauthservice"
 )
 
 // NewRouter returns a router configured with handlers for configured
@@ -21,7 +21,7 @@ func NewRouter(env string) *gin.Engine {
 	v1 := router.Group("v1")
 
 	// Create auth handler
-	authService, err := services.BuildSimpleAuthService()
+	authService, _, err := simpleauthservice.Build()
 	if err != nil {
 		panic(err)
 	}
