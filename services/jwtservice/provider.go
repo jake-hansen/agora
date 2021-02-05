@@ -31,6 +31,6 @@ func Provide(config *Config) *Service {
 }
 
 var (
-	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)),Cfg)
+	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)), Cfg)
 	ProviderTestSet		  = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)), CfgTest)
 )

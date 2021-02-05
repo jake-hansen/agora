@@ -1,14 +1,27 @@
 package server
 
 import (
-	"github.com/jake-hansen/agora/config"
+	"github.com/jake-hansen/agora/router"
 )
 
-func Init(env string) {
-	r := NewRouter(env)
-	address := config.Build().GetString("server.address")
-	err := r.Run(address)
-	if err != nil {
-		panic(err)
+type Config struct {
+	Address		string
+}
+
+type Server struct {
+	config		*Config
+	router		*router.Router
+}
+
+func (s *Server) ListenAndServe() error {
+	err := s.router.Run(s.config.Address)
+	return err
+}
+
+func New(cfg Config, router *router.Router) *Server  {
+	s := &Server{
+		config: &cfg,
+		router: router,
 	}
+	return s
 }

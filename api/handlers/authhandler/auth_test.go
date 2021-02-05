@@ -1,4 +1,4 @@
-package handlers_test
+package authhandler_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api/dto"
-	"github.com/jake-hansen/agora/api/handlers"
+	"github.com/jake-hansen/agora/api/handlers/authhandler"
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/mocks/authservicemock"
@@ -45,7 +45,9 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+
+		h := authhandler.BuildTest(mockAuthService)
+		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(DTOMockCredentials)
@@ -77,7 +79,8 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+		h := authhandler.BuildTest(mockAuthService)
+		_ = h.Register(router.Group("test"))
 
 		badRequest := `{}`
 		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Credentials\"," +
@@ -111,7 +114,8 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+		h := authhandler.BuildTest(mockAuthService)
+		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(domainMockCredentials)
@@ -133,7 +137,8 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+		h := authhandler.BuildTest(mockAuthService)
+		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(DTOMockToken)
@@ -152,7 +157,8 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+		h := authhandler.BuildTest(mockAuthService)
+		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(DTOMockToken)
@@ -170,7 +176,8 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		handlers.NewAuthHandler(router.Group("test"), mockAuthService)
+		h := authhandler.BuildTest(mockAuthService)
+		_ = h.Register(router.Group("test"))
 
 		badRequest := `{}`
 		req, err := http.NewRequest("DELETE", "/test/auth", strings.NewReader(badRequest))

@@ -1,4 +1,4 @@
-package handlers
+package authhandler
 
 import (
 	"errors"
@@ -16,16 +16,13 @@ type AuthHandler struct {
 	AuthService *domain.AuthService
 }
 
-// NewAuthHandler registers a new AuthHandler on the specified RouterGroup. The AuthHandler uses
-// the specified AuthService.
-func NewAuthHandler(parentGroup *gin.RouterGroup, service domain.AuthService) {
-	handler := &AuthHandler{AuthService: &service}
-
+func (a *AuthHandler) Register(parentGroup *gin.RouterGroup) error {
 	authGroup := parentGroup.Group("auth")
 	{
-		authGroup.POST("", handler.Login)
-		authGroup.DELETE("", handler.Logout)
+		authGroup.POST("", a.Login)
+		authGroup.DELETE("", a.Logout)
 	}
+	return nil
 }
 
 func validateHelper(err error) error {
