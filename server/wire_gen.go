@@ -14,19 +14,25 @@ import (
 
 // Injectors from injector.go:
 
-func Build() (*Server, error) {
+func Build() (*Server, func(), error) {
 	viper := config.Provide()
 	serverConfig, err := Cfg(viper)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	v := middleware.ProvideAllProductionMiddleware()
-	v2 := handlers.ProvideAllProductionHandlers()
+	v2, cleanup, err := handlers.ProvideAllProductionHandlers()
+	if err != nil {
+		return nil, nil, err
+	}
 	routerConfig, err := router.Cfg(viper, v, v2)
 	if err != nil {
-		return nil, err
+		cleanup()
+		return nil, nil, err
 	}
 	routerRouter := router.Provide(routerConfig)
 	server := Provide(serverConfig, routerRouter)
-	return server, nil
+	return server, func() {
+		cleanup()
+	}, nil
 }

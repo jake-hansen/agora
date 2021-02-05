@@ -6,14 +6,21 @@ import (
 	"github.com/jake-hansen/agora/router/handlers"
 )
 
-func ProvideAllProductionHandlers() []handlers.Handler {
+func ProvideAllProductionHandlers() ([]handlers.Handler, func(), error) {
 	var handlers []handlers.Handler
 
-	auth, _, _ := authhandler.Build()
+	auth, authCleanup, err := authhandler.Build()
+	if err != nil {
+		return nil, nil, err
+	}
 
 	handlers = append(handlers, auth)
 
-	return handlers
+	cleanup := func() {
+		authCleanup()
+	}
+
+	return handlers, cleanup, nil
 }
 
 var (

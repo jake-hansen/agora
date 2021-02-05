@@ -11,7 +11,12 @@ import (
 
 // Injectors from injector.go:
 
-func Build() []handlers.Handler {
-	v := ProvideAllProductionHandlers()
-	return v
+func Build() ([]handlers.Handler, func(), error) {
+	v, cleanup, err := ProvideAllProductionHandlers()
+	if err != nil {
+		return nil, nil, err
+	}
+	return v, func() {
+		cleanup()
+	}, nil
 }

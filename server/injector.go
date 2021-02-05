@@ -10,7 +10,7 @@ import (
 	"github.com/jake-hansen/agora/router"
 )
 
-func Build() (*Server, error) {
+func Build() (*Server, func(), error) {
 	panic(wire.Build(ProviderProductionSet,
 			         router.ProviderProductionSet,
 			         handlers.ProviderProductionSet,

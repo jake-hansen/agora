@@ -5,11 +5,12 @@ import (
 )
 
 func main() {
-	startAPIServer()
+	cleanup := startAPIServer()
+	defer cleanup()
 }
 
-func startAPIServer() {
-	apiServer, err := server.Build()
+func startAPIServer() func() {
+	apiServer, cleanup, err := server.Build()
 	if err != nil {
 		panic(err)
 	}
@@ -17,4 +18,5 @@ func startAPIServer() {
 	if err != nil {
 		panic(err)
 	}
+	return cleanup
 }
