@@ -9,6 +9,7 @@ import (
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
+	"github.com/jake-hansen/agora/domain"
 )
 
 // Injectors from injector.go:
@@ -33,4 +34,9 @@ func Build() (*UserService, func(), error) {
 	return userService, func() {
 		cleanup()
 	}, nil
+}
+
+func BuildTest(repo domain.UserRepository) *UserService {
+	userService := Provide(repo)
+	return userService
 }

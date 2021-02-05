@@ -1,4 +1,4 @@
-package repository_mocks
+package userrepomock
 
 import (
 	"github.com/jake-hansen/agora/domain"

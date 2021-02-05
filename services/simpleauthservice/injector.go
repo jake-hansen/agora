@@ -8,7 +8,7 @@ import (
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/providers"
 	"github.com/jake-hansen/agora/services/jwtservice"
-	"github.com/jake-hansen/agora/services/servicemocks/userservicemock"
+	"github.com/jake-hansen/agora/services/mocks/userservicemock"
 	"github.com/jake-hansen/agora/services/userservice"
 )
 
