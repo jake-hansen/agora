@@ -28,7 +28,7 @@ var domainMockToken = domain.Token{
 }
 
 var DTOMockCredentials = dto.Auth{
-	Credentials: &dto.User{
+	Credentials: &dto.Credentials{
 		Username:  "test",
 		Password:  "test",
 	},
