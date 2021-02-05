@@ -3,15 +3,11 @@
 //go:generate go run github.com/google/wire/cmd/wire
 //+build !wireinject
 
-package config
-
-import (
-	"github.com/spf13/viper"
-)
+package authservicemock
 
 // Injectors from injector.go:
 
-func Build() *viper.Viper {
-	viperViper := Provide()
-	return viperViper
+func Build() *AuthService {
+	authService := Provide()
+	return authService
 }

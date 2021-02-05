@@ -9,7 +9,7 @@ import (
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/services/mocks"
+	"github.com/jake-hansen/agora/services/mocks/authservicemock"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -40,7 +40,7 @@ var DTOMockToken = dto.Token{
 
 func TestAuthHandler_Login(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		mockAuthService := new(servicemocks.AuthService)
+		mockAuthService := authservicemock.Build()
 		mockAuthService.On("Authenticate").Return(&domainMockToken, nil)
 
 		router := gin.Default()
@@ -73,7 +73,7 @@ func TestAuthHandler_Login(t *testing.T) {
 			assert.Equal(t, validationError, w.Body.String())
 		}
 
-		mockAuthService := new(servicemocks.AuthService)
+		mockAuthService := authservicemock.Build()
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
@@ -104,7 +104,7 @@ func TestAuthHandler_Login(t *testing.T) {
 	})
 
 	t.Run("invalid-credentials", func(t *testing.T) {
-		mockAuthService := new(servicemocks.AuthService)
+		mockAuthService := authservicemock.Build()
 		var token *domain.Token = nil
 		mockAuthService.On("Authenticate").Return(token,
 			errors.New("username or password not correct"))
@@ -128,7 +128,7 @@ func TestAuthHandler_Login(t *testing.T) {
 
 func TestAuthHandler_Logout(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		mockAuthService := new(servicemocks.AuthService)
+		mockAuthService := authservicemock.Build()
 		mockAuthService.On("Deauthenticate").Return(nil)
 
 		router := gin.Default()
@@ -147,7 +147,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		mockAuthService := new(servicemocks.AuthService)
+		mockAuthService := authservicemock.Build()
 		mockAuthService.On("Deauthenticate").Return(errors.New("test error"))
 
 		router := gin.Default()
@@ -166,7 +166,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 	})
 
 	t.Run("token-missing", func(t *testing.T) {
-		mockAuthService := new(servicemocks.AuthService)
+		mockAuthService := authservicemock.Build()
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())

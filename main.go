@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/server"
 	"os"
 )
@@ -15,6 +14,5 @@ func main() {
 		os.Exit(1)
 	}
 	flag.Parse()
-	config.Init(*environment)
 	server.Init(*environment)
 }

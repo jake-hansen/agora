@@ -7,6 +7,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Build() (*viper.Viper, func(), error) {
+func Build() *viper.Viper {
 	panic(wire.Build(Provide))
 }
