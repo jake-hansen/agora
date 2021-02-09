@@ -10,11 +10,15 @@ import (
 	"testing"
 )
 
+var mockUserPassword = "Password123"
+
+var passwordObj = domain.NewPassword("Password123")
+
 var mockUser = domain.User{
 	Firstname: "john",
 	Lastname:  "doe",
 	Username:  "jdoe",
-	Password:  "Password123",
+	Password:  passwordObj,
 }
 
 var mockUserHash = "$2a$10$PdjlGYhMGonCrjKNquZmzeMQY0M4vlxsCjtQysCOOSzxcfpTW5JAe"
@@ -149,22 +153,20 @@ func TestUserService_Delete(t *testing.T) {
 
 func TestUserService_Validate(t *testing.T) {
 	returnUser := mockUser
-	returnUser.Password = mockUserHash
+	returnUser.Password.Hash = []byte(mockUserHash)
 
 	t.Run("success", func(t *testing.T) {
 		r := userrepomock.Build()
-		returnUser := mockUser
-		returnUser.Password = mockUserHash
 		r.On("GetByUsername", mock.AnythingOfType("string")).Return(&returnUser, nil)
 
 		uService := userservice.BuildTest(r)
 
-		vUser := &domain.User{
+		creds := &domain.Credentials{
 			Username: mockUser.Username,
-			Password: mockUser.Password,
+			Password: mockUserPassword,
 		}
 
-		err := uService.Validate(vUser)
+		_, err := uService.Validate(creds)
 
 		assert.NoError(t, err)
 	})
@@ -175,12 +177,12 @@ func TestUserService_Validate(t *testing.T) {
 
 		uService := userservice.BuildTest(r)
 
-		vUser := &domain.User{
+		creds := &domain.Credentials{
 			Username: mockUser.Username,
 			Password: "wrong-password",
 		}
 
-		err := uService.Validate(vUser)
+		_, err := uService.Validate(creds)
 
 		assert.Error(t, err)
 	})
@@ -191,12 +193,12 @@ func TestUserService_Validate(t *testing.T) {
 
 		uService := userservice.BuildTest(r)
 
-		vUser := &domain.User{
+		creds := &domain.Credentials{
 			Username: mockUser.Username,
 			Password: "wrong-password",
 		}
 
-		err := uService.Validate(vUser)
+		_, err := uService.Validate(creds)
 
 		assert.Error(t, err)
 	})

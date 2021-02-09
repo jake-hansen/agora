@@ -18,7 +18,7 @@ import (
 )
 
 var domainMockCredentials = domain.Auth{
-	Credentials: &domain.User{
+	Credentials: &domain.Credentials{
 		Username:  "test",
 		Password:  "test",
 	},
