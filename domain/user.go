@@ -1,13 +1,43 @@
 package domain
 
-import "gorm.io/gorm"
+import (
+	"database/sql/driver"
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
-	Firstname	string
-	Lastname	string
-	Username	string
-	Password	string
+	Firstname 	  string
+	Lastname  	  string
+	Username  	  string
+	Password  	  *Password
+}
+
+type Password struct {
+	plaintext	string
+	Hash		[]byte
+}
+
+func NewPassword(plaintext string) *Password {
+	return &Password{plaintext: plaintext}
+}
+
+func (p *Password) HashPassword() ([]byte, error) {
+	pHash, err := bcrypt.GenerateFromPassword([]byte(p.plaintext), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+	return pHash, err
+}
+
+func (p *Password) Scan(src interface{}) error {
+	p.Hash = src.([]byte)
+	return nil
+}
+
+func (p *Password) Value() (driver.Value, error) {
+	return p.HashPassword()
 }
 
 type UserRepository interface {
@@ -21,7 +51,7 @@ type UserRepository interface {
 
 type UserService interface {
 	Register(user *User) (uint, error)
-	Validate(user *User) error
+	Validate(credentials *Credentials) (*User, error)
 	GetAll() ([]*User, error)
 	GetByID(ID uint) (*User, error)
 	Update(user *User) error
