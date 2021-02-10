@@ -32,12 +32,13 @@ func (p *Password) HashPassword() ([]byte, error) {
 }
 
 func (p *Password) Scan(src interface{}) error {
-	p.Hash = src.([]byte)
+	p.Hash = make([]byte, len(src.([]byte)))
+	copy(p.Hash, src.([]byte))
 	return nil
 }
 
 func (p *Password) Value() (driver.Value, error) {
-	return p.HashPassword()
+	return p.Hash, nil
 }
 
 type UserRepository interface {
