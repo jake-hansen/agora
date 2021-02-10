@@ -21,8 +21,8 @@ type Config struct {
 	Duration   time.Duration
 }
 
-// Service is an implementation of a JWTService.
-type Service struct {
+// JWTServiceImpl is an implementation of a JWTService.
+type JWTServiceImpl struct {
 	config Config
 }
 
@@ -30,8 +30,8 @@ type claims struct {
 	jwt.StandardClaims
 }
 
-// GenerateToken creates a JWT for the specified userrepo and returns the token as a string.
-func (j *Service) GenerateToken(user domain.User) (string, error) {
+// GenerateToken creates a JWT for the specified User and returns the token as a string.
+func (j *JWTServiceImpl) GenerateToken(user domain.User) (string, error) {
 	now := time.Now()
 
 	claims := &claims{
@@ -54,9 +54,9 @@ func (j *Service) GenerateToken(user domain.User) (string, error) {
 	return t, nil
 }
 
-// ValidateToken validates the given token string. If the token is valid, the token string is return as a jwtservice.Token.
+// ValidateToken validates the given token string. If the token is valid, the token string is return as a jwt.Token.
 // Otherwise, a nil token is returned along with an error.
-func (j *Service) ValidateToken(token string) (*jwt.Token, error) {
+func (j *JWTServiceImpl) ValidateToken(token string) (*jwt.Token, error) {
 	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])

@@ -30,14 +30,14 @@ func CfgTest(cfg Config) (*Config, error) {
 }
 
 // Provide returns a new JWTService with the specified config.
-func Provide(config *Config) *Service {
-	return &Service{*config}
+func Provide(config *Config) *JWTServiceImpl {
+	return &JWTServiceImpl{*config}
 }
 
 var (
-	// ProviderProductionSet provides a new Service for use in production.
-	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)), Cfg)
+	// ProviderProductionSet provides a new JWTServiceImpl for use in production.
+	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*JWTServiceImpl)), Cfg)
 
-	// ProviderTestSet provides a new Service for testing.
-	ProviderTestSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)), CfgTest)
+	// ProviderTestSet provides a new JWTServiceImpl for testing.
+	ProviderTestSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*JWTServiceImpl)), CfgTest)
 )
