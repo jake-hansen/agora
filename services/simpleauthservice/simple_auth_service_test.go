@@ -20,7 +20,7 @@ var testconfig = jwtservice.Config{
 	SigningKey: "test",
 	Duration:   dur,
 }
-var testAuth = domain.Auth{Credentials: &domain.User{
+var testAuth = domain.Auth{Credentials: &domain.Credentials{
 	Username:  "test",
 	Password:  "test",
 }}
@@ -37,7 +37,7 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 	t.Run("test-valid-token", func(t *testing.T) {
 		as, js, us := buildTest(t)
 		js.On("GenerateToken", mock.Anything).Return("test-token", nil)
-		us.On("Validate", mock.Anything).Return(nil)
+		us.On("Validate", mock.Anything).Return(&domain.User{}, nil)
 		token, err := as.Authenticate(testAuth)
 
 		assert.NoError(t, err)

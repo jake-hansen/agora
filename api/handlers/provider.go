@@ -4,32 +4,35 @@ import (
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
+	"github.com/jake-hansen/agora/database"
+	"github.com/jake-hansen/agora/database/repositories/userrepo"
+	"github.com/jake-hansen/agora/providers"
 	"github.com/jake-hansen/agora/router/handlers"
+	"github.com/jake-hansen/agora/services/jwtservice"
+	"github.com/jake-hansen/agora/services/simpleauthservice"
+	"github.com/jake-hansen/agora/services/userservice"
 )
 
-func ProvideAllProductionHandlers() ([]handlers.Handler, func(), error) {
+func ProvideAllProductionHandlers(auth *authhandler.AuthHandler, user *userhandler.UserHandler) []handlers.Handler {
 	var handlers []handlers.Handler
-
-	auth, authCleanup, err := authhandler.Build()
-	if err != nil {
-		return nil, nil, err
-	}
-	user, userCleanup, err := userhandler.Build()
-	if err != nil {
-		return nil, nil, err
-	}
 
 	handlers = append(handlers, auth)
 	handlers = append(handlers, user)
 
-	cleanup := func() {
-		authCleanup()
-		userCleanup()
-	}
-
-	return handlers, cleanup, nil
+	return handlers
 }
 
 var (
-	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers)
+	authHandlerProductionSet = wire.NewSet(authhandler.Provide,
+		                                   simpleauthservice.ProviderProductionSet,
+		                                   userservice.ProviderProductionSet,
+		                                   userrepo.ProviderProductionSet,
+		                                   jwtservice.ProviderProductionSet)
+
+	userHandlerProductionSet = wire.NewSet(userhandler.Provide)
+	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers,
+										authHandlerProductionSet,
+										userHandlerProductionSet,
+										database.ProviderProductionSet,
+										providers.ProductionSet)
 )

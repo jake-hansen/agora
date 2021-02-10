@@ -31,3 +31,21 @@ Once you are satisfied with the changes you've made - and you've ensured every u
 Before pushing your branch, its reccommended that you pull the lastest changes from the `develop` branch and attempt to locally merge your branch with `develop`. If your branch successfully merges, then you are good to push your branch. If your branch has merge conflicts, make sure you resolve those conflicts before you push.
 
 If your PR is accepted and merged to develop, go ahead and delete your feature branch and start working on the next feature by starting the process over again!
+
+### Database
+Agora relies on some type of relational database to store data. Currently, only MySQL is supported, but more databases can easily be supported by including their driver and passing the appropriate Dialector in a database.Config.
+
+Migrations are found in the `database/migrations` directory, and should be run against a database using the [golang-migrate/migrate](https://github.com/golang-migrate/migrate) project.
+
+For development, a MySQL database with the latest migrations can be brought up by using the `docker-compose.yaml` file found in the `database` directory.
+
+Running the command
+```sh
+$ docker-compose up
+```
+
+should bring up a database with the latest migrations applied. You can then bring down the database with
+
+```sh
+$ docker-compose down
+```
