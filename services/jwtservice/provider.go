@@ -2,11 +2,13 @@ package jwtservice
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/google/wire"
 	"github.com/spf13/viper"
-	"time"
 )
 
+// Cfg provides a new Config using values from a Viper.
 func Cfg(v *viper.Viper) (*Config, error) {
 	dur, err := time.ParseDuration(v.GetString("jwtservice.duration"))
 	if err != nil {
@@ -22,6 +24,7 @@ func Cfg(v *viper.Viper) (*Config, error) {
 	return cfg, nil
 }
 
+// CfgTest provides the passed Config.
 func CfgTest(cfg Config) (*Config, error) {
 	return &cfg, nil
 }
@@ -32,6 +35,9 @@ func Provide(config *Config) *Service {
 }
 
 var (
+	// ProviderProductionSet provides a new Service for use in production.
 	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)), Cfg)
-	ProviderTestSet		  = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)), CfgTest)
+
+	// ProviderTestSet provides a new Service for testing.
+	ProviderTestSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*Service)), CfgTest)
 )

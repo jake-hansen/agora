@@ -27,4 +27,3 @@ func UserDomainToDTO(user *domain.User) *dto.User {
 	}
 	return resultUser
 }
-

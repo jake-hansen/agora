@@ -13,6 +13,9 @@ func Provide(jwtService jwtservice.JWTService, userService domain.UserService) *
 }
 
 var (
+	// ProviderProductionSet provides a new SimpleAuthService for use in production.
 	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(domain.AuthService), new(*SimpleAuthService)))
-	ProviderTestSet		  = wire.NewSet(Provide, wire.Bind(new(domain.AuthService), new(*SimpleAuthService)))
+
+	// ProviderTestSet provides a new SimpleAuthService for testing.
+	ProviderTestSet = wire.NewSet(Provide, wire.Bind(new(domain.AuthService), new(*SimpleAuthService)))
 )

@@ -2,11 +2,12 @@ package authmiddleware
 
 import (
 	"errors"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/domain"
-	"net/http"
-	"strings"
 )
 
 // ParseTokenFunc defines a function which parses an HTTP request for
@@ -16,8 +17,8 @@ type ParseTokenFunc = func(r *http.Request) (*domain.Token, error)
 // AuthMiddleware handles authentication by using AuthService to determine if
 // a request is authenticated.
 type AuthMiddleware struct {
-	AuthService		*domain.AuthService
-	ParseToken		ParseTokenFunc
+	AuthService *domain.AuthService
+	ParseToken  ParseTokenFunc
 }
 
 // New returns a new AuthMiddleware configured with the specified AuthService and ParseTokenFunc.
@@ -54,7 +55,7 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 
 // getTokenFromBearerHeader parses the Authorization header for a Bearer token
 // and returns the parsed result as a domain.Token.
-func getTokenFromBearerHeader(r*http.Request) (*domain.Token, error) {
+func getTokenFromBearerHeader(r *http.Request) (*domain.Token, error) {
 	t := r.Header.Get("Authorization")
 	if t == "" {
 		return nil, errors.New("token not found")

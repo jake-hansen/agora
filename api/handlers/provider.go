@@ -13,6 +13,7 @@ import (
 	"github.com/jake-hansen/agora/services/userservice"
 )
 
+// ProvideAllProductionHandlers provides all the handlers that will be used in production.
 func ProvideAllProductionHandlers(auth *authhandler.AuthHandler, user *userhandler.UserHandler) []handlers.Handler {
 	var handlers []handlers.Handler
 
@@ -24,15 +25,17 @@ func ProvideAllProductionHandlers(auth *authhandler.AuthHandler, user *userhandl
 
 var (
 	authHandlerProductionSet = wire.NewSet(authhandler.Provide,
-		                                   simpleauthservice.ProviderProductionSet,
-		                                   userservice.ProviderProductionSet,
-		                                   userrepo.ProviderProductionSet,
-		                                   jwtservice.ProviderProductionSet)
+		simpleauthservice.ProviderProductionSet,
+		userservice.ProviderProductionSet,
+		userrepo.ProviderProductionSet,
+		jwtservice.ProviderProductionSet)
 
 	userHandlerProductionSet = wire.NewSet(userhandler.Provide)
+
+	// ProviderProductionSet provides all handlers for production.
 	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers,
-										authHandlerProductionSet,
-										userHandlerProductionSet,
-										database.ProviderProductionSet,
-										providers.ProductionSet)
+		authHandlerProductionSet,
+		userHandlerProductionSet,
+		database.ProviderProductionSet,
+		providers.ProductionSet)
 )

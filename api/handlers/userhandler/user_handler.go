@@ -2,19 +2,23 @@ package userhandler
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/adapter"
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/domain"
-	"net/http"
 )
 
+// UserHandler is the handler that manages operations on Users for the API.
 type UserHandler struct {
 	UserService *domain.UserService
 }
 
+// Register creates one endpoint to manage Users.
+// / (POST) - Register new user
 func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	userGroup := parentGroup.Group("user")
 	{
@@ -31,7 +35,8 @@ func validateHelper(err error) error {
 	return err
 }
 
-func(u *UserHandler) RegisterUser(c *gin.Context)  {
+// RegisterUser attempts to register the given user retrieved from the body as JSON.
+func (u *UserHandler) RegisterUser(c *gin.Context) {
 	var user dto.User
 	err := c.ShouldBind(&user)
 	err = validateHelper(err)
@@ -49,4 +54,3 @@ func(u *UserHandler) RegisterUser(c *gin.Context)  {
 		c.Status(http.StatusOK)
 	}
 }
-

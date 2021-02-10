@@ -2,12 +2,13 @@ package userservice_test
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/jake-hansen/agora/database/repositories/mocks/userrepomock"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/userservice"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 var mockUserPassword = "Password123"

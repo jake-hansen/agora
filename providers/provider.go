@@ -6,5 +6,6 @@ import (
 )
 
 var (
+	// ProductionSet contains the dependencies necessary for production.
 	ProductionSet = wire.NewSet(config.ProviderSet)
 )

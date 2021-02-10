@@ -2,22 +2,26 @@ package jwtservice
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/domain"
-	"time"
 )
 
+// JWTService is a service for generating and validating JWTs.
 type JWTService interface {
 	GenerateToken(user domain.User) (string, error)
 	ValidateToken(token string) (*jwt.Token, error)
 }
 
+// Config contains the parameters for configuring a JWTService.
 type Config struct {
 	Issuer     string
 	SigningKey string
 	Duration   time.Duration
 }
 
+// Service is an implementation of a JWTService.
 type Service struct {
 	config Config
 }

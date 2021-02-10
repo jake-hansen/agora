@@ -3,6 +3,10 @@ package userrepo_test
 import (
 	"database/sql/driver"
 	"errors"
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
@@ -12,15 +16,12 @@ import (
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"regexp"
-	"testing"
-	"time"
 )
 
 var pword = "Password123!"
 
 var mockUser = domain.User{
-	Model:     gorm.Model{
+	Model: gorm.Model{
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		DeletedAt: gorm.DeletedAt{},
@@ -31,7 +32,7 @@ var mockUser = domain.User{
 	Password:  domain.NewPassword(pword),
 }
 
-type ProperHash struct {}
+type ProperHash struct{}
 
 func (a ProperHash) Match(value driver.Value) bool {
 	err := bcrypt.CompareHashAndPassword(value.([]byte), []byte("Password123!"))
@@ -139,9 +140,9 @@ func (s *Suite) TestUserRepository_GetByID() {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
 			WithArgs(0).
 			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "firstname",
-													"lastname", "username", "password"}).
+				"lastname", "username", "password"}).
 				AddRow(0, mockUser.CreatedAt, mockUser.UpdatedAt, mockUser.DeletedAt, mockUser.Firstname,
-					   mockUser.Lastname, mockUser.Username, mockUser.Password))
+					mockUser.Lastname, mockUser.Username, mockUser.Password))
 
 		user, err := s.repo.GetByID(0)
 

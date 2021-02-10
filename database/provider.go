@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/wire"
 	"github.com/spf13/viper"
@@ -9,6 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Cfg provides a new Config using values from a Viper.
 func Cfg(v *viper.Viper) (*Config, error) {
 	c := Config{}
 
@@ -19,16 +21,19 @@ func Cfg(v *viper.Viper) (*Config, error) {
 	}
 
 	c.ConnMaxLifetime = v.GetDuration("database.connections.lifetime.max")
-	c.MaxIdleConns	  = v.GetInt("database.connections.idle.max")
-	c.MaxOpenConns	  = v.GetInt("database.connections.open.max")
+	c.MaxIdleConns = v.GetInt("database.connections.idle.max")
+	c.MaxOpenConns = v.GetInt("database.connections.open.max")
 
 	return &c, nil
 }
 
+// CfgTest provides the passed Config.
 func CfgTest(cfg Config) (*Config, error) {
 	return &cfg, nil
 }
 
+// ProvideGORM provides a DB using the configuration properties provided
+// by the given Config.
 func ProvideGORM(cfg *Config) (*gorm.DB, func(), error) {
 	db, err := gorm.Open(*cfg.dialector, &gorm.Config{})
 	if err != nil {
@@ -53,11 +58,13 @@ func ProvideGORM(cfg *Config) (*gorm.DB, func(), error) {
 	return db, cleanup, err
 }
 
+// Provide provides a new Manager containing the given Config and DB.
 func Provide(cfg *Config, db *gorm.DB) (*Manager, error) {
 	g := New(*cfg, db)
 	return g, nil
 }
 
+// ProvideMock provies a new MockManager containing the given Config.
 func ProvideMock(cfg *Config) (*MockManager, func(), error) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -80,13 +87,16 @@ func ProvideMock(cfg *Config) (*MockManager, func(), error) {
 
 	manager := MockManager{
 		Manager: g,
-		Mock: &mock,
+		Mock:    &mock,
 	}
 
 	return &manager, cleanup, nil
 }
 
 var (
+	// ProviderProductionSet provides a new Manager for use in production.
 	ProviderProductionSet = wire.NewSet(Provide, ProvideGORM, Cfg)
-	ProviderTestSet       = wire.NewSet(ProvideMock, CfgTest)
+
+	// ProviderTestSet provides a new MockManager for testing.
+	ProviderTestSet = wire.NewSet(ProvideMock, CfgTest)
 )

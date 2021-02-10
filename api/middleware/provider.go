@@ -5,6 +5,7 @@ import (
 	"github.com/google/wire"
 )
 
+// ProvideAllProductionMiddleware provides all the middleware that will be used in production.
 func ProvideAllProductionMiddleware() []gin.HandlerFunc {
 	var middlewares []gin.HandlerFunc
 
@@ -16,5 +17,6 @@ func ProvideAllProductionMiddleware() []gin.HandlerFunc {
 }
 
 var (
+	// ProviderProductionSet provides all middleware for production.
 	ProviderProductionSet = wire.NewSet(ProvideAllProductionMiddleware)
 )

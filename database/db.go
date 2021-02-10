@@ -3,32 +3,38 @@ package database
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
 )
 
+// Config contains the parameters for configuring a database.
 type Config struct {
 	URL             string
 	MaxOpenConns    int
 	MaxIdleConns    int
 	ConnMaxLifetime time.Duration
-	dialector		*gorm.Dialector
+	dialector       *gorm.Dialector
 }
 
+// Manager manages a connection to a database.
 type Manager struct {
 	ctx context.Context
 	cfg Config
 	DB  *gorm.DB
 }
 
+// MockManager manages a mock connection to a database.
 type MockManager struct {
 	Manager *Manager
-	Mock *sqlmock.Sqlmock
+	Mock    *sqlmock.Sqlmock
 }
 
+// New returns a new instance of Manager configured with the given
+// Config and DB.
 func New(cfg Config, db *gorm.DB) *Manager {
 	return &Manager{
 		cfg: cfg,
@@ -36,6 +42,8 @@ func New(cfg Config, db *gorm.DB) *Manager {
 	}
 }
 
+// mySQLDialector creates a Dialector neccessary for communicating
+// with a MySQL database.
 func mySQLDialector(v *viper.Viper) *gorm.Dialector {
 	mysqlConfig := fmt.Sprintf(
 		"%s:%s@%s(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",

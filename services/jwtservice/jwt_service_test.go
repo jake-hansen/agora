@@ -1,11 +1,12 @@
 package jwtservice_test
 
 import (
+	"testing"
+	"time"
+
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 var testConfig = jwtservice.Config{

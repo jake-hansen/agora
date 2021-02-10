@@ -1,13 +1,43 @@
 server:
-  address: :8080
+  # Address the API should listen on. This should be in the format of
+  # {ADDRESS}:{PORT}. If the address is omitted, the API will listen
+  # on all addresses.
+  address:
 api:
-  auth:
-    jwtduration: 30m
+  endpoints:
+    # This value will be prepended on all endpoints. For example, if
+    # The API normally registers an endpoint /v1/example, and the root
+    # value is set to 'myroot', then the new registed endpoint will be
+    # /myroot/v1/example.
+    root:
+# This is the environment the application should run in. This controls
+# various things but mainly logging levels. Valid values for this property
+# are 'dev' or 'prod'.
+environment:
+jwtservice:
+  # This is the duration of the JWT token that is issued when using the 
+  # built in authentication service. Values should be in human readable
+  # format. For example '30m', '1h', or '1d', meaning 30 minutes, 1 hour,
+  # and 1 day, respectively.
+  duration: 
+  # Issuer value to be set within signed JWTs.
+  issuer:
+  # Key to use to sign JWTs.
+  signingkey:
 database:
-  type:
-  user:
-  password:
-  protocol:
-  host:
+  # Type of database that will be used. Valid values are 'mysql'.
+  type: 
+  # Username to use to connect to the database.
+  username: 
+  # Password to use to connect to the database.
+  password: 
+  # Protocol to use to connect to the database. Should normally be 'TCP'
+  # unless another protocol is needed for a specific purpose.
+  protocol: 
+  # Hostname of the server the database is running on.
+  host: 
+  # Port to use to connect to the database.
   port:
+  # Name of the database or schema to use.
   name:
+  

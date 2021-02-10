@@ -3,6 +3,10 @@ package userhandler_test
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
@@ -10,12 +14,9 @@ import (
 	"github.com/jake-hansen/agora/services/mocks/userservicemock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
-var DTOMockCredentials = dto.User {
+var DTOMockCredentials = dto.User{
 	Firstname: "john",
 	Lastname:  "doe",
 	Username:  "jdoe",

@@ -2,13 +2,14 @@ package authhandler
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/adapter"
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/domain"
-	"net/http"
 )
 
 // AuthHandler is the handler that manages authentication for the API.
@@ -16,6 +17,9 @@ type AuthHandler struct {
 	AuthService *domain.AuthService
 }
 
+// Register creates two endpoints to handle login and logout functionality.
+// / (POST) - 	Login
+// / (DELETE) - Logout
 func (a *AuthHandler) Register(parentGroup *gin.RouterGroup) error {
 	authGroup := parentGroup.Group("auth")
 	{
