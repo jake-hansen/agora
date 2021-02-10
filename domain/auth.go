@@ -1,8 +1,14 @@
 package domain
 
 type Auth struct {
-	Credentials *User
+	Credentials *Credentials
 }
+
+type Credentials struct {
+	Username	string
+	Password	string
+}
+
 
 type AuthService interface {
 	IsAuthenticated(token Token) (bool, error)
