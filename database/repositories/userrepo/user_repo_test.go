@@ -52,7 +52,7 @@ func (s *Suite) SetupSuite() {
 	s.repo = userrepo.Provide(manager.Manager)
 
 	hash, err := mockUser.Password.HashPassword()
-	mockUser.Password.Hash = []byte(hash)
+	mockUser.Password.Hash = hash
 	s.Require().NoError(err)
 }
 
@@ -128,8 +128,8 @@ func userEqualityHelper(t *testing.T, expected *domain.User, actual *domain.User
 	assert.Equal(t, expected.Lastname, actual.Lastname)
 	assert.Equal(t, expected.Username, actual.Username)
 
-	//err := bcrypt.CompareHashAndPassword([]byte(actual.Password.Hash), []byte(pword))
-	//assert.NoError(t, err)
+	err := bcrypt.CompareHashAndPassword(actual.Password.Hash, []byte(pword))
+	assert.NoError(t, err)
 }
 
 func (s *Suite) TestUserRepository_GetByID() {
@@ -141,7 +141,7 @@ func (s *Suite) TestUserRepository_GetByID() {
 			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "firstname",
 													"lastname", "username", "password"}).
 				AddRow(0, mockUser.CreatedAt, mockUser.UpdatedAt, mockUser.DeletedAt, mockUser.Firstname,
-					   mockUser.Lastname, mockUser.Username, []byte{}))
+					   mockUser.Lastname, mockUser.Username, mockUser.Password))
 
 		user, err := s.repo.GetByID(0)
 
@@ -169,7 +169,7 @@ func (s *Suite) TestUserRepository_GetByUsername() {
 			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "firstname",
 				"lastname", "username", "password"}).
 				AddRow(0, mockUser.CreatedAt, mockUser.UpdatedAt, mockUser.DeletedAt, mockUser.Firstname,
-					mockUser.Lastname, mockUser.Username, []byte{}))
+					mockUser.Lastname, mockUser.Username, mockUser.Password))
 
 		user, err := s.repo.GetByUsername("jdoe")
 
@@ -196,9 +196,9 @@ func (s *Suite) TestUserRepository_GetAll() {
 			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "firstname",
 				"lastname", "username", "password"}).
 				AddRow(0, mockUser.CreatedAt, mockUser.UpdatedAt, mockUser.DeletedAt, mockUser.Firstname,
-					mockUser.Lastname, mockUser.Username, []byte{}).
+					mockUser.Lastname, mockUser.Username, mockUser.Password).
 				AddRow(0, mockUser.CreatedAt, mockUser.UpdatedAt, mockUser.DeletedAt, mockUser.Firstname,
-					mockUser.Lastname, mockUser.Username, []byte{}))
+					mockUser.Lastname, mockUser.Username, mockUser.Password))
 
 		users, err := s.repo.GetAll()
 
