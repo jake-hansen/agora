@@ -14,6 +14,11 @@ type UserService struct {
 
 // Register creates a new User in the repository.
 func (u *UserService) Register(user *domain.User) (uint, error) {
+	var err error
+	user.Password.Hash, err = user.Password.HashPassword()
+	if err != nil {
+		return 1, fmt.Errorf("could not register user: %w", err)
+	}
 	return u.repo.Create(user)
 }
 
