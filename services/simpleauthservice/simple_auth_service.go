@@ -29,15 +29,15 @@ func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
 func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error) {
 	// Validate credentials with database
 
-	if err := s.userService.Validate(auth.Credentials); err != nil {
+	if u, err := s.userService.Validate(auth.Credentials); err != nil {
 		return nil, errors.New("username or password is not correct")
+	} else {
+		token, err := s.jwtService.GenerateToken(*u)
+		if err != nil {
+			return nil, err
+		}
+		return &domain.Token{Value: token}, nil
 	}
-
-	token, err := s.jwtService.GenerateToken(*auth.Credentials)
-	if err != nil {
-		return nil, err
-	}
-	return &domain.Token{Value: token}, nil
 }
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.

@@ -1,6 +1,7 @@
 package userrepo_test
 
 import (
+	"database/sql/driver"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jake-hansen/agora/database"
@@ -9,11 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"regexp"
 	"testing"
 	"time"
 )
+
+var pword = "Password123!"
 
 var mockUser = domain.User{
 	Model:     gorm.Model{
@@ -24,7 +28,14 @@ var mockUser = domain.User{
 	Firstname: "john",
 	Lastname:  "doe",
 	Username:  "jdoe",
-	Password:  "Password123!",
+	Password:  domain.NewPassword(pword),
+}
+
+type ProperHash struct {}
+
+func (a ProperHash) Match(value driver.Value) bool {
+	err := bcrypt.CompareHashAndPassword(value.([]byte), []byte("Password123!"))
+	return err == nil
 }
 
 type Suite struct {
@@ -39,6 +50,10 @@ func (s *Suite) SetupSuite() {
 
 	s.mock = *manager.Mock
 	s.repo = userrepo.Provide(manager.Manager)
+
+	hash, err := mockUser.Password.HashPassword()
+	mockUser.Password.Hash = hash
+	s.Require().NoError(err)
 }
 
 func (s *Suite) TestUserRepository_Create() {
@@ -50,7 +65,7 @@ func (s *Suite) TestUserRepository_Create() {
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
 			WithArgs(mockUser.CreatedAt, mockUser.UpdatedAt, mockUser.DeletedAt,
 				mockUser.Firstname, mockUser.Lastname, mockUser.Username,
-				mockUser.Password).
+				ProperHash{}).
 			WillReturnResult(sqlmock.NewResult(0, 1))
 		s.mock.ExpectCommit()
 
@@ -65,7 +80,7 @@ func (s *Suite) TestUserRepository_Create() {
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
 			WithArgs(mockUser.CreatedAt, mockUser.UpdatedAt, mockUser.DeletedAt,
 				mockUser.Firstname, mockUser.Lastname, mockUser.Username,
-				mockUser.Password).
+				ProperHash{}).
 			WillReturnError(errors.New("unknown error"))
 		s.mock.ExpectRollback()
 
@@ -104,6 +119,19 @@ func (s *Suite) TestUserRepository_Delete() {
 	})
 }
 
+func userEqualityHelper(t *testing.T, expected *domain.User, actual *domain.User) {
+	assert.Equal(t, expected.ID, actual.ID)
+	assert.Equal(t, expected.CreatedAt, actual.CreatedAt)
+	assert.Equal(t, expected.UpdatedAt, actual.UpdatedAt)
+	assert.Equal(t, expected.DeletedAt, actual.DeletedAt)
+	assert.Equal(t, expected.Firstname, actual.Firstname)
+	assert.Equal(t, expected.Lastname, actual.Lastname)
+	assert.Equal(t, expected.Username, actual.Username)
+
+	err := bcrypt.CompareHashAndPassword(actual.Password.Hash, []byte(pword))
+	assert.NoError(t, err)
+}
+
 func (s *Suite) TestUserRepository_GetByID() {
 	getSQL := "SELECT * FROM `users` WHERE `users`.`id` = ? AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1"
 
@@ -118,7 +146,7 @@ func (s *Suite) TestUserRepository_GetByID() {
 		user, err := s.repo.GetByID(0)
 
 		require.NoError(t, err)
-		assert.Equal(t, mockUser, *user)
+		userEqualityHelper(t, &mockUser, user)
 	})
 
 	s.T().Run("failure", func(t *testing.T) {
@@ -146,7 +174,7 @@ func (s *Suite) TestUserRepository_GetByUsername() {
 		user, err := s.repo.GetByUsername("jdoe")
 
 		require.NoError(t, err)
-		assert.Equal(t, mockUser, *user)
+		userEqualityHelper(t, &mockUser, user)
 	})
 
 	s.T().Run("failure", func(t *testing.T) {
@@ -175,8 +203,8 @@ func (s *Suite) TestUserRepository_GetAll() {
 		users, err := s.repo.GetAll()
 
 		require.NoError(t, err)
-		assert.Equal(t, mockUser, *users[0])
-		assert.Equal(t, mockUser, *users[1])
+		userEqualityHelper(t, &mockUser, users[0])
+		userEqualityHelper(t, &mockUser, users[1])
 		assert.Len(t, users, 2)
 	})
 
@@ -196,7 +224,7 @@ func (s *Suite) TestUserRepository_Update() {
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(updSQL)).
-			WithArgs(sqlmock.AnyArg(), mockUser.Firstname, mockUser.Lastname, mockUser.Username, mockUser.Password, 1).
+			WithArgs(sqlmock.AnyArg(), mockUser.Firstname, mockUser.Lastname, mockUser.Username, ProperHash{}, 1).
 			WillReturnResult(sqlmock.NewResult(int64(mockUser.ID), 1))
 
 		s.mock.ExpectCommit()
@@ -211,7 +239,7 @@ func (s *Suite) TestUserRepository_Update() {
 	s.T().Run("failure-rollback", func(t *testing.T) {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(updSQL)).
-			WithArgs(sqlmock.AnyArg(), mockUser.Firstname, mockUser.Lastname, mockUser.Username, mockUser.Password, 1).
+			WithArgs(sqlmock.AnyArg(), mockUser.Firstname, mockUser.Lastname, mockUser.Username, ProperHash{}, 1).
 			WillReturnError(errors.New("unknown error"))
 
 		s.mock.ExpectRollback()

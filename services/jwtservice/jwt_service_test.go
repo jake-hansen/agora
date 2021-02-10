@@ -18,7 +18,7 @@ var testUser domain.User = domain.User{
 	Firstname: "john",
 	Lastname:  "doe",
 	Username:  "jdoe",
-	Password:  "password123",
+	Password:  domain.NewPassword("password123"),
 }
 
 func TestJWTService_GenerateToken(t *testing.T) {

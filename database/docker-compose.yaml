@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:latest
+    networks:
+      new:
+        aliases:
+          - database
+    environment: 
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: agora
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 10
+  migrate:
+    image: migrate/migrate:latest
+    networks:
+      - new
+    volumes:
+      - ./migrations:/migrations
+    command: ["-path", "/migrations", "-database", "mysql://root:password@tcp(database:3306)/agora", "up"]
+    links:
+      - db
+    depends_on: 
+      db:
+        condition: service_healthy
+networks:
+  new:
+  
