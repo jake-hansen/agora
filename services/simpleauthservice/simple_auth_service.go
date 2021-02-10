@@ -2,6 +2,7 @@ package simpleauthservice
 
 import (
 	"errors"
+
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
 )
@@ -44,4 +45,3 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error
 func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
 }
-

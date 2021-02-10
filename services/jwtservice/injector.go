@@ -7,10 +7,10 @@ import (
 	"github.com/jake-hansen/agora/providers"
 )
 
-func Build() (*Service, error) {
+func Build() (*JWTServiceImpl, error) {
 	panic(wire.Build(ProviderProductionSet, providers.ProductionSet))
 }
 
-func BuildTest(cfg Config) (*Service, error) {
+func BuildTest(cfg Config) (*JWTServiceImpl, error) {
 	panic(wire.Build(ProviderTestSet))
 }

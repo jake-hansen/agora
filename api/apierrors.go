@@ -2,17 +2,18 @@ package api
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin/binding"
-	"github.com/go-playground/validator/v10"
 	"reflect"
 	"strings"
+
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 // APIError represents an error that occurred during an operation on an endpoint.
 type APIError struct {
-	Status  int		// HTTP status returned to client.
-	Err     error	// Error that occurred.
-	Message string	// Additional information about error returned to client.
+	Status  int    // HTTP status returned to client.
+	Err     error  // Error that occurred.
+	Message string // Additional information about error returned to client.
 
 }
 

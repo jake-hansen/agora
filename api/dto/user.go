@@ -2,10 +2,10 @@ package dto
 
 // User represents information about a userrepo.
 type User struct {
-	Firstname	string	`json:"firstname,omitempty" binding:"required"`
-	Lastname	string	`json:"lastname,omitempty" binding:"required"`
-	Username	string	`json:"username,omitempty" binding:"required"`
-	Password	string	`json:"password,omitempty" binding:"required"`
+	Firstname string `json:"firstname,omitempty" binding:"required"`
+	Lastname  string `json:"lastname,omitempty" binding:"required"`
+	Username  string `json:"username,omitempty" binding:"required"`
+	Password  string `json:"password,omitempty" binding:"required"`
 }
 
 // NewUser returns a pointer to a User which contains the given parameters.

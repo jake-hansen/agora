@@ -2,21 +2,24 @@ package router
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
 )
 
+// Config contains the parameters for configuring a Router.
 type Config struct {
-	Environment		string
-	Middleware		[]gin.HandlerFunc
-	Handlers		[]handlers2.Handler
-	RootEndpoint	string
+	Environment  string
+	Middleware   []gin.HandlerFunc
+	Handlers     []handlers2.Handler
+	RootEndpoint string
 }
 
+// Router contains the Engine and Config for routing requests.
 type Router struct {
-	engine		*gin.Engine
-	config		*Config
+	engine *gin.Engine
+	config *Config
 }
 
 func (r *Router) init() {
@@ -39,11 +42,13 @@ func (r *Router) init() {
 	}
 }
 
+// Run runs the router's engine.
 func (r *Router) Run(address string) error {
 	err := r.engine.Run(address)
 	return err
 }
 
+// New returns a new instance of Router configured with the given Config.
 func New(cfg Config) *Router {
 	r := &Router{config: &cfg}
 	r.init()

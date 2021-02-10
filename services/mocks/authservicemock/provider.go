@@ -5,10 +5,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func Provide() *AuthService  {
+// Provide provides a mock AuthService.
+func Provide() *AuthService {
 	return &AuthService{mock.Mock{}}
 }
 
 var (
+	// ProviderSet provides a mock AuthService for use in testing.
 	ProviderSet = wire.NewSet(Provide)
 )

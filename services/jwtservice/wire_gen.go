@@ -11,21 +11,21 @@ import (
 
 // Injectors from injector.go:
 
-func Build() (*Service, error) {
+func Build() (*JWTServiceImpl, error) {
 	viper := config.Provide()
-	jwtConfig, err := Cfg(viper)
+	jwtserviceConfig, err := Cfg(viper)
 	if err != nil {
 		return nil, err
 	}
-	service := Provide(jwtConfig)
-	return service, nil
+	jwtServiceImpl := Provide(jwtserviceConfig)
+	return jwtServiceImpl, nil
 }
 
-func BuildTest(cfg Config) (*Service, error) {
-	jwtConfig, err := CfgTest(cfg)
+func BuildTest(cfg Config) (*JWTServiceImpl, error) {
+	jwtserviceConfig, err := CfgTest(cfg)
 	if err != nil {
 		return nil, err
 	}
-	service := Provide(jwtConfig)
-	return service, nil
+	jwtServiceImpl := Provide(jwtserviceConfig)
+	return jwtServiceImpl, nil
 }

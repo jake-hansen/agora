@@ -2,6 +2,9 @@ package simpleauthservice_test
 
 import (
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
@@ -10,8 +13,6 @@ import (
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
-	"time"
 )
 
 var dur, _ = time.ParseDuration("5m")
@@ -21,8 +22,8 @@ var testconfig = jwtservice.Config{
 	Duration:   dur,
 }
 var testAuth = domain.Auth{Credentials: &domain.Credentials{
-	Username:  "test",
-	Password:  "test",
+	Username: "test",
+	Password: "test",
 }}
 
 func buildTest(t *testing.T) (*simpleauthservice.SimpleAuthService, *jwtservicemock.Service, *userservicemock.UserService) {
@@ -47,7 +48,7 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, valid)
 	})
-	
+
 	t.Run("test-invalid-token", func(t *testing.T) {
 		invalidToken := domain.Token{Value: "invalid"}
 		as, ds, _ := buildTest(t)

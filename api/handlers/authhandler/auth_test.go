@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
@@ -11,16 +16,12 @@ import (
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/mocks/authservicemock"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 var domainMockCredentials = domain.Auth{
 	Credentials: &domain.Credentials{
-		Username:  "test",
-		Password:  "test",
+		Username: "test",
+		Password: "test",
 	},
 }
 var domainMockToken = domain.Token{
@@ -29,8 +30,8 @@ var domainMockToken = domain.Token{
 
 var DTOMockCredentials = dto.Auth{
 	Credentials: &dto.Credentials{
-		Username:  "test",
-		Password:  "test",
+		Username: "test",
+		Password: "test",
 	},
 }
 
@@ -83,23 +84,23 @@ func TestAuthHandler_Login(t *testing.T) {
 		_ = h.Register(router.Group("test"))
 
 		badRequest := `{}`
-		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Credentials\"," +
+		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Credentials\","+
 			"\"reason\":\"required\"}]}")
 
 		badRequest = `{"credentials": {}}`
-		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Username\",\"reason\":" +
+		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Username\",\"reason\":"+
 			"\"required\"},{\"field\":\"Password\",\"reason\":\"required\"}]}")
 
 		badRequest = `{"credentials": {"usernames": "test", "passwords": "test"}}`
-		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Username\",\"reason\":" +
+		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Username\",\"reason\":"+
 			"\"required\"},{\"field\":\"Password\",\"reason\":\"required\"}]}")
 
 		badRequest = `{"credentials": {"username": "test", "passwords": "test"}}`
-		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Password\",\"reason\":" +
+		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Password\",\"reason\":"+
 			"\"required\"}]}")
 
 		badRequest = `{"credentials": {"usernames": "test", "password": "test"}}`
-		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Username\",\"reason\":" +
+		testBadRequest(router, badRequest, "{\"validation errors\":[{\"field\":\"Username\",\"reason\":"+
 			"\"required\"}]}")
 
 		badRequest = `{"credentials": {"usernames": "test", "password": "test"}`

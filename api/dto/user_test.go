@@ -3,8 +3,9 @@ package dto_test
 import (
 	"github.com/stretchr/testify/assert"
 
-	"github.com/jake-hansen/agora/api/dto"
 	"testing"
+
+	"github.com/jake-hansen/agora/api/dto"
 )
 
 func TestNewUser(t *testing.T) {
