@@ -14,6 +14,7 @@ import (
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/router"
+	handlers2 "github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
@@ -32,7 +33,7 @@ func Build() (*Server, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	service := jwtservice.Provide(jwtserviceConfig)
+	jwtServiceImpl := jwtservice.Provide(jwtserviceConfig)
 	databaseConfig, err := database.Cfg(viper)
 	if err != nil {
 		return nil, nil, err
@@ -48,11 +49,12 @@ func Build() (*Server, func(), error) {
 	}
 	userRepository := userrepo.Provide(manager)
 	userService := userservice.Provide(userRepository)
-	simpleAuthService := simpleauthservice.Provide(service, userService)
+	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
 	authHandler := authhandler.Provide(simpleAuthService)
 	userHandler := userhandler.Provide(userService)
 	v2 := handlers.ProvideAllProductionHandlers(authHandler, userHandler)
-	routerConfig, err := router.Cfg(viper, v, v2)
+	handlerManager := handlers2.ProvideHandlerManager(v2)
+	routerConfig, err := router.Cfg(viper, v, handlerManager)
 	if err != nil {
 		cleanup()
 		return nil, nil, err

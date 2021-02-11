@@ -5,15 +5,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api"
-	handlers2 "github.com/jake-hansen/agora/router/handlers"
+	"github.com/jake-hansen/agora/router/handlers"
 )
 
 // Config contains the parameters for configuring a Router.
 type Config struct {
-	Environment  string
-	Middleware   []gin.HandlerFunc
-	Handlers     []handlers2.Handler
-	RootEndpoint string
+	Environment    string
+	Middleware     []gin.HandlerFunc
+	HandlerManager *handlers.HandlerManager
+	RootEndpoint   string
 }
 
 // Router contains the Engine and Config for routing requests.
@@ -34,7 +34,7 @@ func (r *Router) init() {
 	parentGroup := r.engine.Group(r.config.RootEndpoint)
 	versionGroup := parentGroup.Group("v1")
 
-	for _, handler := range r.config.Handlers {
+	for _, handler := range *r.config.HandlerManager.Handlers {
 		err := handler.Register(versionGroup)
 		if err != nil {
 			fmt.Printf("could not register handler: %s\n", err.Error())

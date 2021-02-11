@@ -19,7 +19,7 @@ import (
 
 // Injectors from injector.go:
 
-func Build() ([]handlers.Handler, func(), error) {
+func Build() (*[]handlers.Handler, func(), error) {
 	viper := config.Provide()
 	jwtserviceConfig, err := jwtservice.Cfg(viper)
 	if err != nil {

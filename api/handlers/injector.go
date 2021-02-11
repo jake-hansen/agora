@@ -7,6 +7,6 @@ import (
 	"github.com/jake-hansen/agora/router/handlers"
 )
 
-func Build() ([]handlers.Handler, func(), error) {
+func Build() (*[]handlers.Handler, func(), error) {
 	panic(wire.Build(ProviderProductionSet))
 }
