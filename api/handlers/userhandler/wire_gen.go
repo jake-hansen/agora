@@ -10,6 +10,7 @@ import (
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/domain"
+	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/services/userservice"
 )
 
@@ -17,16 +18,24 @@ import (
 
 func Build() (*UserHandler, func(), error) {
 	viper := config.Provide()
-	databaseConfig, err := database.Cfg(viper)
+	zapConfig := log.Cfg(viper)
+	logLog, cleanup, err := log.Provide(zapConfig)
 	if err != nil {
 		return nil, nil, err
 	}
-	db, cleanup, err := database.ProvideGORM(databaseConfig)
+	databaseConfig, err := database.Cfg(viper, logLog)
 	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	db, cleanup2, err := database.ProvideGORM(databaseConfig)
+	if err != nil {
+		cleanup()
 		return nil, nil, err
 	}
 	manager, err := database.Provide(databaseConfig, db)
 	if err != nil {
+		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
@@ -34,6 +43,7 @@ func Build() (*UserHandler, func(), error) {
 	userService := userservice.Provide(userRepository)
 	userHandler := Provide(userService)
 	return userHandler, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

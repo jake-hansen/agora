@@ -2,16 +2,17 @@ package database
 
 import (
 	"errors"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/wire"
+	"github.com/jake-hansen/agora/log"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"moul.io/zapgorm2"
 )
 
 // Cfg provides a new Config using values from a Viper.
-func Cfg(v *viper.Viper) (*Config, error) {
+func Cfg(v *viper.Viper, logger *log.Log) (*Config, error) {
 	c := Config{}
 
 	if v.GetString("database.type") == "mysql" {
@@ -24,6 +25,8 @@ func Cfg(v *viper.Viper) (*Config, error) {
 	c.MaxIdleConns = v.GetInt("database.connections.idle.max")
 	c.MaxOpenConns = v.GetInt("database.connections.open.max")
 
+	c.Logger = logger
+
 	return &c, nil
 }
 
@@ -35,7 +38,7 @@ func CfgTest(cfg Config) (*Config, error) {
 // ProvideGORM provides a DB using the configuration properties provided
 // by the given Config.
 func ProvideGORM(cfg *Config) (*gorm.DB, func(), error) {
-	db, err := gorm.Open(*cfg.dialector, &gorm.Config{})
+	db, err := gorm.Open(*cfg.dialector, &gorm.Config{Logger: zapgorm2.New(cfg.Logger.Logger)})
 	if err != nil {
 		return nil, nil, err
 	}
