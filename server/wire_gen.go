@@ -15,6 +15,7 @@ import (
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/router"
+	handlers2 "github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
@@ -62,7 +63,8 @@ func Build() (*Server, func(), error) {
 	authHandler := authhandler.Provide(simpleAuthService)
 	userHandler := userhandler.Provide(userService)
 	v2 := handlers.ProvideAllProductionHandlers(authHandler, userHandler)
-	routerConfig, err := router.Cfg(viper, v, v2)
+	handlerManager := handlers2.ProvideHandlerManager(v2)
+	routerConfig, err := router.Cfg(viper, v, handlerManager)
 	if err != nil {
 		cleanup2()
 		cleanup()

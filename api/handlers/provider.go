@@ -14,13 +14,13 @@ import (
 )
 
 // ProvideAllProductionHandlers provides all the handlers that will be used in production.
-func ProvideAllProductionHandlers(auth *authhandler.AuthHandler, user *userhandler.UserHandler) []handlers.Handler {
+func ProvideAllProductionHandlers(auth *authhandler.AuthHandler, user *userhandler.UserHandler) *[]handlers.Handler {
 	var handlers []handlers.Handler
 
 	handlers = append(handlers, auth)
 	handlers = append(handlers, user)
 
-	return handlers
+	return &handlers
 }
 
 var (

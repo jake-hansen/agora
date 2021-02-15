@@ -3,17 +3,17 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
-	handlers2 "github.com/jake-hansen/agora/router/handlers"
+	"github.com/jake-hansen/agora/router/handlers"
 	"github.com/spf13/viper"
 )
 
 // Cfg provides a new Config using values from a Viper and contins the given middleware and handlers.
-func Cfg(v *viper.Viper, middleware []gin.HandlerFunc, handlers []handlers2.Handler) (*Config, error) {
+func Cfg(v *viper.Viper, middleware []gin.HandlerFunc, handlerManager *handlers.HandlerManager) (*Config, error) {
 	cfg := &Config{
-		Environment:  v.GetString("environment"),
-		Middleware:   middleware,
-		Handlers:     handlers,
-		RootEndpoint: v.GetString("api.endpoints.root"),
+		Environment:    v.GetString("environment"),
+		Middleware:     middleware,
+		HandlerManager: handlerManager,
+		RootEndpoint:   v.GetString("api.endpoints.root"),
 	}
 
 	return cfg, nil
@@ -31,7 +31,7 @@ func Provide(cfg *Config) *Router {
 
 var (
 	// ProviderProductionSet provides a new Router for use in production.
-	ProviderProductionSet = wire.NewSet(Provide, Cfg)
+	ProviderProductionSet = wire.NewSet(Provide, Cfg, handlers.ProvideHandlerManager)
 
 	// ProviderTestSet provides a new Router for use in testing.
 	ProviderTestSet = wire.NewSet(Provide, CfgTest)
