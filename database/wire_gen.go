@@ -7,26 +7,36 @@ package database
 
 import (
 	"github.com/jake-hansen/agora/config"
+	"github.com/jake-hansen/agora/log"
 )
 
 // Injectors from injector.go:
 
 func Build() (*Manager, func(), error) {
 	viper := config.Provide()
-	databaseConfig, err := Cfg(viper)
+	zapConfig := log.Cfg(viper)
+	logLog, cleanup, err := log.Provide(zapConfig)
 	if err != nil {
 		return nil, nil, err
 	}
-	db, cleanup, err := ProvideGORM(databaseConfig)
-	if err != nil {
-		return nil, nil, err
-	}
-	manager, err := Provide(databaseConfig, db)
+	databaseConfig, err := Cfg(viper, logLog)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
+	db, cleanup2, err := ProvideGORM(databaseConfig)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	manager, err := Provide(databaseConfig, db)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
 	return manager, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }
