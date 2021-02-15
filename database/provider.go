@@ -38,7 +38,7 @@ func CfgTest(cfg Config) (*Config, error) {
 // ProvideGORM provides a DB using the configuration properties provided
 // by the given Config.
 func ProvideGORM(cfg *Config) (*gorm.DB, func(), error) {
-	db, err := gorm.Open(*cfg.dialector, &gorm.Config{Logger: zapgorm2.New(cfg.Logger.Logger)})
+	db, err := gorm.Open(*cfg.dialector, &gorm.Config{Logger: zapgorm2.New(cfg.Logger.ZapLogger)})
 	if err != nil {
 		return nil, nil, err
 	}

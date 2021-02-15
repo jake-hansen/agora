@@ -10,7 +10,7 @@ import (
 func Provide(cfg *zap.Config) (*Log, func(), error) {
 	log, err := NewLog(cfg)
 	cleanup := func() {
-		log.Sync()
+		log.ZapLogger.Sync()
 	}
 	return log, cleanup, err
 }

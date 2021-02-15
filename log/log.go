@@ -5,7 +5,7 @@ import (
 )
 
 type Log struct {
-	*zap.Logger
+	ZapLogger *zap.Logger
 }
 
 func NewLog(cfg *zap.Config) (*Log, error) {
