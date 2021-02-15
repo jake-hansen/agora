@@ -28,17 +28,18 @@ func Build() (*Server, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	v := middleware.ProvideAllProductionMiddleware()
-	jwtserviceConfig, err := jwtservice.Cfg(viper)
-	if err != nil {
-		return nil, nil, err
-	}
-	jwtServiceImpl := jwtservice.Provide(jwtserviceConfig)
 	zapConfig := log.Cfg(viper)
 	logLog, cleanup, err := log.Provide(zapConfig)
 	if err != nil {
 		return nil, nil, err
 	}
+	v := middleware.ProvideAllProductionMiddleware(logLog)
+	jwtserviceConfig, err := jwtservice.Cfg(viper)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	jwtServiceImpl := jwtservice.Provide(jwtserviceConfig)
 	databaseConfig, err := database.Cfg(viper, logLog)
 	if err != nil {
 		cleanup()
