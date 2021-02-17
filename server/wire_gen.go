@@ -14,11 +14,13 @@ import (
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
+	"github.com/jake-hansen/agora/database/repositories/meetingproviderrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
+	"github.com/jake-hansen/agora/services/meetingproviderservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
 )
@@ -66,7 +68,9 @@ func Build() (*Server, func(), error) {
 	userHandler := userhandler.Provide(userService)
 	v2 := authmiddleware.ProvideAuthorizationHeaderParser()
 	authMiddleware := authmiddleware.Provide(simpleAuthService, v2)
-	meetingProviderHandler := meetingproviderhandler.Provide(authMiddleware)
+	meetingProviderRepo := meetingproviderrepo.Provide(manager)
+	meetingProviderService := meetingproviderservice.Provide(meetingProviderRepo)
+	meetingProviderHandler := meetingproviderhandler.Provide(authMiddleware, meetingProviderService)
 	v3 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingProviderHandler)
 	handlerManager := handlers2.ProvideHandlerManager(v3)
 	routerConfig, err := router.Cfg(viper, v, handlerManager)

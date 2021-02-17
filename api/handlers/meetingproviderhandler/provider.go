@@ -7,10 +7,10 @@ import (
 	"github.com/jake-hansen/agora/router/handlers"
 )
 
-func Provide(authMiddleware *authmiddleware.AuthMiddleware, meetingProviderService *domain.MeetingProviderService) *MeetingProviderHandler {
+func Provide(authMiddleware *authmiddleware.AuthMiddleware, meetingProviderService domain.MeetingProviderService) *MeetingProviderHandler {
 	return &MeetingProviderHandler{
 		AuthMiddleware: authMiddleware,
-		MeetingProviderService: meetingProviderService,
+		MeetingProviderService: &meetingProviderService,
 	}
 }
 

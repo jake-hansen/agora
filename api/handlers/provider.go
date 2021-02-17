@@ -7,10 +7,12 @@ import (
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/database"
+	"github.com/jake-hansen/agora/database/repositories/meetingproviderrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/providers"
 	"github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
+	"github.com/jake-hansen/agora/services/meetingproviderservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
 )
@@ -38,7 +40,9 @@ var (
 	userHandlerProductionSet = wire.NewSet(userhandler.Provide)
 	meetingProviderProductionSet = wire.NewSet(meetingproviderhandler.Provide,
 		authmiddleware.Provide,
-		authmiddleware.ProvideAuthorizationHeaderParser)
+		authmiddleware.ProvideAuthorizationHeaderParser,
+		meetingproviderservice.ProviderSet,
+		meetingproviderrepo.ProviderSet)
 
 	// ProviderProductionSet provides all handlers for production.
 	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers,
