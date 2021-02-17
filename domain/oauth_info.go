@@ -23,3 +23,8 @@ type OAuthInfoRepository interface {
 type OAuthTokenService interface {
 
 }
+
+func (O OAuthInfo) TableName() string {
+	return "oauth_info"
+}
+
