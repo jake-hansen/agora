@@ -1,5 +1,6 @@
 package dto
 
 type MeetingProvider struct {
-	Name	string
+	Name		string
+	RedirectURL string
 }

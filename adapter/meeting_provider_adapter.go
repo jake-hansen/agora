@@ -8,6 +8,7 @@ import (
 func MeetingProviderDTOToDomain(meetingProvider dto.MeetingProvider) *domain.MeetingProvider {
 	convertedMeetingProvider := &domain.MeetingProvider{
 		Name: meetingProvider.Name,
+		RedirectURL: meetingProvider.RedirectURL,
 	}
 	return convertedMeetingProvider
 }
@@ -15,6 +16,7 @@ func MeetingProviderDTOToDomain(meetingProvider dto.MeetingProvider) *domain.Mee
 func MeetingProviderDomainToDTO(meetingProvider domain.MeetingProvider) *dto.MeetingProvider {
 	convertedMeetingProvider := &dto.MeetingProvider{
 		Name: meetingProvider.Name,
+		RedirectURL: meetingProvider.RedirectURL,
 	}
 	return convertedMeetingProvider
 }

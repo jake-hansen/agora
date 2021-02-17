@@ -4,7 +4,8 @@ import "gorm.io/gorm"
 
 type MeetingProvider struct {
 	gorm.Model
-	Name	string
+	Name		string
+	RedirectURL string
 }
 
 type MeetingProviderRepository interface {
