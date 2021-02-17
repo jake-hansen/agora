@@ -38,6 +38,7 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 		if err != nil {
 			apiError := api.NewAPIError(http.StatusUnauthorized, err, err.Error())
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+			c.Abort()
 			return
 		}
 
@@ -46,6 +47,7 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 		if err != nil {
 			apiError := api.NewAPIError(http.StatusUnauthorized, err, "the provided token is not valid")
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+			c.Abort()
 			return
 		}
 
