@@ -8,8 +8,10 @@ package server
 import (
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
+	"github.com/jake-hansen/agora/api/handlers/meetingproviderhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware"
+	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
@@ -62,8 +64,11 @@ func Build() (*Server, func(), error) {
 	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
 	authHandler := authhandler.Provide(simpleAuthService)
 	userHandler := userhandler.Provide(userService)
-	v2 := handlers.ProvideAllProductionHandlers(authHandler, userHandler)
-	handlerManager := handlers2.ProvideHandlerManager(v2)
+	v2 := authmiddleware.ProvideAuthorizationHeaderParser()
+	authMiddleware := authmiddleware.Provide(simpleAuthService, v2)
+	meetingProviderHandler := meetingproviderhandler.Provide(authMiddleware)
+	v3 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingProviderHandler)
+	handlerManager := handlers2.ProvideHandlerManager(v3)
 	routerConfig, err := router.Cfg(viper, v, handlerManager)
 	if err != nil {
 		cleanup2()

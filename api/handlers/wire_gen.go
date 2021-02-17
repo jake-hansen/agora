@@ -7,7 +7,9 @@ package handlers
 
 import (
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
+	"github.com/jake-hansen/agora/api/handlers/meetingproviderhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
+	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
@@ -53,8 +55,11 @@ func Build() (*[]handlers.Handler, func(), error) {
 	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
 	authHandler := authhandler.Provide(simpleAuthService)
 	userHandler := userhandler.Provide(userService)
-	v := ProvideAllProductionHandlers(authHandler, userHandler)
-	return v, func() {
+	v := authmiddleware.ProvideAuthorizationHeaderParser()
+	authMiddleware := authmiddleware.Provide(simpleAuthService, v)
+	meetingProviderHandler := meetingproviderhandler.Provide(authMiddleware)
+	v2 := ProvideAllProductionHandlers(authHandler, userHandler, meetingProviderHandler)
+	return v2, func() {
 		cleanup2()
 		cleanup()
 	}, nil
