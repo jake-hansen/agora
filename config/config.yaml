@@ -10,6 +10,14 @@ api:
     # value is set to 'myroot', then the new registed endpoint will be
     # /myroot/v1/example.
     root:
+  cors:
+    # This sets how long the results fo a preflight request can be cached.
+    # Values should be in human readable format. For example '30m', '1h',
+    # or '1d', meaning 30 minutes, 1 hour, and 1 day, respectively.
+    maxage:
+    origins:
+      # List of allowed origins.
+      allowed:
 # This is the environment the application should run in. This controls
 # various things but mainly logging levels. Valid values for this property
 # are 'dev' or 'prod'.
