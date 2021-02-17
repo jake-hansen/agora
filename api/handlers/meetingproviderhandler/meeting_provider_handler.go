@@ -11,11 +11,18 @@ import (
 )
 
 type MeetingProviderHandler struct {
-	AuthMiddleware	*authmiddleware.AuthMiddleware
-	Providers		[]domain.MeetingProvider
+	AuthMiddleware		   *authmiddleware.AuthMiddleware
+	MeetingProviderService *domain.MeetingProviderService
+	Providers			   []*domain.MeetingProvider
 }
 
 func (m *MeetingProviderHandler) Register(parentGroup *gin.RouterGroup) error {
+	var err error
+	m.Providers, err = (*m.MeetingProviderService).GetAll()
+	if err != nil {
+		return fmt.Errorf("could not register Meeting Provider Handler: %w", err)
+	}
+
 	meetingHandlerGroup := parentGroup.Group("provider")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
@@ -37,7 +44,7 @@ func (m *MeetingProviderHandler) GetAllProviders(c *gin.Context) {
 	var providers []dto.MeetingProvider
 
 	for _, provider := range m.Providers {
-		providers = append(providers, *adapter.MeetingProviderDomainToDTO(provider))
+		providers = append(providers, *adapter.MeetingProviderDomainToDTO(*provider))
 	}
 	c.JSON(http.StatusOK, providers)
 }

@@ -17,5 +17,10 @@ type MeetingProviderRepository interface {
 }
 
 type MeetingProviderService interface {
-
+	Create(meetingProvider *MeetingProvider) (uint, error)
+	GetAll() ([]*MeetingProvider, error)
+	GetByID(ID uint) (*MeetingProvider, error)
+	GetByProviderName(providerName string) (*MeetingProvider, error)
+	Update(meetingProvider *MeetingProvider) error
+	Delete(ID uint) error
 }
