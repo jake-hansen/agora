@@ -1,9 +1,9 @@
 // +build wireinject
 
-package meetingproviderrepomock
+package meetingplatformrepomock
 
 import "github.com/google/wire"
 
-func Build() *MeetingProviderRepository {
+func Build() *MeetingPlatformRepository {
 	panic(wire.Build(ProviderSet))
 }

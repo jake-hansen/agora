@@ -3,7 +3,7 @@
 //go:generate go run github.com/google/wire/cmd/wire
 //+build !wireinject
 
-package meetingproviderservice
+package meetingplatformservice
 
 import (
 	"github.com/jake-hansen/agora/domain"
@@ -11,7 +11,7 @@ import (
 
 // Injectors from injector.go:
 
-func BuildTest(repo domain.MeetingProviderRepository) *MeetingProviderService {
+func BuildTest(repo domain.MeetingPlatformRepository) *MeetingProviderService {
 	meetingProviderService := Provide(repo)
 	return meetingProviderService
 }

@@ -3,11 +3,11 @@
 //go:generate go run github.com/google/wire/cmd/wire
 //+build !wireinject
 
-package meetingproviderrepomock
+package meetingplatformrepomock
 
 // Injectors from injector.go:
 
-func Build() *MeetingProviderRepository {
+func Build() *MeetingPlatformRepository {
 	meetingProviderRepository := Provide()
 	return meetingProviderRepository
 }

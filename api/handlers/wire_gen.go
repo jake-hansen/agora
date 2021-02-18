@@ -12,12 +12,12 @@ import (
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
-	"github.com/jake-hansen/agora/database/repositories/meetingproviderrepo"
+	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
-	"github.com/jake-hansen/agora/services/meetingproviderservice"
+	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
 )
@@ -59,8 +59,8 @@ func Build() (*[]handlers.Handler, func(), error) {
 	userHandler := userhandler.Provide(userService)
 	v := authmiddleware.ProvideAuthorizationHeaderParser()
 	authMiddleware := authmiddleware.Provide(simpleAuthService, v)
-	meetingProviderRepo := meetingproviderrepo.Provide(manager)
-	meetingProviderService := meetingproviderservice.Provide(meetingProviderRepo)
+	meetingProviderRepo := meetingplatformrepo.Provide(manager)
+	meetingProviderService := meetingplatformservice.Provide(meetingProviderRepo)
 	meetingProviderHandler := meetingproviderhandler.Provide(authMiddleware, meetingProviderService)
 	v2 := ProvideAllProductionHandlers(authHandler, userHandler, meetingProviderHandler)
 	return v2, func() {

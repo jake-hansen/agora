@@ -12,8 +12,8 @@ import (
 
 type MeetingProviderHandler struct {
 	AuthMiddleware		   *authmiddleware.AuthMiddleware
-	MeetingProviderService *domain.MeetingProviderService
-	Providers			   []*domain.MeetingProvider
+	MeetingProviderService *domain.MeetingPlatformService
+	Providers			   []*domain.MeetingPlatform
 }
 
 func (m *MeetingProviderHandler) Register(parentGroup *gin.RouterGroup) error {

@@ -37,7 +37,7 @@ func (o *OAuthInfoRepo) GetByID(ID uint) (*domain.OAuthInfo, error) {
 func (o *OAuthInfoRepo) GetAllByMeetingProviderId(providerID uint) ([]*domain.OAuthInfo, error) {
 	var oauthTokens []*domain.OAuthInfo
 	if err := o.DB.Where("meeting_provider_id = ?", providerID).Find(&oauthTokens).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving OAuthInfos by MeetingProvider ID %d: %w", providerID, err)
+		return nil, fmt.Errorf("error retrieving OAuthInfos by MeetingPlatform ID %d: %w", providerID, err)
 	}
 	return oauthTokens, nil
 }

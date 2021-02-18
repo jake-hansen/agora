@@ -1,10 +1,10 @@
-package meetingproviderrepo_test
+package meetingplatformrepo_test
 
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jake-hansen/agora/database"
-	"github.com/jake-hansen/agora/database/repositories/meetingproviderrepo"
+	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -15,42 +15,43 @@ import (
 	"time"
 )
 
-var mockMeetingProvider = domain.MeetingProvider {
+var mockMeetingPlatform = domain.MeetingPlatform{
 	Model: gorm.Model{
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		DeletedAt: gorm.DeletedAt{},
 	},
-	Name:  "really awesome meeting provider",
+	Name:  "really awesome meeting platform",
+	RedirectURL: "https://my-redirect",
 }
 
 type Suite struct {
 	suite.Suite
 	mock sqlmock.Sqlmock
-	repo domain.MeetingProviderRepository
+	repo domain.MeetingPlatformRepository
 }
 
-func (s *Suite) SetupSuite()  {
+func (s *Suite) SetupTest()  {
 	manager, _, err := database.BuildTest(database.Config{})
 	s.Require().NoError(err)
 
 	s.mock = *manager.Mock
-	s.repo, _, err = meetingproviderrepo.Build(manager.Manager)
+	s.repo, _, err = meetingplatformrepo.Build(manager.Manager)
 	s.Require().NoError(err)
 }
 
 func (s *Suite) TestMeetingProviderRepo_Create() {
-	instSQL := "INSERT INTO `meeting_providers` (`created_at`,`updated_at`,`deleted_at`,`name`) VALUES (?,?,?,?)"
+	instSQL := "INSERT INTO `meeting_platforms` (`created_at`,`updated_at`,`deleted_at`,`name`,`redirect_url`) VALUES (?,?,?,?,?)"
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
-			WithArgs(mockMeetingProvider.CreatedAt, mockMeetingProvider.UpdatedAt,
-				mockMeetingProvider.DeletedAt, mockMeetingProvider.Name).
+			WithArgs(mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
+				mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL).
 			WillReturnResult(sqlmock.NewResult(0, 1))
 		s.mock.ExpectCommit()
 
-		id, err := s.repo.Create(&mockMeetingProvider)
+		id, err := s.repo.Create(&mockMeetingPlatform)
 
 		require.NoError(t, err)
 		assert.Equal(t, uint(0), id)
@@ -59,19 +60,19 @@ func (s *Suite) TestMeetingProviderRepo_Create() {
 	s.T().Run("failure-rollback", func(t *testing.T) {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
-			WithArgs(mockMeetingProvider.CreatedAt, mockMeetingProvider.UpdatedAt,
-				mockMeetingProvider.DeletedAt, mockMeetingProvider.Name).
+			WithArgs(mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
+				mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL).
 			WillReturnError(errors.New("unknown error"))
 		s.mock.ExpectRollback()
 
-		_, err := s.repo.Create(&mockMeetingProvider)
+		_, err := s.repo.Create(&mockMeetingPlatform)
 		require.Error(t, err)
 	})
 }
 
 func (s *Suite) TestMeetingProviderRepo_Delete() {
-	delSQL := "UPDATE `meeting_providers` SET `deleted_at`=? WHERE `meeting_providers`.`id` = ? " +
-		"AND `meeting_providers`.`deleted_at` IS NULL"
+	delSQL := "UPDATE `meeting_platforms` SET `deleted_at`=? WHERE `meeting_platforms`.`id` = ? " +
+		"AND `meeting_platforms`.`deleted_at` IS NULL"
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectBegin()
@@ -99,21 +100,21 @@ func (s *Suite) TestMeetingProviderRepo_Delete() {
 }
 
 func (s *Suite) TestMeetingProviderRepo_GetAll() {
-	getSQL := "SELECT * FROM `meeting_providers` WHERE `meeting_providers`.`deleted_at` IS NULL"
+	getSQL := "SELECT * FROM `meeting_platforms` WHERE `meeting_platforms`.`deleted_at` IS NULL"
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name"}).
-				AddRow(0, mockMeetingProvider.CreatedAt, mockMeetingProvider.UpdatedAt,
-					mockMeetingProvider.DeletedAt, mockMeetingProvider.Name).
-				AddRow(0, mockMeetingProvider.CreatedAt, mockMeetingProvider.UpdatedAt,
-					mockMeetingProvider.DeletedAt, mockMeetingProvider.Name))
+			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name", "redirect_url"}).
+				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL).
+				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL))
 
 		providers, err := s.repo.GetAll()
 		require.NoError(t, err)
 
-		assert.Equal(t, &mockMeetingProvider, providers[0])
-		assert.Equal(t, &mockMeetingProvider, providers[1])
+		assert.Equal(t, &mockMeetingPlatform, providers[0])
+		assert.Equal(t, &mockMeetingPlatform, providers[1])
 		assert.Len(t, providers, 2)
 	})
 
@@ -128,20 +129,20 @@ func (s *Suite) TestMeetingProviderRepo_GetAll() {
 }
 
 func (s *Suite)TestMeetingProviderRepo_GetByID() {
-	getSQL := "SELECT * FROM `meeting_providers` WHERE `meeting_providers`.`id` = ? AND " +
-		"`meeting_providers`.`deleted_at` IS NULL ORDER BY `meeting_providers`.`id` LIMIT 1"
+	getSQL := "SELECT * FROM `meeting_platforms` WHERE `meeting_platforms`.`id` = ? AND " +
+		"`meeting_platforms`.`deleted_at` IS NULL ORDER BY `meeting_platforms`.`id` LIMIT 1"
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
 			WithArgs(0).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name"}).
-				AddRow(0, mockMeetingProvider.CreatedAt, mockMeetingProvider.UpdatedAt,
-					mockMeetingProvider.DeletedAt, mockMeetingProvider.Name))
+			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name", "redirect_url"}).
+				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL))
 
 		provider, err := s.repo.GetByID(0)
 
 		require.NoError(t, err)
-		assert.Equal(t, &mockMeetingProvider, provider)
+		assert.Equal(t, &mockMeetingPlatform, provider)
 	})
 
 	s.T().Run("failure", func(t *testing.T) {
@@ -156,44 +157,44 @@ func (s *Suite)TestMeetingProviderRepo_GetByID() {
 }
 
 func (s *Suite) TestMeetingProviderRepo_GetByProviderName() {
-	getSQL := "SELECT * FROM `meeting_providers` WHERE name = ? AND " +
-		"`meeting_providers`.`deleted_at` IS NULL ORDER BY `meeting_providers`.`id` LIMIT 1"
+	getSQL := "SELECT * FROM `meeting_platforms` WHERE name = ? AND " +
+		"`meeting_platforms`.`deleted_at` IS NULL ORDER BY `meeting_platforms`.`id` LIMIT 1"
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
-			WithArgs(mockMeetingProvider.Name).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name"}).
-				AddRow(0, mockMeetingProvider.CreatedAt, mockMeetingProvider.UpdatedAt,
-					mockMeetingProvider.DeletedAt, mockMeetingProvider.Name))
+			WithArgs(mockMeetingPlatform.Name).
+			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name", "redirect_url"}).
+				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL))
 
-		provider, err := s.repo.GetByProviderName(mockMeetingProvider.Name)
+		provider, err := s.repo.GetByProviderName(mockMeetingPlatform.Name)
 
 		require.NoError(t, err)
-		assert.Equal(t, &mockMeetingProvider, provider)
+		assert.Equal(t, &mockMeetingPlatform, provider)
 	})
 
 	s.T().Run("failure", func(t *testing.T) {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
-			WithArgs(mockMeetingProvider.Name).
+			WithArgs(mockMeetingPlatform.Name).
 			WillReturnError(errors.New("unknown error"))
 
-		_, err := s.repo.GetByProviderName(mockMeetingProvider.Name)
+		_, err := s.repo.GetByProviderName(mockMeetingPlatform.Name)
 
 		require.Error(t, err)
 	})
 }
 
 func (s *Suite) TestMeetingProviderRepo_Update() {
-	updSQL := "UPDATE `meeting_providers` SET `updated_at`=?,`name`=? WHERE `id` = ?"
+	updSQL := "UPDATE `meeting_platforms` SET `updated_at`=?,`name`=? WHERE `id` = ?"
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(updSQL)).
-			WithArgs(sqlmock.AnyArg(), mockMeetingProvider.Name, 1).
-			WillReturnResult(sqlmock.NewResult(int64(mockMeetingProvider.ID), 1))
+			WithArgs(sqlmock.AnyArg(), mockMeetingPlatform.Name, 1).
+			WillReturnResult(sqlmock.NewResult(int64(mockMeetingPlatform.ID), 1))
 		s.mock.ExpectCommit()
 
-		provider := mockMeetingProvider
+		provider := mockMeetingPlatform
 		provider.ID = 1
 		err := s.repo.Update(&provider)
 
@@ -203,11 +204,13 @@ func (s *Suite) TestMeetingProviderRepo_Update() {
 	s.T().Run("failure-rollback", func(t *testing.T) {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(updSQL)).
-			WithArgs(sqlmock.AnyArg(), mockMeetingProvider.Name, 1).
+			WithArgs(sqlmock.AnyArg(), mockMeetingPlatform.Name, 1).
 			WillReturnError(errors.New("unknown error"))
 		s.mock.ExpectRollback()
 
-		err := s.repo.Update(&mockMeetingProvider)
+		provider := mockMeetingPlatform
+		provider.ID = 1
+		err := s.repo.Update(&provider)
 
 		require.Error(t, err)
 	})
