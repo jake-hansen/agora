@@ -7,6 +7,6 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
-func BuildTest(repo domain.MeetingPlatformRepository) *MeetingProviderService {
+func BuildTest(repo domain.MeetingPlatformRepository) *MeetingPlatformService {
 	panic(wire.Build(Provide))
 }

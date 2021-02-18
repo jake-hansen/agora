@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"golang.org/x/oauth2"
 	"gorm.io/gorm"
 )
@@ -9,8 +10,8 @@ type MeetingPlatform struct {
 	gorm.Model
 	Name		string
 	RedirectURL string
-	OAuth		MeetingPlatformOAuthInfo
-	Actions		MeetingPlatformActions
+	OAuth		MeetingPlatformOAuthInfo	`gorm:"-"`
+	Actions		MeetingPlatformActions		`gorm:"-"`
 }
 
 type MeetingPlatformOAuthInfo struct {
@@ -37,4 +38,5 @@ type MeetingPlatformService interface {
 	GetByProviderName(providerName string) (*MeetingPlatform, error)
 	Update(meetingProvider *MeetingPlatform) error
 	Delete(ID uint) error
+	GetOAuthTokens(ctx context.Context, authorization string, platform *MeetingPlatform) (*oauth2.Token, error)
 }
