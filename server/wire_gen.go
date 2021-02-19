@@ -12,6 +12,7 @@ import (
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
+	"github.com/jake-hansen/agora/api/middleware/corsmiddleware"
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
@@ -42,7 +43,13 @@ func Build() (*Server, func(), error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	v := middleware.ProvideAllProductionMiddleware(logLog)
+	corsConfig, err := corsmiddleware.Cfg(viper)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	corsMiddleware := corsmiddleware.Provide(corsConfig)
+	v := middleware.ProvideAllProductionMiddleware(logLog, corsMiddleware)
 	jwtserviceConfig, err := jwtservice.Cfg(viper)
 	if err != nil {
 		cleanup()
