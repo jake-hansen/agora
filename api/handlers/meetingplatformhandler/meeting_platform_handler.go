@@ -1,6 +1,7 @@
 package meetingplatformhandler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/adapter"
@@ -8,6 +9,7 @@ import (
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/domain"
+	"golang.org/x/oauth2"
 	"net/http"
 )
 
@@ -45,7 +47,13 @@ func (m *MeetingPlatformHandler) Auth(c *gin.Context) {
 		}
 		err = (*m.OAuthService).CreateOAuthInfo(c, authorizationCode, user.ID, platform)
 		if err != nil {
-			apiError := api.NewAPIError(http.StatusBadRequest, err, "could not validate authorization code")
+			var apiError *api.APIError
+			var oauthError *oauth2.RetrieveError
+			if errors.As(err, &oauthError) {
+				apiError = api.NewAPIError(http.StatusBadRequest, oauthError, "could not validate authorization code")
+			} else {
+				apiError = api.NewAPIError(http.StatusInternalServerError, err, "an error occurred while saving the authorization tokens")
+			}
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
 			return
 		}
