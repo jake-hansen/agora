@@ -21,7 +21,7 @@ type OAuthInfoRepository interface {
 	Create(oauthToken *OAuthInfo) (uint, error)
 	GetAll() ([]*OAuthInfo, error)
 	GetByID(ID uint) (*OAuthInfo, error)
-	GetAllByMeetingProviderId(providerID uint) ([]*OAuthInfo, error)
+	GetAlByMeetingPlatformID(ID uint) ([]*OAuthInfo, error)
 	GetAllByUserID(userID uint) ([]*OAuthInfo, error)
 	GetByUserIDAndMeetingPlatformID(userID uint, meetingPlatformID uint) (*OAuthInfo, error)
 	Update(oauthToken *OAuthInfo) error

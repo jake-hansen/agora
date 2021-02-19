@@ -34,10 +34,10 @@ func (o *OAuthInfoRepo) GetByID(ID uint) (*domain.OAuthInfo, error) {
 	return oauthToken, nil
 }
 
-func (o *OAuthInfoRepo) GetAllByMeetingProviderId(providerID uint) ([]*domain.OAuthInfo, error) {
+func (o *OAuthInfoRepo) GetAlByMeetingPlatformID(ID uint) ([]*domain.OAuthInfo, error) {
 	var oauthTokens []*domain.OAuthInfo
-	if err := o.DB.Where("meeting_provider_id = ?", providerID).Find(&oauthTokens).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving OAuthInfos by MeetingPlatform ID %d: %w", providerID, err)
+	if err := o.DB.Where("meeting_platform_id = ?", ID).Find(&oauthTokens).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving OAuthInfos by MeetingPlatform ID %d: %w", ID, err)
 	}
 	return oauthTokens, nil
 }
@@ -56,6 +56,8 @@ func (o *OAuthInfoRepo) Update(oauthToken *domain.OAuthInfo) error {
 		MeetingPlatformID: oauthToken.MeetingPlatformID,
 		AccessToken:       oauthToken.AccessToken,
 		RefreshToken:      oauthToken.RefreshToken,
+		TokenType: 		   oauthToken.TokenType,
+		Expiry: 		   oauthToken.Expiry,
 	}).Error; err != nil {
 		return fmt.Errorf("error updating OAuthInfo with ID %d: %w", oauthToken.ID, err)
 	}
