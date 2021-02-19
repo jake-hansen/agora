@@ -9,7 +9,6 @@ import (
 type MeetingPlatform struct {
 	gorm.Model
 	Name		string
-	RedirectURL string
 	OAuth		MeetingPlatformOAuthInfo	`gorm:"-"`
 	Actions		MeetingPlatformActions		`gorm:"-"`
 }
@@ -23,20 +22,20 @@ type MeetingPlatformActions interface {
 }
 
 type MeetingPlatformRepository interface {
-	Create(meetingProvider *MeetingPlatform) (uint, error)
+	Create(platform *MeetingPlatform) (uint, error)
 	GetAll() ([]*MeetingPlatform, error)
 	GetByID(ID uint) (*MeetingPlatform, error)
-	GetByProviderName(providerName string) (*MeetingPlatform, error)
-	Update(meetingProvider *MeetingPlatform) error
+	GetByPlatformName(name string) (*MeetingPlatform, error)
+	Update(platform *MeetingPlatform) error
 	Delete(ID uint) error
 }
 
 type MeetingPlatformService interface {
-	Create(meetingProvider *MeetingPlatform) (uint, error)
+	Save(platform *MeetingPlatform) (uint, error)
 	GetAll() ([]*MeetingPlatform, error)
-	GetByID(ID uint) (*MeetingPlatform, error)
-	GetByProviderName(providerName string) (*MeetingPlatform, error)
-	Update(meetingProvider *MeetingPlatform) error
 	Delete(ID uint) error
-	GetOAuthTokens(ctx context.Context, authorization string, platform *MeetingPlatform) (*oauth2.Token, error)
+	GetByID(ID uint) (*MeetingPlatform, error)
+	GetByPlatformName(name string) (*MeetingPlatform, error)
+    GetOAuthToken(ctx context.Context, authorization string, platform *MeetingPlatform) (*oauth2.Token, error)
+	RefreshOAuthToken(ctx context.Context, token *oauth2.Token, platform *MeetingPlatform) (*oauth2.Token, error)
 }

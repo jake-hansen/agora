@@ -17,7 +17,6 @@ type Config struct {
 func NewPlatform(name string, actions domain.MeetingPlatformActions, cfg *Config) *domain.MeetingPlatform {
 	p := &domain.MeetingPlatform{
 		Name:        name,
-		RedirectURL: cfg.OAuthRedirectURL,
 		OAuth:       domain.MeetingPlatformOAuthInfo{
 			Config: oauth2.Config{
 				ClientID:     cfg.OAuthClientID,
@@ -27,6 +26,7 @@ func NewPlatform(name string, actions domain.MeetingPlatformActions, cfg *Config
 					TokenURL:  cfg.OAuthTokenURL,
 				},
 				Scopes:       cfg.OAuthScopes,
+				RedirectURL: cfg.OAuthRedirectURL,
 			},
 		},
 		Actions: actions,

@@ -13,7 +13,7 @@ func Cfg(v *viper.Viper, name string) *Config {
 		OAuthRedirectURL:  v.GetString(fmt.Sprintf("platforms.%s.oauth.url.redirect", name)),
 		OAuthClientID:     v.GetString(fmt.Sprintf("platforms.%s.oauth.client.id", name)),
 		OAuthClientSecret: v.GetString(fmt.Sprintf("platforms.%s.oauth.client.secret", name)),
-		OAuthScopes:       v.GetStringSlice(fmt.Sprintf("platforms.%s.oauth.client.id", name)),
+		OAuthScopes:       v.GetStringSlice(fmt.Sprintf("platforms.%s.oauth.client.scopes", name)),
 		OAuthAuthURL:      v.GetString(fmt.Sprintf("platforms.%s.oauth.url.auth", name)),
 		OAuthTokenURL:     v.GetString(fmt.Sprintf("platforms.%s.oauth.url.token", name)),
 	}
@@ -23,7 +23,7 @@ func Cfg(v *viper.Viper, name string) *Config {
 func Provide(zoomActions *zoom.Zoom, v *viper.Viper) []*domain.MeetingPlatform {
 	var platforms []*domain.MeetingPlatform
 
-	platforms = append(platforms, NewPlatform("Zoom", zoomActions, Cfg(v, "zoom")))
+	platforms = append(platforms, NewPlatform("zoom", zoomActions, Cfg(v, "zoom")))
 
 	return platforms
 }

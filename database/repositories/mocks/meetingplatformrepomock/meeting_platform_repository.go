@@ -24,7 +24,7 @@ func (m *MeetingPlatformRepository) GetByID(ID uint) (*domain.MeetingPlatform, e
 	return args.Get(0).(*domain.MeetingPlatform), args.Error(1)
 }
 
-func (m *MeetingPlatformRepository) GetByProviderName(providerName string) (*domain.MeetingPlatform, error) {
+func (m *MeetingPlatformRepository) GetByPlatformName(providerName string) (*domain.MeetingPlatform, error) {
 	args := m.Called(providerName)
 	return args.Get(0).(*domain.MeetingPlatform), args.Error(1)
 }

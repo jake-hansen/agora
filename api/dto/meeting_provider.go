@@ -1,6 +1,6 @@
 package dto
 
 type MeetingProvider struct {
-	Name		string
-	RedirectURL string
+	Name		string `json:"name"`
+	RedirectURL string	`json:"redirect_url"`
 }

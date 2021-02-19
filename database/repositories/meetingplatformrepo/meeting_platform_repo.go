@@ -34,7 +34,7 @@ func (m *MeetingPlatformRepo) GetByID(ID uint) (*domain.MeetingPlatform, error) 
 	return meetingProvider, nil
 }
 
-func (m *MeetingPlatformRepo) GetByProviderName(providerName string) (*domain.MeetingPlatform, error) {
+func (m *MeetingPlatformRepo) GetByPlatformName(providerName string) (*domain.MeetingPlatform, error) {
 	meetingProvider := new(domain.MeetingPlatform)
 	if err := m.DB.Where("name = ?", providerName).First(meetingProvider).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving meeting provider by name %s: %w", providerName, err)

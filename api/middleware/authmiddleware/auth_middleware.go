@@ -55,6 +55,18 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 	}
 }
 
+func (a *AuthMiddleware) GetUser(c *gin.Context) (*domain.User, error) {
+	token, err := a.ParseToken(c.Request)
+	if err != nil {
+		return nil, err
+	}
+	user, err := (*a.AuthService).GetUser(*token)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // getTokenFromBearerHeader parses the Authorization header for a Bearer token
 // and returns the parsed result as a domain.Token.
 func getTokenFromBearerHeader(r *http.Request) (*domain.Token, error) {

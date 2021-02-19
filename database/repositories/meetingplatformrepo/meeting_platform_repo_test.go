@@ -167,7 +167,7 @@ func (s *Suite) TestMeetingProviderRepo_GetByProviderName() {
 				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
 					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL))
 
-		provider, err := s.repo.GetByProviderName(mockMeetingPlatform.Name)
+		provider, err := s.repo.GetByPlatformName(mockMeetingPlatform.Name)
 
 		require.NoError(t, err)
 		assert.Equal(t, &mockMeetingPlatform, provider)
@@ -178,7 +178,7 @@ func (s *Suite) TestMeetingProviderRepo_GetByProviderName() {
 			WithArgs(mockMeetingPlatform.Name).
 			WillReturnError(errors.New("unknown error"))
 
-		_, err := s.repo.GetByProviderName(mockMeetingPlatform.Name)
+		_, err := s.repo.GetByPlatformName(mockMeetingPlatform.Name)
 
 		require.Error(t, err)
 	})

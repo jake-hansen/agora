@@ -11,7 +11,7 @@ import (
 
 // Injectors from injector.go:
 
-func BuildTest(repo domain.MeetingPlatformRepository) *MeetingPlatformService {
-	meetingProviderService := Provide(repo)
-	return meetingProviderService
+func BuildTest(repo domain.MeetingPlatformRepository, configuredPlatforms []*domain.MeetingPlatform) *MeetingPlatformService {
+	meetingPlatformService := Provide(repo, configuredPlatforms)
+	return meetingPlatformService
 }

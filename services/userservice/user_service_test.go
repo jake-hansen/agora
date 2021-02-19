@@ -27,7 +27,7 @@ var mockUserHash = "$2a$10$PdjlGYhMGonCrjKNquZmzeMQY0M4vlxsCjtQysCOOSzxcfpTW5JAe
 func TestUserService_Register(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		r := userrepomock.Build()
-		r.On("Create", mock.AnythingOfType("*domain.User")).Return(1, nil)
+		r.On("Save", mock.AnythingOfType("*domain.User")).Return(1, nil)
 
 		uService := userservice.BuildTest(r)
 
@@ -39,7 +39,7 @@ func TestUserService_Register(t *testing.T) {
 
 	t.Run("failure", func(t *testing.T) {
 		r := userrepomock.Build()
-		r.On("Create", mock.AnythingOfType("*domain.User")).Return(0, errors.New("unknown error"))
+		r.On("Save", mock.AnythingOfType("*domain.User")).Return(0, errors.New("unknown error"))
 
 		uService := userservice.BuildTest(r)
 

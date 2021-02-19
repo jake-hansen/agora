@@ -5,10 +5,9 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
-func Provide(repository domain.MeetingPlatformRepository) *MeetingPlatformService {
-	return &MeetingPlatformService{repo: repository}
+func Provide(repository domain.MeetingPlatformRepository, configuredPlatforms []*domain.MeetingPlatform) *MeetingPlatformService {
+	return New(repository, configuredPlatforms)
 }
-
 var (
 	ProviderSet = wire.NewSet(Provide, wire.Bind(new(domain.MeetingPlatformService), new(*MeetingPlatformService)))
 )
