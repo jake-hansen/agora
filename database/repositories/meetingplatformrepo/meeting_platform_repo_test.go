@@ -22,7 +22,6 @@ var mockMeetingPlatform = domain.MeetingPlatform{
 		DeletedAt: gorm.DeletedAt{},
 	},
 	Name:  "really awesome meeting platform",
-	RedirectURL: "https://my-redirect",
 }
 
 type Suite struct {
@@ -41,13 +40,13 @@ func (s *Suite) SetupTest()  {
 }
 
 func (s *Suite) TestMeetingProviderRepo_Create() {
-	instSQL := "INSERT INTO `meeting_platforms` (`created_at`,`updated_at`,`deleted_at`,`name`,`redirect_url`) VALUES (?,?,?,?,?)"
+	instSQL := "INSERT INTO `meeting_platforms` (`created_at`,`updated_at`,`deleted_at`,`name`) VALUES (?,?,?,?)"
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
 			WithArgs(mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
-				mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL).
+				mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name).
 			WillReturnResult(sqlmock.NewResult(0, 1))
 		s.mock.ExpectCommit()
 
@@ -61,7 +60,7 @@ func (s *Suite) TestMeetingProviderRepo_Create() {
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
 			WithArgs(mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
-				mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL).
+				mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name).
 			WillReturnError(errors.New("unknown error"))
 		s.mock.ExpectRollback()
 
@@ -104,11 +103,11 @@ func (s *Suite) TestMeetingProviderRepo_GetAll() {
 
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name", "redirect_url"}).
+			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name"}).
 				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
-					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL).
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name).
 				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
-					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL))
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name))
 
 		providers, err := s.repo.GetAll()
 		require.NoError(t, err)
@@ -135,9 +134,9 @@ func (s *Suite)TestMeetingProviderRepo_GetByID() {
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
 			WithArgs(0).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name", "redirect_url"}).
+			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name"}).
 				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
-					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL))
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name))
 
 		provider, err := s.repo.GetByID(0)
 
@@ -163,9 +162,9 @@ func (s *Suite) TestMeetingProviderRepo_GetByProviderName() {
 	s.T().Run("success", func(t *testing.T) {
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
 			WithArgs(mockMeetingPlatform.Name).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name", "redirect_url"}).
+			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "name"}).
 				AddRow(0, mockMeetingPlatform.CreatedAt, mockMeetingPlatform.UpdatedAt,
-					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name, mockMeetingPlatform.RedirectURL))
+					mockMeetingPlatform.DeletedAt, mockMeetingPlatform.Name))
 
 		provider, err := s.repo.GetByPlatformName(mockMeetingPlatform.Name)
 
