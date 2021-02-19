@@ -3,6 +3,7 @@ package jwtservicemock
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/domain"
+	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -18,7 +19,7 @@ func (j *Service) GenerateToken(user domain.User) (string, error) {
 }
 
 // ValidateToken mocks JWTService's ValidateToken function.
-func (j *Service) ValidateToken(token string) (*jwt.Token, error) {
+func (j *Service) ValidateToken(token string) (*jwt.Token, *jwtservice.Claims, error) {
 	args := j.Mock.Called(token)
-	return args.Get(0).(*jwt.Token), args.Error(1)
+	return args.Get(0).(*jwt.Token), args.Get(1).(*jwtservice.Claims), args.Error(2)
 }
