@@ -2,7 +2,6 @@ package oauthinfoservice
 
 import (
 	"context"
-	"fmt"
 	"github.com/jake-hansen/agora/domain"
 	"golang.org/x/oauth2"
 )
@@ -13,6 +12,14 @@ type OAuthInfoService struct {
 }
 
 func (o *OAuthInfoService) CreateOAuthInfo(ctx context.Context, authorization string, userID uint, platform *domain.MeetingPlatform) error {
+	_, err := o.repo.GetByUserIDAndMeetingPlatformID(userID, platform.ID)
+	if err == nil {
+		return &domain.TokenExistsError{
+			UserID:   userID,
+			Platform: platform.Name,
+		}
+	}
+
 	token, err := o.platformService.GetOAuthToken(ctx, authorization, platform)
 	if err != nil {
 		return err
@@ -20,11 +27,11 @@ func (o *OAuthInfoService) CreateOAuthInfo(ctx context.Context, authorization st
 
 	oauthInfo := &domain.OAuthInfo{
 		UserID:            userID,
-		MeetingProviderID: platform.ID,
+		MeetingPlatformID: platform.ID,
 		AccessToken:       token.AccessToken,
 		RefreshToken:      token.RefreshToken,
-		TokenType:  	   token.TokenType,
-		Expiry: 		   token.Expiry,
+		TokenType:         token.TokenType,
+		Expiry:            token.Expiry,
 	}
 
 	_, err = o.repo.Create(oauthInfo)
@@ -32,38 +39,32 @@ func (o *OAuthInfoService) CreateOAuthInfo(ctx context.Context, authorization st
 }
 
 func (o *OAuthInfoService) GetOAuthInfo(userID uint, platform *domain.MeetingPlatform) (*domain.OAuthInfo, error) {
-	oauthInfos, err := o.repo.GetAllByUserID(userID)
+	oauthInfo, err := o.repo.GetByUserIDAndMeetingPlatformID(userID, platform.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, info := range oauthInfos {
-		if info.MeetingProviderID == platform.ID {
-			token := restoreToken(info)
+	token := restoreToken(oauthInfo)
 
-			if token.Valid() {
-				return info, nil
+	if token.Valid() {
+		return oauthInfo, nil
+	} else {
+		newToken, err := o.platformService.RefreshOAuthToken(nil, &token, platform)
+		if err != nil {
+			return nil, err
+		} else {
+			oauthInfo.AccessToken = newToken.AccessToken
+			oauthInfo.RefreshToken = newToken.RefreshToken
+			oauthInfo.Expiry = newToken.Expiry
+			oauthInfo.TokenType = newToken.TokenType
+			err = o.repo.Update(oauthInfo)
+			if err != nil {
+				return nil, err
 			} else {
-				newToken, err := o.platformService.RefreshOAuthToken(nil, &token, platform)
-				if err != nil {
-					return nil, err
-				} else {
-					info.AccessToken = newToken.AccessToken
-					info.RefreshToken = newToken.RefreshToken
-					info.Expiry = newToken.Expiry
-					info.TokenType = newToken.TokenType
-					err = o.repo.Update(info)
-					if err != nil {
-						return nil, err
-					} else {
-						return info, nil
-					}
-				}
+				return oauthInfo, nil
 			}
 		}
 	}
-
-	return nil, fmt.Errorf("the user with id %d does not have OAuth tokens stored for platform with id %d", userID, platform.ID)
 }
 
 func restoreToken(oauthInfo *domain.OAuthInfo) oauth2.Token {

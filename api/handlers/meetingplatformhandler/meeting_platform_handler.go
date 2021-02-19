@@ -49,10 +49,13 @@ func (m *MeetingPlatformHandler) Auth(c *gin.Context) {
 		if err != nil {
 			var apiError *api.APIError
 			var oauthError *oauth2.RetrieveError
+			var tokenExistsError *domain.TokenExistsError
 			if errors.As(err, &oauthError) {
 				apiError = api.NewAPIError(http.StatusBadRequest, oauthError, "could not validate authorization code")
+			} else if errors.As(err, &tokenExistsError) {
+				apiError = api.NewAPIError(http.StatusBadRequest, tokenExistsError, "authentication tokens already exist for this platform")
 			} else {
-				apiError = api.NewAPIError(http.StatusInternalServerError, err, "an error occurred while saving the authorization tokens")
+				apiError = api.NewAPIError(http.StatusInternalServerError, err, "an error occurred while saving the authentication tokens")
 			}
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
 			return

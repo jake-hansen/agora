@@ -53,7 +53,7 @@ func (o *OAuthInfoRepo) GetAllByUserID(userID uint) ([]*domain.OAuthInfo, error)
 func (o *OAuthInfoRepo) Update(oauthToken *domain.OAuthInfo) error {
 	if err := o.DB.Model(oauthToken).Updates(domain.OAuthInfo{
 		UserID:            oauthToken.UserID,
-		MeetingProviderID: oauthToken.MeetingProviderID,
+		MeetingPlatformID: oauthToken.MeetingPlatformID,
 		AccessToken:       oauthToken.AccessToken,
 		RefreshToken:      oauthToken.RefreshToken,
 	}).Error; err != nil {
@@ -68,4 +68,14 @@ func (o *OAuthInfoRepo) Delete(ID uint) error {
 	}
 	return nil
 }
+
+func (o *OAuthInfoRepo) GetByUserIDAndMeetingPlatformID(userID uint, meetingPlatformID uint) (*domain.OAuthInfo, error) {
+	oauthToken := new(domain.OAuthInfo)
+
+	if err := o.DB.First(oauthToken,"user_id = ? AND meeting_platform_id = ?", userID, meetingPlatformID).Error; err != nil {
+		return nil, fmt.Errorf("error finding OAuthInfo for user id %d with meeting platform id %d: %w", userID, meetingPlatformID, err)
+	}
+	return oauthToken, nil
+}
+
 
