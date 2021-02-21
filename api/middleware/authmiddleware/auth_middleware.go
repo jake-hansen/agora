@@ -38,6 +38,7 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 		if err != nil {
 			apiError := api.NewAPIError(http.StatusUnauthorized, err, err.Error())
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+			c.Abort()
 			return
 		}
 
@@ -46,11 +47,24 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 		if err != nil {
 			apiError := api.NewAPIError(http.StatusUnauthorized, err, "the provided token is not valid")
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+			c.Abort()
 			return
 		}
 
 		c.Next()
 	}
+}
+
+func (a *AuthMiddleware) GetUser(c *gin.Context) (*domain.User, error) {
+	token, err := a.ParseToken(c.Request)
+	if err != nil {
+		return nil, err
+	}
+	user, err := (*a.AuthService).GetUser(*token)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // getTokenFromBearerHeader parses the Authorization header for a Bearer token

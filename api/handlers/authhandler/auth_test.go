@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -42,7 +43,7 @@ var DTOMockToken = dto.Token{
 func TestAuthHandler_Login(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockAuthService := authservicemock.Build()
-		mockAuthService.On("Authenticate").Return(&domainMockToken, nil)
+		mockAuthService.On("Authenticate", mock.AnythingOfType("domain.Auth")).Return(&domainMockToken, nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
@@ -110,7 +111,7 @@ func TestAuthHandler_Login(t *testing.T) {
 	t.Run("invalid-credentials", func(t *testing.T) {
 		mockAuthService := authservicemock.Build()
 		var token *domain.Token = nil
-		mockAuthService.On("Authenticate").Return(token,
+		mockAuthService.On("Authenticate", mock.AnythingOfType("domain.Auth")).Return(token,
 			errors.New("username or password not correct"))
 
 		router := gin.Default()
@@ -134,7 +135,7 @@ func TestAuthHandler_Login(t *testing.T) {
 func TestAuthHandler_Logout(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockAuthService := authservicemock.Build()
-		mockAuthService.On("Deauthenticate").Return(nil)
+		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.Token")).Return(nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
@@ -154,7 +155,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 	t.Run("failure", func(t *testing.T) {
 		mockAuthService := authservicemock.Build()
-		mockAuthService.On("Deauthenticate").Return(errors.New("test error"))
+		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.Token")).Return(errors.New("test error"))
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())

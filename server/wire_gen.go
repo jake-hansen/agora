@@ -8,16 +8,24 @@ package server
 import (
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
+	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware"
+	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/api/middleware/corsmiddleware"
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
+	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
+	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
+	"github.com/jake-hansen/agora/services/meetingplatforms"
+	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
+	"github.com/jake-hansen/agora/services/meetingplatformservice"
+	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
 )
@@ -69,8 +77,17 @@ func Build() (*Server, func(), error) {
 	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
 	authHandler := authhandler.Provide(simpleAuthService)
 	userHandler := userhandler.Provide(userService)
-	v2 := handlers.ProvideAllProductionHandlers(authHandler, userHandler)
-	handlerManager := handlers2.ProvideHandlerManager(v2)
+	v2 := authmiddleware.ProvideAuthorizationHeaderParser()
+	authMiddleware := authmiddleware.Provide(simpleAuthService, v2)
+	meetingPlatformRepo := meetingplatformrepo.Provide(manager)
+	zoomZoom := zoom.Provide()
+	v3 := meetingplatforms.Provide(zoomZoom, viper)
+	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, v3)
+	oAuthInfoRepo := oauthinforepo.Provide(manager)
+	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)
+	meetingPlatformHandler := meetingplatformhandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
+	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler)
+	handlerManager := handlers2.ProvideHandlerManager(v4)
 	routerConfig, err := router.Cfg(viper, v, handlerManager)
 	if err != nil {
 		cleanup2()

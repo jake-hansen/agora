@@ -1,0 +1,1 @@
+alter table meeting_providers drop column redirect_url;

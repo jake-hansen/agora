@@ -43,7 +43,7 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 
 		assert.NoError(t, err)
 
-		js.On("ValidateToken", mock.Anything).Return(&jwt.Token{}, nil)
+		js.On("ValidateToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.Claims{}, nil)
 		valid, err := as.IsAuthenticated(*token)
 		assert.NoError(t, err)
 		assert.True(t, valid)
@@ -53,7 +53,7 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 		invalidToken := domain.Token{Value: "invalid"}
 		as, ds, _ := buildTest(t)
 
-		ds.On("ValidateToken", mock.Anything).Return(&jwt.Token{}, errors.New("invalid token"))
+		ds.On("ValidateToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.Claims{}, errors.New("invalid token"))
 		valid, err := as.IsAuthenticated(invalidToken)
 		assert.Error(t, err)
 		assert.False(t, valid)

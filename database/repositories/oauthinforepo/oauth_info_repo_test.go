@@ -1,6 +1,7 @@
 package oauthinforepo_test
 
 import (
+	"database/sql/driver"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jake-hansen/agora/database"
@@ -22,10 +23,15 @@ var mockOAuthInfo = domain.OAuthInfo{
 		DeletedAt: gorm.DeletedAt{},
 	},
 	UserID:            uint(1),
-	MeetingProviderID: uint(123456),
+	MeetingPlatformID: uint(123456),
 	AccessToken:       "random-access-token",
 	RefreshToken:      "random-refresh-token",
+	TokenType:		   "bearer",
+	Expiry: 		   time.Now().Add(1 * time.Hour),
 }
+
+var columnNames = []string{"id", "created_at", "updated_at", "deleted_at", "user_id", "meeting_platform_id", "access_token", "refresh_token", "token_type", "expiry"}
+var rowValues = []driver.Value{mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.MeetingPlatformID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.TokenType, mockOAuthInfo.Expiry}
 
 type Suite struct {
 	suite.Suite
@@ -43,13 +49,13 @@ func (s *Suite) SetupTest() {
 }
 
 func (s *Suite) TestOAuthInfoRepo_Create() {
-	instSQL := "INSERT INTO `oauth_info` (`created_at`,`updated_at`,`deleted_at`,`user_id`,`meeting_provider_id`,`access_token`,`refresh_token`) VALUES (?,?,?,?,?,?,?)"
+	instSQL := "INSERT INTO `oauth_info` (`created_at`,`updated_at`,`deleted_at`,`user_id`,`meeting_platform_id`,`access_token`,`refresh_token`,`token_type`,`expiry`) VALUES (?,?,?,?,?,?,?,?,?)"
 
 	s.T().Run("success", func(t *testing.T) {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
-			WithArgs(mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.MeetingProviderID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken).
+			WithArgs(rowValues...).
 			WillReturnResult(sqlmock.NewResult(0, 1))
 
 		s.mock.ExpectCommit()
@@ -64,7 +70,7 @@ func (s *Suite) TestOAuthInfoRepo_Create() {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(instSQL)).
-			WithArgs(mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.MeetingProviderID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken).
+			WithArgs(mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.MeetingPlatformID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken).
 			WillReturnError(errors.New("unknown error"))
 		s.mock.ExpectRollback()
 
@@ -109,9 +115,9 @@ func (s *Suite) TestOAuthInfoRepo_GetAll() {
 	s.T().Run("success", func(t *testing.T) {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "user_id", "access_token", "refresh_token", "meeting_provider_id"}).
-				AddRow(0, mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.MeetingProviderID).
-				AddRow(0, mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.MeetingProviderID))
+			WillReturnRows(sqlmock.NewRows(columnNames).
+				AddRow(append([]driver.Value{0}, rowValues...)...).
+				AddRow(append([]driver.Value{0}, rowValues...)...))
 
 		oauthinfos, err := s.repo.GetAll()
 		require.NoError(t, err)
@@ -133,18 +139,18 @@ func (s *Suite) TestOAuthInfoRepo_GetAll() {
 	})
 }
 
-func (s *Suite) TestOAuthInfoRepo_GetAllByMeetingProviderId() {
-	getSQL := "SELECT * FROM `oauth_info` WHERE meeting_provider_id = ? AND `oauth_info`.`deleted_at` IS NULL"
+func (s *Suite) TestOAuthInfoRepo_GetAllByMeetingPlatformId() {
+	getSQL := "SELECT * FROM `oauth_info` WHERE (meeting_platform_id = ?) AND `oauth_info`.`deleted_at` IS NULL"
 
 	s.T().Run("success", func(t *testing.T) {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
-			WithArgs(mockOAuthInfo.MeetingProviderID).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "user_id", "access_token", "refresh_token", "meeting_provider_id"}).
-				AddRow(0, mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.MeetingProviderID).
-				AddRow(0, mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.MeetingProviderID))
+			WithArgs(mockOAuthInfo.MeetingPlatformID).
+			WillReturnRows(sqlmock.NewRows(columnNames).
+				AddRow(append([]driver.Value{0}, rowValues...)...).
+				AddRow(append([]driver.Value{0}, rowValues...)...))
 
-		oauthinfos, err := s.repo.GetAllByMeetingProviderId(mockOAuthInfo.MeetingProviderID)
+		oauthinfos, err := s.repo.GetAlByMeetingPlatformID(mockOAuthInfo.MeetingPlatformID)
 		require.NoError(t, err)
 
 		assert.Equal(t, &mockOAuthInfo, oauthinfos[0])
@@ -156,10 +162,10 @@ func (s *Suite) TestOAuthInfoRepo_GetAllByMeetingProviderId() {
 	s.T().Run("failure", func(t *testing.T) {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
-			WithArgs(mockOAuthInfo.MeetingProviderID).
+			WithArgs(mockOAuthInfo.MeetingPlatformID).
 			WillReturnError(errors.New("unknown error"))
 
-		_, err := s.repo.GetAllByMeetingProviderId(mockOAuthInfo.MeetingProviderID)
+		_, err := s.repo.GetAlByMeetingPlatformID(mockOAuthInfo.MeetingPlatformID)
 
 		require.Error(t, err)
 	})
@@ -172,9 +178,9 @@ func (s *Suite) TestOAuthInfoRepo_GetAllByUserID() {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
 			WithArgs(mockOAuthInfo.UserID).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "user_id", "access_token", "refresh_token", "meeting_provider_id"}).
-				AddRow(0, mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.MeetingProviderID).
-				AddRow(0, mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.MeetingProviderID))
+			WillReturnRows(sqlmock.NewRows(columnNames).
+				AddRow(append([]driver.Value{0}, rowValues...)...).
+				AddRow(append([]driver.Value{0}, rowValues...)...))
 
 		oauthinfos, err := s.repo.GetAllByUserID(mockOAuthInfo.UserID)
 		require.NoError(t, err)
@@ -204,8 +210,8 @@ func (s *Suite) TestOAuthInfoRepo_GetByID() {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectQuery(regexp.QuoteMeta(getSQL)).
 			WithArgs(0).
-			WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "user_id", "access_token", "refresh_token", "meeting_provider_id"}).
-				AddRow(0, mockOAuthInfo.CreatedAt, mockOAuthInfo.UpdatedAt, mockOAuthInfo.DeletedAt, mockOAuthInfo.UserID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.MeetingProviderID))
+			WillReturnRows(sqlmock.NewRows(columnNames).
+				AddRow(append([]driver.Value{0}, rowValues...)...))
 
 		oauthinfo, err := s.repo.GetByID(0)
 
@@ -226,13 +232,13 @@ func (s *Suite) TestOAuthInfoRepo_GetByID() {
 }
 
 func (s *Suite) TestOAuthInfoRepo_Update() {
-	updSQL := "UPDATE `oauth_info` SET `updated_at`=?,`user_id`=?,`meeting_provider_id`=?,`access_token`=?,`refresh_token`=? WHERE `id` = ?"
+	updSQL := "UPDATE `oauth_info` SET `updated_at`=?,`user_id`=?,`meeting_platform_id`=?,`access_token`=?,`refresh_token`=?,`token_type`=?,`expiry`=? WHERE `id` = ?"
 
 	s.T().Run("success", func(t *testing.T) {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(updSQL)).
-			WithArgs(sqlmock.AnyArg(), mockOAuthInfo.UserID, mockOAuthInfo.MeetingProviderID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, 1).
+			WithArgs(sqlmock.AnyArg(), mockOAuthInfo.UserID, mockOAuthInfo.MeetingPlatformID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, mockOAuthInfo.TokenType, sqlmock.AnyArg(), 1).
 			WillReturnResult(sqlmock.NewResult(int64(mockOAuthInfo.ID), 1))
 		s.mock.ExpectCommit()
 
@@ -247,7 +253,7 @@ func (s *Suite) TestOAuthInfoRepo_Update() {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())
 		s.mock.ExpectBegin()
 		s.mock.ExpectExec(regexp.QuoteMeta(updSQL)).
-			WithArgs(sqlmock.AnyArg(), mockOAuthInfo.UserID, mockOAuthInfo.MeetingProviderID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, 1).
+			WithArgs(sqlmock.AnyArg(), mockOAuthInfo.UserID, mockOAuthInfo.MeetingPlatformID, mockOAuthInfo.AccessToken, mockOAuthInfo.RefreshToken, 1).
 			WillReturnError(errors.New("unknown error"))
 		s.mock.ExpectRollback()
 

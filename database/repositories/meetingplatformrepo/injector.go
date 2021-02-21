@@ -1,12 +1,12 @@
 // +build wireinject
 
-package meetingproviderrepo
+package meetingplatformrepo
 
 import (
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/database"
 )
 
-func Build(manager *database.Manager) (*MeetingProviderRepo, func(), error)  {
+func Build(manager *database.Manager) (*MeetingPlatformRepo, func(), error)  {
 	panic(wire.Build(Provide))
 }

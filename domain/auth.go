@@ -16,6 +16,7 @@ type AuthService interface {
 	IsAuthenticated(token Token) (bool, error)
 	Authenticate(auth Auth) (*Token, error)
 	Deauthenticate(token Token) error
+	GetUser(token Token) (*User, error)
 }
 
 // Token contains a string based token that can be used for authentication.

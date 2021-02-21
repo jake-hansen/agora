@@ -1,0 +1,1 @@
+rename table meeting_platforms to meeting_providers;

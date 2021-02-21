@@ -15,7 +15,7 @@ var testConfig = jwtservice.Config{
 	Duration:   300000000000,
 }
 
-var testUser domain.User = domain.User{
+var testUser = domain.User{
 	Firstname: "john",
 	Lastname:  "doe",
 	Username:  "jdoe",
@@ -38,7 +38,7 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		token, err := service.GenerateToken(testUser)
 		assert.NoError(t, err)
 
-		parsedToken, err := service.ValidateToken(token)
+		parsedToken, _, err := service.ValidateToken(token)
 		assert.NoError(t, err)
 		assert.Equal(t, token, parsedToken.Raw)
 	})
@@ -53,7 +53,7 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		assert.NoError(t, err)
 
 		time.Sleep(1000000000)
-		_, err = service.ValidateToken(token)
+		_, _, err = service.ValidateToken(token)
 		assert.Error(t, err)
 	})
 }

@@ -48,4 +48,24 @@ database:
   port:
   # Name of the database or schema to use.
   name:
+# Configuration details for meeting platforms.
+platforms:
+  zoom:
+    oauth:
+      url:
+        # URL that users should be redirected to after authenticating with
+        # the authorization server.
+        redirect: 
+        # URL that users should be directed to in order to authenticate with
+        # the authorizaton server.
+        auth: 
+        # URL to exhchange an authorization code for access and refresh tokens.
+        token: 
+      client:
+        # ID of this client on the authorization server.
+        id: 
+        # Secret of this client on the authorization server.
+        secret: 
+        # List of scopes to be requested during authorization.
+        scopes:
   

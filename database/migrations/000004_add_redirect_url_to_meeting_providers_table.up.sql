@@ -1,0 +1,1 @@
+alter table meeting_providers add redirect_url text not null;

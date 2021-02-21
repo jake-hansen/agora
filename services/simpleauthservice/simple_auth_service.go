@@ -18,7 +18,7 @@ type SimpleAuthService struct {
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
 // if the contained JWT is valid.
 func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
-	_, err := s.jwtService.ValidateToken(token.Value)
+	_, _, err := s.jwtService.ValidateToken(token.Value)
 	if err != nil {
 		return false, err
 	}
@@ -44,4 +44,18 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
 func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
+}
+
+func (s *SimpleAuthService) GetUser(token domain.Token) (*domain.User, error) {
+	_, claims, err := s.jwtService.ValidateToken(token.Value)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := s.userService.GetByID(claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
