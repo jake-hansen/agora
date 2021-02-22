@@ -25,7 +25,7 @@ var DTOMockCredentials = dto.User{
 
 func TestUserHandler_RegisterUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		userService := userservicemock.Build()
+		userService := userservicemock.Provide()
 		userService.On("Register", mock.Anything).Return(1, nil)
 
 		router := gin.Default()
@@ -50,7 +50,7 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 			"{\"field\":\"Lastname\",\"reason\":\"required\"},{\"field\":\"Username\",\"reason\":\"required\"}," +
 			"{\"field\":\"Password\",\"reason\":\"required\"}]}"
 
-		userService := userservicemock.Build()
+		userService := userservicemock.Provide()
 		userService.On("Register", mock.Anything).Return(1, nil)
 
 		router := gin.Default()

@@ -18,7 +18,7 @@ func TestAuthMiddleware_HandleAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
 	t.Run("success", func(t *testing.T) {
-		mockAuthService := authservicemock.Build()
+		mockAuthService := authservicemock.Provide()
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 		endpoint := router.Group("test")
@@ -41,7 +41,7 @@ func TestAuthMiddleware_HandleAuth(t *testing.T) {
 	})
 
 	t.Run("failure-no-token", func(t *testing.T) {
-		mockAuthService := authservicemock.Build()
+		mockAuthService := authservicemock.Provide()
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 		endpoint := router.Group("test")
@@ -62,7 +62,7 @@ func TestAuthMiddleware_HandleAuth(t *testing.T) {
 	})
 
 	t.Run("failure-invalid-token", func(t *testing.T) {
-		mockAuthService := authservicemock.Build()
+		mockAuthService := authservicemock.Provide()
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 		endpoint := router.Group("test")
