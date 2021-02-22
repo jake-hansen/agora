@@ -14,7 +14,4 @@ func Provide(manager *database.Manager) *UserRepository {
 var (
 	// ProviderProductionSet provides a UserRepository for Production.
 	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(domain.UserRepository), new(*UserRepository)))
-
-	// ProviderTestSet provides a UserRepository for testing.
-	ProviderTestSet = wire.NewSet(Provide, wire.Bind(new(domain.UserRepository), new(*UserRepository)))
 )
