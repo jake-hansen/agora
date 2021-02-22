@@ -25,27 +25,44 @@ func (m *MeetingPlatformHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		meetingHandlerGroup.GET("", m.GetAllPlatforms)
 		meetingHandlerGroup.POST(":platform/auth", m.Auth)
+		meetingHandlerGroup.GET(":platform/auth", m.GetAuth)
 	}
 
 	return nil
+}
+
+func (m *MeetingPlatformHandler) meetingPlatformValidator(c *gin.Context, platformName string) *domain.MeetingPlatform {
+	platform, err := (*m.PlatformService).GetByPlatformName(platformName)
+	if err != nil {
+		apiError := api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("the platform %s does not exist", platformName))
+		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+		return nil
+	}
+	return platform
+}
+
+func (m *MeetingPlatformHandler) getUser(c *gin.Context) *domain.User {
+	user, err := m.AuthMiddleware.GetUser(c)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return nil
+	}
+	return user
 }
 
 func (m *MeetingPlatformHandler) Auth(c *gin.Context) {
 	platformName := c.Param("platform")
 	authorizationCode := c.Query("code")
 
-	platform, err := (*m.PlatformService).GetByPlatformName(platformName)
-	if err != nil {
-		apiError := api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("the platform %s does not exist", platformName))
-		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+	platform := m.meetingPlatformValidator(c, platformName)
+	if platform == nil {
 		return
 	} else {
-		user, err := m.AuthMiddleware.GetUser(c)
-		if err != nil {
-			_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		user := m.getUser(c)
+		if user == nil {
 			return
 		}
-		err = (*m.OAuthService).CreateOAuthInfo(c, authorizationCode, user.ID, platform)
+		err := (*m.OAuthService).CreateOAuthInfo(c, authorizationCode, user.ID, platform)
 		if err != nil {
 			var apiError *api.APIError
 			var oauthError *oauth2.RetrieveError
@@ -63,6 +80,27 @@ func (m *MeetingPlatformHandler) Auth(c *gin.Context) {
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func (m *MeetingPlatformHandler) GetAuth(c *gin.Context) {
+	platformName := c.Param("platform")
+
+	user := m.getUser(c)
+	if user == nil {
+		return
+	}
+
+	platform := m.meetingPlatformValidator(c, platformName)
+	if platform == nil {
+		return
+	} else {
+		_, err := (*m.OAuthService).GetOAuthInfo(user.ID, platform)
+		if err != nil {
+			c.AbortWithStatus(http.StatusNotFound)
+		} else {
+			c.Status(http.StatusOK)
+		}
+	}
 }
 
 func (m *MeetingPlatformHandler) GetAllPlatforms(c *gin.Context) {
