@@ -22,10 +22,9 @@ func main() {
 
 	loadData(db, configuration)
 
-	serverCleanup := startAPIServer()
+	startAPIServer(db, configuration, logger)
 
 	cleanup := func() {
-		serverCleanup()
 		dbCleanup()
 		logCleanup()
 	}
@@ -33,8 +32,8 @@ func main() {
 	defer cleanup()
 }
 
-func startAPIServer() func() {
-	apiServer, cleanup, err := server.Build()
+func startAPIServer(db *database.Manager, v *viper.Viper, log *log.Log) {
+	apiServer, err := server.Build(db, v, log)
 	if err != nil {
 		panic(err)
 	}
@@ -42,7 +41,6 @@ func startAPIServer() func() {
 	if err != nil {
 		panic(err)
 	}
-	return cleanup
 }
 
 func loadData(db *database.Manager, v *viper.Viper) {
