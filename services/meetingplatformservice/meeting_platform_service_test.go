@@ -18,7 +18,7 @@ var mockConfiguredPlatforms = []*domain.MeetingPlatform{&mockMeetingPlatform}
 
 func TestMeetingProviderService_Save(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("Create", mock.AnythingOfType("*domain.MeetingPlatform")).Return(1, nil)
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -30,7 +30,7 @@ func TestMeetingProviderService_Save(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("Create", mock.AnythingOfType("*domain.MeetingPlatform")).Return(0, errors.New("unknown error"))
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -44,7 +44,7 @@ func TestMeetingProviderService_Save(t *testing.T) {
 
 func TestMeetingProviderService_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("Delete", mock.AnythingOfType("uint")).Return(nil)
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -55,7 +55,7 @@ func TestMeetingProviderService_Delete(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("Delete", mock.AnythingOfType("uint")).Return(errors.New("unknown error"))
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -70,7 +70,7 @@ func TestMeetingProviderService_GetAll(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockProviders := []*domain.MeetingPlatform{&mockMeetingPlatform, &mockMeetingPlatform}
 
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("GetAll").Return(mockProviders, nil)
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -82,7 +82,7 @@ func TestMeetingProviderService_GetAll(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("GetAll").Return([]*domain.MeetingPlatform{}, errors.New("unknown error"))
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -96,7 +96,7 @@ func TestMeetingProviderService_GetAll(t *testing.T) {
 
 func TestMeetingProviderService_GetByID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("GetByID", mock.AnythingOfType("uint")).Return(&mockMeetingPlatform, nil)
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -108,7 +108,7 @@ func TestMeetingProviderService_GetByID(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("GetByID", mock.AnythingOfType("uint")).Return(&domain.MeetingPlatform{}, errors.New("unknown error"))
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -122,7 +122,7 @@ func TestMeetingProviderService_GetByID(t *testing.T) {
 
 func TestMeetingProviderService_GetByPlatformName(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("GetByPlatformName", mock.AnythingOfType("string")).Return(&mockMeetingPlatform, nil)
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)
@@ -134,7 +134,7 @@ func TestMeetingProviderService_GetByPlatformName(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := meetingplatformrepomock.Build()
+		r := meetingplatformrepomock.Provide()
 		r.On("GetByPlatformName", mock.AnythingOfType("string")).Return(&domain.MeetingPlatform{}, errors.New("unknown error"))
 
 		mService := meetingplatformservice.Provide(r, mockConfiguredPlatforms)

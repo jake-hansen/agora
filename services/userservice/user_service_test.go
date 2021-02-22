@@ -26,7 +26,7 @@ var mockUserHash = "$2a$10$PdjlGYhMGonCrjKNquZmzeMQY0M4vlxsCjtQysCOOSzxcfpTW5JAe
 
 func TestUserService_Register(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("Create", mock.AnythingOfType("*domain.User")).Return(1, nil)
 
 		uService := userservice.Provide(r)
@@ -38,7 +38,7 @@ func TestUserService_Register(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("Create", mock.AnythingOfType("*domain.User")).Return(0, errors.New("unknown error"))
 
 		uService := userservice.Provide(r)
@@ -54,7 +54,7 @@ func TestUserService_GetAll(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockUsers := []*domain.User{&mockUser, &mockUser}
 
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("GetAll").Return(mockUsers, nil)
 
 		uService := userservice.Provide(r)
@@ -66,7 +66,7 @@ func TestUserService_GetAll(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("GetAll").Return([]*domain.User{}, errors.New("unknown error"))
 
 		uService := userservice.Provide(r)
@@ -80,7 +80,7 @@ func TestUserService_GetAll(t *testing.T) {
 
 func TestUserService_GetByID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("GetByID", mock.AnythingOfType("uint")).Return(&mockUser, nil)
 
 		uService := userservice.Provide(r)
@@ -92,7 +92,7 @@ func TestUserService_GetByID(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("GetByID", mock.AnythingOfType("uint")).Return(&domain.User{}, errors.New("unknown error"))
 
 		uService := userservice.Provide(r)
@@ -106,7 +106,7 @@ func TestUserService_GetByID(t *testing.T) {
 
 func TestUserService_Update(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("Update", mock.AnythingOfType("*domain.User")).Return(nil)
 
 		uService := userservice.Provide(r)
@@ -117,7 +117,7 @@ func TestUserService_Update(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("Update", mock.AnythingOfType("*domain.User")).Return(errors.New("unknown error"))
 
 		uService := userservice.Provide(r)
@@ -130,7 +130,7 @@ func TestUserService_Update(t *testing.T) {
 
 func TestUserService_Delete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("Delete", mock.AnythingOfType("uint")).Return(nil)
 
 		uService := userservice.Provide(r)
@@ -141,7 +141,7 @@ func TestUserService_Delete(t *testing.T) {
 	})
 
 	t.Run("failure", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("Delete", mock.AnythingOfType("uint")).Return(errors.New("unknown error"))
 
 		uService := userservice.Provide(r)
@@ -157,7 +157,7 @@ func TestUserService_Validate(t *testing.T) {
 	returnUser.Password.Hash = []byte(mockUserHash)
 
 	t.Run("success", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("GetByUsername", mock.AnythingOfType("string")).Return(&returnUser, nil)
 
 		uService := userservice.Provide(r)
@@ -173,7 +173,7 @@ func TestUserService_Validate(t *testing.T) {
 	})
 
 	t.Run("bad-password", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("GetByUsername", mock.AnythingOfType("string")).Return(&returnUser, nil)
 
 		uService := userservice.Provide(r)
@@ -189,7 +189,7 @@ func TestUserService_Validate(t *testing.T) {
 	})
 
 	t.Run("retrieval-error", func(t *testing.T) {
-		r := userrepomock.Build()
+		r := userrepomock.Provide()
 		r.On("GetByUsername", mock.AnythingOfType("string")).Return(&domain.User{}, errors.New("unknown error"))
 
 		uService := userservice.Provide(r)
