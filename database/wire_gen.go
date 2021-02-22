@@ -6,47 +6,37 @@
 package database
 
 import (
-	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/log"
+	"github.com/spf13/viper"
 )
 
 // Injectors from injector.go:
 
-func Build() (*Manager, func(), error) {
-	viper := config.Provide()
-	zapConfig := log.Cfg(viper)
-	logLog, cleanup, err := log.Provide(zapConfig)
+func Build(v *viper.Viper, log2 *log.Log) (*Manager, func(), error) {
+	config, err := Cfg(v, log2)
 	if err != nil {
 		return nil, nil, err
 	}
-	databaseConfig, err := Cfg(viper, logLog)
+	db, cleanup, err := ProvideGORM(config)
 	if err != nil {
-		cleanup()
 		return nil, nil, err
 	}
-	db, cleanup2, err := ProvideGORM(databaseConfig)
+	manager, err := Provide(config, db)
 	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	manager, err := Provide(databaseConfig, db)
-	if err != nil {
-		cleanup2()
 		cleanup()
 		return nil, nil, err
 	}
 	return manager, func() {
-		cleanup2()
 		cleanup()
 	}, nil
 }
 
 func BuildTest(cfg Config) (*MockManager, func(), error) {
-	databaseConfig, err := CfgTest(cfg)
+	config, err := CfgTest(cfg)
 	if err != nil {
 		return nil, nil, err
 	}
-	mockManager, cleanup, err := ProvideMock(databaseConfig)
+	mockManager, cleanup, err := ProvideMock(config)
 	if err != nil {
 		return nil, nil, err
 	}

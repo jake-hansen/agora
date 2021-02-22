@@ -4,13 +4,15 @@ import (
 	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/loader"
+	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/server"
 	"github.com/spf13/viper"
 )
 
 func main() {
 	configuration := config.Build()
-	db, dbCleanup, err := database.Build()
+	logger, _, _ := log.Build()
+	db, dbCleanup, err := database.Build(configuration, logger)
 	if err != nil {
 		panic(err)
 	}
