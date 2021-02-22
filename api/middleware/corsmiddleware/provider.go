@@ -16,7 +16,7 @@ func Cfg(v *viper.Viper) (*cors.Config, error) {
 		AllowMethods:           []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
 		AllowCredentials:       true,
 		MaxAge:                 maxAge,
-		AllowHeaders:			[]string{"Origin", "Content-Length", "Content-Type"},
+		AllowHeaders:			[]string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowWildcard:          false,
 		AllowBrowserExtensions: true,
 		AllowWebSockets:        false,
