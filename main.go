@@ -11,7 +11,10 @@ import (
 
 func main() {
 	configuration := config.Build()
-	logger, _, _ := log.Build()
+	logger, logCleanup, err := log.Build()
+	if err != nil {
+		panic(err)
+	}
 	db, dbCleanup, err := database.Build(configuration, logger)
 	if err != nil {
 		panic(err)
@@ -19,9 +22,15 @@ func main() {
 
 	loadData(db, configuration)
 
-	cleanup := startAPIServer()
+	serverCleanup := startAPIServer()
+
+	cleanup := func() {
+		serverCleanup()
+		dbCleanup()
+		logCleanup()
+	}
+
 	defer cleanup()
-	defer dbCleanup()
 }
 
 func startAPIServer() func() {
