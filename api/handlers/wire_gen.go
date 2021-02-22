@@ -42,12 +42,12 @@ func Build(db *database.Manager, v *viper.Viper) (*[]handlers.Handler, func(), e
 	authMiddleware := authmiddleware.Provide(simpleAuthService, v2)
 	meetingPlatformRepo := meetingplatformrepo.Provide(db)
 	zoomZoom := zoom.Provide()
-	v3 := meetingplatforms.Provide(zoomZoom, v)
-	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, v3)
+	configuredPlatforms := meetingplatforms.Provide(zoomZoom, v)
+	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, configuredPlatforms)
 	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)
 	meetingPlatformHandler := meetingplatformhandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
-	v4 := ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler)
-	return v4, func() {
+	v3 := ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler)
+	return v3, func() {
 	}, nil
 }

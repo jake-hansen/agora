@@ -5,6 +5,7 @@ import (
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
+	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/spf13/viper"
 )
 
@@ -20,7 +21,7 @@ func Cfg(v *viper.Viper, name string) *Config {
 	return &c
 }
 
-func Provide(zoomActions *zoom.Zoom, v *viper.Viper) []*domain.MeetingPlatform {
+func Provide(zoomActions *zoom.Zoom, v *viper.Viper) meetingplatformservice.ConfiguredPlatforms {
 	var platforms []*domain.MeetingPlatform
 
 	platforms = append(platforms, NewPlatform("zoom", zoomActions, Cfg(v, "zoom")))
