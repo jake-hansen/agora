@@ -10,12 +10,10 @@ import (
 	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
-	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
-	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatforms"
@@ -24,55 +22,32 @@ import (
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
+	"github.com/spf13/viper"
 )
 
 // Injectors from injector.go:
 
-func Build() (*[]handlers.Handler, func(), error) {
-	viper := config.Provide()
-	jwtserviceConfig, err := jwtservice.Cfg(viper)
+func Build(db *database.Manager, v *viper.Viper) (*[]handlers.Handler, func(), error) {
+	config, err := jwtservice.Cfg(v)
 	if err != nil {
 		return nil, nil, err
 	}
-	jwtServiceImpl := jwtservice.Provide(jwtserviceConfig)
-	zapConfig := log.Cfg(viper)
-	logLog, cleanup, err := log.Provide(zapConfig)
-	if err != nil {
-		return nil, nil, err
-	}
-	databaseConfig, err := database.Cfg(viper, logLog)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	db, cleanup2, err := database.ProvideGORM(databaseConfig)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	manager, err := database.Provide(databaseConfig, db)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	userRepository := userrepo.Provide(manager)
+	jwtServiceImpl := jwtservice.Provide(config)
+	userRepository := userrepo.Provide(db)
 	userService := userservice.Provide(userRepository)
 	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
 	authHandler := authhandler.Provide(simpleAuthService)
 	userHandler := userhandler.Provide(userService)
-	v := authmiddleware.ProvideAuthorizationHeaderParser()
-	authMiddleware := authmiddleware.Provide(simpleAuthService, v)
-	meetingPlatformRepo := meetingplatformrepo.Provide(manager)
+	v2 := authmiddleware.ProvideAuthorizationHeaderParser()
+	authMiddleware := authmiddleware.Provide(simpleAuthService, v2)
+	meetingPlatformRepo := meetingplatformrepo.Provide(db)
 	zoomZoom := zoom.Provide()
-	v2 := meetingplatforms.Provide(zoomZoom, viper)
-	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, v2)
-	oAuthInfoRepo := oauthinforepo.Provide(manager)
+	v3 := meetingplatforms.Provide(zoomZoom, v)
+	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, v3)
+	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)
 	meetingPlatformHandler := meetingplatformhandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
-	v3 := ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler)
-	return v3, func() {
-		cleanup2()
-		cleanup()
+	v4 := ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler)
+	return v4, func() {
 	}, nil
 }
