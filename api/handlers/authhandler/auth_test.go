@@ -48,7 +48,7 @@ func TestAuthHandler_Login(t *testing.T) {
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 
-		h := authhandler.BuildTest(mockAuthService)
+		h := authhandler.Provide(mockAuthService)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -81,7 +81,7 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.BuildTest(mockAuthService)
+		h := authhandler.Provide(mockAuthService)
 		_ = h.Register(router.Group("test"))
 
 		badRequest := `{}`
@@ -116,7 +116,7 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.BuildTest(mockAuthService)
+		h := authhandler.Provide(mockAuthService)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -139,7 +139,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.BuildTest(mockAuthService)
+		h := authhandler.Provide(mockAuthService)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -159,7 +159,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.BuildTest(mockAuthService)
+		h := authhandler.Provide(mockAuthService)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -178,7 +178,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.BuildTest(mockAuthService)
+		h := authhandler.Provide(mockAuthService)
 		_ = h.Register(router.Group("test"))
 
 		badRequest := `{}`
