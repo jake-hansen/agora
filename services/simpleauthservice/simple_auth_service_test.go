@@ -29,8 +29,7 @@ var testAuth = domain.Auth{Credentials: &domain.Credentials{
 func buildTest(t *testing.T) (*simpleauthservice.SimpleAuthService, *jwtservicemock.Service, *userservicemock.UserService) {
 	jwtServiceMock := jwtservicemock.Build()
 	userServiceMock := userservicemock.Build()
-	authService, err := simpleauthservice.BuildTest(jwtServiceMock, userServiceMock)
-	assert.NoError(t, err)
+	authService := simpleauthservice.Provide(jwtServiceMock, userServiceMock)
 	return authService, jwtServiceMock, userServiceMock
 }
 
