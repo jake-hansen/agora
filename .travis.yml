@@ -1,8 +1,38 @@
+dist: focal
+
+os: linux
+
 language: go
 
 go:
-  - 1.15
+  - "1.15"
 
-script:
-  - go test -v ./...
+before_install:
+- docker --version
+- echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+- sudo service docker restart
 
+jobs:
+  include:
+    - stage: test
+      script: make unit-test
+    - stage: build-image
+      before_script:
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        - LAST_COMMIT_SHA=$(git rev-parse --short HEAD)
+        - TAG=$(git tag --points-at HEAD)
+        - aws ecr get-login-password --region $AWS_ECR_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
+      script:
+        - make build-image
+        - docker tag agora:latest $AWS_ECR_URL/agora:latest
+        - docker tag agora:latest $AWS_ECR_URL/agora:$LAST_COMMIT_SHA
+        - if [[ ${TAG} != "" ]]; then docker tag agora:latest $AWS_ECR_URL/agora:$TAG; fi;
+        - docker push $AWS_ECR_URL/agora:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora:latest
+        - if [[ ${TAG} != "" ]]; then docker push $AWS_ECR_URL/agora:$TAG; fi;
+
+stages:
+  - test
+  - name: build-image
+    if: branch IN (develop, main) AND type=push
