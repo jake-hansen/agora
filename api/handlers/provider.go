@@ -6,11 +6,9 @@ import (
 	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
-	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
-	"github.com/jake-hansen/agora/providers"
 	"github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatforms"
@@ -34,27 +32,24 @@ func ProvideAllProductionHandlers(auth *authhandler.AuthHandler, user *userhandl
 }
 
 var (
-	authHandlerProductionSet = wire.NewSet(authhandler.Provide,
-		simpleauthservice.ProviderProductionSet,
-		userservice.ProviderProductionSet,
-		userrepo.ProviderProductionSet,
-		jwtservice.ProviderProductionSet)
-
-	userHandlerProductionSet = wire.NewSet(userhandler.Provide)
-	meetingPlatformProductionSet = wire.NewSet(meetingplatformhandler.Provide,
-		authmiddleware.Provide,
-		authmiddleware.ProvideAuthorizationHeaderParser,
+	services = wire.NewSet(simpleauthservice.ProviderProductionSet,
 		meetingplatformservice.ProviderSet,
-		meetingplatformrepo.ProviderSet,
-		meetingplatforms.ProviderSet,
+		jwtservice.ProviderProductionSet,
 		oauthinfoservice.ProviderProductionSet,
+		userservice.ProviderProductionSet)
+
+	repos = wire.NewSet(meetingplatformrepo.ProviderSet,
+		meetingplatforms.ProviderSet,
+		userrepo.ProviderProductionSet,
 		oauthinforepo.ProviderSet)
 
+	middleware = wire.NewSet(authmiddleware.Provide,
+		authmiddleware.ProvideAuthorizationHeaderParser)
+
+	handlersSet = wire.NewSet(authhandler.Provide,
+		userhandler.Provide,
+		meetingplatformhandler.Provide)
+
 	// ProviderProductionSet provides all handlers for production.
-	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers,
-		authHandlerProductionSet,
-		userHandlerProductionSet,
-		meetingPlatformProductionSet,
-		database.ProviderProductionSet,
-		providers.ProductionSet)
+	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers, repos, services, middleware, handlersSet)
 )

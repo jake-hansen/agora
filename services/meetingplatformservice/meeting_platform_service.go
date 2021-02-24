@@ -8,12 +8,14 @@ import (
 	"strings"
 )
 
+type ConfiguredPlatforms []*domain.MeetingPlatform
+
 type MeetingPlatformService struct {
 	dbRepo 				domain.MeetingPlatformRepository
 	configuredPlatforms map[string]*domain.MeetingPlatform
 }
 
-func New(repository domain.MeetingPlatformRepository, configuredPlatforms []*domain.MeetingPlatform) *MeetingPlatformService {
+func New(repository domain.MeetingPlatformRepository, configuredPlatforms ConfiguredPlatforms) *MeetingPlatformService {
 	p := MeetingPlatformService{
 		dbRepo:              repository,
 		configuredPlatforms: make(map[string]*domain.MeetingPlatform),

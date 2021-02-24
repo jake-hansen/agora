@@ -35,8 +35,7 @@ func (s *Suite) SetupTest()  {
 	s.Require().NoError(err)
 
 	s.mock = *manager.Mock
-	s.repo, _, err = meetingplatformrepo.Build(manager.Manager)
-	s.Require().NoError(err)
+	s.repo = meetingplatformrepo.Provide(manager.Manager)
 }
 
 func (s *Suite) TestMeetingProviderRepo_Create() {
