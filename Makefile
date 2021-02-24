@@ -28,6 +28,9 @@ build-image:
 	@DOCKER_BUILDKIT=1 docker build . --target build-image --platform linux/amd64 \
 	-t agora:latest
 
+	@DOCKER_BUILDKIT=1 docker build database/migrations/ -t agora-migrate:latest
+
 ifeq ($(GIT_TREE_STATE), clean)
 	@docker tag agora:latest agora:$(LAST_COMMIT_SHA)
+	@docker tag agora-migrate:latest agora-migrate:$(LAST_COMMIT_SHA)
 endif
