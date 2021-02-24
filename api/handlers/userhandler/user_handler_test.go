@@ -25,13 +25,13 @@ var DTOMockCredentials = dto.User{
 
 func TestUserHandler_RegisterUser(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		userService := userservicemock.Build()
+		userService := userservicemock.Provide()
 		userService.On("Register", mock.Anything).Return(1, nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 
-		h := userhandler.BuildTest(userService)
+		h := userhandler.Provide(userService)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -50,13 +50,13 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 			"{\"field\":\"Lastname\",\"reason\":\"required\"},{\"field\":\"Username\",\"reason\":\"required\"}," +
 			"{\"field\":\"Password\",\"reason\":\"required\"}]}"
 
-		userService := userservicemock.Build()
+		userService := userservicemock.Provide()
 		userService.On("Register", mock.Anything).Return(1, nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 
-		h := userhandler.BuildTest(userService)
+		h := userhandler.Provide(userService)
 		_ = h.Register(router.Group("test"))
 
 		creds := &dto.Credentials{}

@@ -13,7 +13,6 @@ import (
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/api/middleware/corsmiddleware"
-	"github.com/jake-hansen/agora/config"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
@@ -28,76 +27,48 @@ import (
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
+	"github.com/spf13/viper"
 )
 
 // Injectors from injector.go:
 
-func Build() (*Server, func(), error) {
-	viper := config.Provide()
-	serverConfig, err := Cfg(viper)
+func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error) {
+	config, err := Cfg(v)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	zapConfig := log.Cfg(viper)
-	logLog, cleanup, err := log.Provide(zapConfig)
+	corsConfig, err := corsmiddleware.Cfg(v)
 	if err != nil {
-		return nil, nil, err
-	}
-	corsConfig, err := corsmiddleware.Cfg(viper)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
+		return nil, err
 	}
 	corsMiddleware := corsmiddleware.Provide(corsConfig)
-	v := middleware.ProvideAllProductionMiddleware(logLog, corsMiddleware)
-	jwtserviceConfig, err := jwtservice.Cfg(viper)
+	v2 := middleware.ProvideAllProductionMiddleware(log2, corsMiddleware)
+	jwtserviceConfig, err := jwtservice.Cfg(v)
 	if err != nil {
-		cleanup()
-		return nil, nil, err
+		return nil, err
 	}
 	jwtServiceImpl := jwtservice.Provide(jwtserviceConfig)
-	databaseConfig, err := database.Cfg(viper, logLog)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	db, cleanup2, err := database.ProvideGORM(databaseConfig)
-	if err != nil {
-		cleanup()
-		return nil, nil, err
-	}
-	manager, err := database.Provide(databaseConfig, db)
-	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
-	}
-	userRepository := userrepo.Provide(manager)
+	userRepository := userrepo.Provide(db)
 	userService := userservice.Provide(userRepository)
 	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
 	authHandler := authhandler.Provide(simpleAuthService)
 	userHandler := userhandler.Provide(userService)
-	v2 := authmiddleware.ProvideAuthorizationHeaderParser()
-	authMiddleware := authmiddleware.Provide(simpleAuthService, v2)
-	meetingPlatformRepo := meetingplatformrepo.Provide(manager)
+	v3 := authmiddleware.ProvideAuthorizationHeaderParser()
+	authMiddleware := authmiddleware.Provide(simpleAuthService, v3)
+	meetingPlatformRepo := meetingplatformrepo.Provide(db)
 	zoomZoom := zoom.Provide()
-	v3 := meetingplatforms.Provide(zoomZoom, viper)
-	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, v3)
-	oAuthInfoRepo := oauthinforepo.Provide(manager)
+	configuredPlatforms := meetingplatforms.Provide(zoomZoom, v)
+	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, configuredPlatforms)
+	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)
 	meetingPlatformHandler := meetingplatformhandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
 	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler)
 	handlerManager := handlers2.ProvideHandlerManager(v4)
-	routerConfig, err := router.Cfg(viper, v, handlerManager)
+	routerConfig, err := router.Cfg(v, v2, handlerManager)
 	if err != nil {
-		cleanup2()
-		cleanup()
-		return nil, nil, err
+		return nil, err
 	}
 	routerRouter := router.Provide(routerConfig)
-	server := Provide(serverConfig, routerRouter)
-	return server, func() {
-		cleanup2()
-		cleanup()
-	}, nil
+	server := Provide(config, routerRouter)
+	return server, nil
 }

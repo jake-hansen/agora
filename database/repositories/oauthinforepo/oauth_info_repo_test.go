@@ -44,7 +44,7 @@ func (s *Suite) SetupTest() {
 	s.Require().NoError(err)
 
 	s.mock = *manager.Mock
-	s.repo, _, err = oauthinforepo.Build(manager.Manager)
+	s.repo = oauthinforepo.Provide(manager.Manager)
 	s.Require().NoError(err)
 }
 

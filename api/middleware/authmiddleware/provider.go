@@ -1,7 +1,6 @@
 package authmiddleware
 
 import (
-	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
 )
 
@@ -15,14 +14,3 @@ func Provide(authService domain.AuthService, parseToken ParseTokenFunc) *AuthMid
 func ProvideAuthorizationHeaderParser() ParseTokenFunc {
 	return getTokenFromBearerHeader
 }
-
-var (
-	// ProviderNoParserSet AuthMiddleware with no AuthService or ParseTokenFunc
-	ProviderNoParserSet = wire.NewSet(Provide)
-
-	// ProviderAuthorizationParserSet AuthMiddleware with authorization header parser and no AuthService
-	ProviderAuthorizationParserSet = wire.NewSet(Provide, ProvideAuthorizationHeaderParser)
-
-	// ProviderTestSet AuthMiddleware with no AuthService or ParseTokenFunc
-	ProviderTestSet = wire.NewSet(Provide)
-)

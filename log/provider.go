@@ -50,5 +50,4 @@ func devZapConfig() *zap.Config {
 
 var (
 	ProviderProductionSet = wire.NewSet(Provide, Cfg)
-	ProviderTestSet = wire.NewSet()
 )

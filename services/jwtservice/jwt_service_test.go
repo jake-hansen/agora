@@ -24,17 +24,15 @@ var testUser = domain.User{
 
 func TestJWTService_GenerateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		service, err := jwtservice.BuildTest(testConfig)
-		assert.NoError(t, err)
-		_, err = service.GenerateToken(testUser)
+		service := jwtservice.Provide(&testConfig)
+		_, err := service.GenerateToken(testUser)
 		assert.NoError(t, err)
 	})
 }
 
 func TestJWTService_ValidateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		service, err := jwtservice.BuildTest(testConfig)
-		assert.NoError(t, err)
+		service := jwtservice.Provide(&testConfig)
 		token, err := service.GenerateToken(testUser)
 		assert.NoError(t, err)
 
@@ -45,14 +43,13 @@ func TestJWTService_ValidateToken(t *testing.T) {
 
 	t.Run("fail-expired", func(t *testing.T) {
 		c := testConfig
-		c.Duration = 1
-		service, err := jwtservice.BuildTest(c)
-		assert.NoError(t, err)
+		c.Duration = 1 * time.Microsecond
+		service := jwtservice.Provide(&c)
 		token, err := service.GenerateToken(testUser)
 
 		assert.NoError(t, err)
 
-		time.Sleep(1000000000)
+		time.Sleep(1 * time.Second)
 		_, _, err = service.ValidateToken(token)
 		assert.Error(t, err)
 	})
