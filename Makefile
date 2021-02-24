@@ -7,25 +7,25 @@ PLATFORM=local
 
 .PHONY: bin/agora
 bin/agora:
-	@docker build . --target bin --output bin/ --platform ${PLATFORM}
+	@DOCKER_BUILDKIT=1 docker build . --target bin --output bin/ --platform ${PLATFORM}
 
 .PHONY: unit-test
 unit-test:
-	@docker build . --target unit-test
+	@DOCKER_BUILDKIT=1 docker build . --target unit-test
 
 .PHONY: unit-test-coverage
 unit-test-coverage:
-	@docker build . --target unit-test-coverage \
+	@DOCKER_BUILDKIT=1 docker build . --target unit-test-coverage \
 	--output coverage/
 	cat coverage/cover.out
 
 .PHONY: lint
 lint:
-	@docker build . --target lint
+	@DOCKER_BUILDKIT=1 docker build . --target lint
 
 .PHONY: build-image
 build-image:
-	@docker build . --target build-image --platform linux/amd64 \
+	@DOCKER_BUILDKIT=1 docker build . --target build-image --platform linux/amd64 \
 	-t agora:latest
 
 ifeq ($(GIT_TREE_STATE), clean)
