@@ -26,7 +26,12 @@ services:
       db:
         condition: service_healthy
     environment: 
-      - DATABASE_CONNECTION_URL=mysql://root:password@tcp(database:3306)/agora
+      - DATABASE_TYPE=mysql
+      - USER=root
+      - PASSWORD=password
+      - PROTOCOL=tcp
+      - HOST=database
+      - PORT=3306
 networks:
   new:
   
