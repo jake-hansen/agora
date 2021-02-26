@@ -8,6 +8,7 @@ package server
 import (
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
+	"github.com/jake-hansen/agora/api/handlers/healthhandler"
 	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware"
@@ -16,10 +17,12 @@ import (
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
+	"github.com/jake-hansen/agora/database/repositories/schemamigrationrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
+	"github.com/jake-hansen/agora/services/healthservice"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatforms"
 	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
@@ -62,7 +65,10 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)
 	meetingPlatformHandler := meetingplatformhandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
-	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler)
+	schemaMigrationRepo := schemamigrationrepo.Provide(db)
+	healthService := healthservice.Provide(schemaMigrationRepo)
+	healthHandler := healthhandler.Provide(healthService)
+	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler, healthHandler)
 	handlerManager := handlers2.ProvideHandlerManager(v4)
 	routerConfig, err := router.Cfg(v, v2, handlerManager)
 	if err != nil {
