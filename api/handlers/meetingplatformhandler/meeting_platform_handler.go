@@ -13,12 +13,17 @@ import (
 	"net/http"
 )
 
+// MeetingPlatformHandler is the handler that manages operations on MeetingPlatforms for the API.
 type MeetingPlatformHandler struct {
 	AuthMiddleware  *authmiddleware.AuthMiddleware
 	PlatformService *domain.MeetingPlatformService
 	OAuthService	*domain.OAuthInfoService
 }
 
+// Register creates three endpoints to manage Health.
+// / 			  (GET)  - Gets all available MeetingPlatforms
+// :platform/auth (POST) - Attempts to authenticate to the specified MeetingPlatform
+// :platform/auth (GET)	 - Attempts to get the Auth for the specified MeetingPlatform
 func (m *MeetingPlatformHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup := parentGroup.Group("platform")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
@@ -50,6 +55,13 @@ func (m *MeetingPlatformHandler) getUser(c *gin.Context) *domain.User {
 	return user
 }
 
+// Auth attempts to authenticate a user against a MeetingPlatform using the
+// provide authorization code. A 200 OK status is returned if OAuth tokens
+// were successfully retrieved from the MeetingPlatform for the user. A
+// 400 BAD REQUEST response is returned if the user already has OAuth tokens
+// stored for the MeetingPlatform or if the provided authorization code was not
+// validated by the platform. A 500 INTERNAL SERVER ERROR is returned if an error
+// occurs.
 func (m *MeetingPlatformHandler) Auth(c *gin.Context) {
 	platformName := c.Param("platform")
 	authorizationCode := c.Query("code")
@@ -82,6 +94,9 @@ func (m *MeetingPlatformHandler) Auth(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// GetAuth attempts to get find an OAuthInfo object for the user that sent
+// the request for the provided platform. If an OAuthInfo object exists,
+// a 200 OK status is returned, otherwise a 404 NOT FOUND status is returned.
 func (m *MeetingPlatformHandler) GetAuth(c *gin.Context) {
 	platformName := c.Param("platform")
 
@@ -103,6 +118,8 @@ func (m *MeetingPlatformHandler) GetAuth(c *gin.Context) {
 	}
 }
 
+// GetAllPlatforms retrieves all configured MeetingPlatforms and
+// returns them as a JSON response.
 func (m *MeetingPlatformHandler) GetAllPlatforms(c *gin.Context) {
 	var platforms []dto.MeetingProvider
 	var retrievedPlatforms []*domain.MeetingPlatform
@@ -117,4 +134,3 @@ func (m *MeetingPlatformHandler) GetAllPlatforms(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, platforms)
 }
-
