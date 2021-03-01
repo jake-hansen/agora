@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// MeetingPlatform represents an external MeetingPlatform.
 type MeetingPlatform struct {
 	gorm.Model
 	Name		string
@@ -13,14 +14,18 @@ type MeetingPlatform struct {
 	Actions		MeetingPlatformActions		`gorm:"-"`
 }
 
+// MeetingPlatformOAuthInfo contains configuration information about the MeetingPlatform's
+// OAuth implementation.
 type MeetingPlatformOAuthInfo struct {
 	Config	oauth2.Config
 }
 
+// MeetingPlatformActions are implementations of the MeetingPlatform's API.
 type MeetingPlatformActions interface {
 	CreateMeeting()
 }
 
+// MeetingPlatformRepository stores information about MeetingPlatforms.
 type MeetingPlatformRepository interface {
 	Create(platform *MeetingPlatform) (uint, error)
 	GetAll() ([]*MeetingPlatform, error)
@@ -30,6 +35,8 @@ type MeetingPlatformRepository interface {
 	Delete(ID uint) error
 }
 
+// MeetingPlatformServices manages CRUD operations on a MeetingPlatform as well as
+// OAuth.
 type MeetingPlatformService interface {
 	Save(platform *MeetingPlatform) (uint, error)
 	GetAll() ([]*MeetingPlatform, error)
