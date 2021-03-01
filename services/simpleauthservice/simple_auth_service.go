@@ -46,6 +46,7 @@ func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
 }
 
+// GetUser retrieves the User that the provided Token belongs to.
 func (s *SimpleAuthService) GetUser(token domain.Token) (*domain.User, error) {
 	_, claims, err := s.jwtService.ValidateToken(token.Value)
 	if err != nil {

@@ -9,14 +9,18 @@ import (
 
 var neededSchemaVersion = 7
 
+// HealthService is a service which processes information about the application's health.
 type HealthService struct {
 	schemaRepo *domain.SchemaMigrationRepo
 }
 
+// GetHealth retrieves the Health of the application.
 func (h *HealthService) GetHealth() (*domain.Health, error) {
 	return h.backwardsCompatibleVersionHealthCheck(7)
 }
 
+// specificVersionNeededHealthCheck retrieves the Health of the application when a specific
+// database schema version is needed.
 func (h *HealthService) specificVersionNeededHealthCheck(neededVersion int) (*domain.Health, error) {
 	health := &domain.Health{Healthy: false}
 
@@ -34,6 +38,8 @@ func (h *HealthService) specificVersionNeededHealthCheck(neededVersion int) (*do
 	return health, nil
 }
 
+// backwardsCompatibleVersionHealthCheck retrieves the Health of the application when a
+// backwards compatible database schema version can be used.
 func (h *HealthService) backwardsCompatibleVersionHealthCheck(neededVersion int) (*domain.Health, error) {
 	health := &domain.Health{Healthy: false}
 

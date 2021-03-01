@@ -1,14 +1,14 @@
 package zoom
 
-type Zoom struct {
+type ZoomActions struct {
 
 }
 
-func NewZoom() *Zoom {
-	return &Zoom{}
+func NewZoom() *ZoomActions {
+	return &ZoomActions{}
 }
 
-func (z *Zoom) CreateMeeting() {
+func (z *ZoomActions) CreateMeeting() {
 	panic("implement me")
 }
 
