@@ -5,7 +5,7 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
-func Provide(repository domain.MeetingPlatformRepository, configuredPlatforms ConfiguredPlatforms) *MeetingPlatformService {
+func Provide(repository domain.MeetingPlatformRepository, configuredPlatforms domain.ConfiguredPlatforms) *MeetingPlatformService {
 	return New(repository, configuredPlatforms)
 }
 var (

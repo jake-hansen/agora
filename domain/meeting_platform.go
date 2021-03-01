@@ -14,6 +14,10 @@ type MeetingPlatform struct {
 	Actions		MeetingPlatformActions		`gorm:"-"`
 }
 
+// ConfiguredPlatforms are a slice of MeetingPlatforms that are configured for
+// the application.
+type ConfiguredPlatforms []*MeetingPlatform
+
 // MeetingPlatformOAuthInfo contains configuration information about the MeetingPlatform's
 // OAuth implementation.
 type MeetingPlatformOAuthInfo struct {
