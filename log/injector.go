@@ -4,9 +4,9 @@ package log
 
 import (
 	"github.com/google/wire"
-	"github.com/jake-hansen/agora/providers"
+	"github.com/spf13/viper"
 )
 
-func Build() (*Log, func(), error) {
-	panic(wire.Build(ProviderProductionSet, providers.ProductionSet))
+func Build(v *viper.Viper) (*Log, func(), error) {
+	panic(wire.Build(ProviderProductionSet))
 }

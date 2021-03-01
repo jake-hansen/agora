@@ -11,7 +11,7 @@ import (
 
 func main() {
 	configuration := config.Build()
-	logger, logCleanup, err := log.Build()
+	logger, logCleanup, err := log.Build(configuration)
 	if err != nil {
 		panic(err)
 	}
