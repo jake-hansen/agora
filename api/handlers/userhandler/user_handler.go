@@ -20,7 +20,7 @@ type UserHandler struct {
 // Register creates one endpoint to manage Users.
 // / (POST) - Register new user
 func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
-	userGroup := parentGroup.Group("user")
+	userGroup := parentGroup.Group("users")
 	{
 		userGroup.POST("", u.RegisterUser)
 	}

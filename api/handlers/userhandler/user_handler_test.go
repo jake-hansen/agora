@@ -36,7 +36,7 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(DTOMockCredentials)
-		req, err := http.NewRequest("POST", "/test/user", payloadBuf)
+		req, err := http.NewRequest("POST", "/test/users", payloadBuf)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
@@ -62,7 +62,7 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 		creds := &dto.Credentials{}
 		payloadBuf := new(bytes.Buffer)
 		json.NewEncoder(payloadBuf).Encode(creds)
-		req, err := http.NewRequest("POST", "/test/user", payloadBuf)
+		req, err := http.NewRequest("POST", "/test/users", payloadBuf)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
