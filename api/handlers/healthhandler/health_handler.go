@@ -7,10 +7,13 @@ import (
 	"net/http"
 )
 
+// HealthHandler is the handler that manages operations on Health for the API.
 type HealthHandler struct {
 	healthService *domain.HealthService
 }
 
+// Register creates one endpoint to manage Health.
+// / (GET) - Get current Health
 func (h *HealthHandler) Register(parentGroup *gin.RouterGroup) error {
 	healthGroup := parentGroup.Group("health")
 	{
@@ -19,6 +22,7 @@ func (h *HealthHandler) Register(parentGroup *gin.RouterGroup) error {
 	return nil
 }
 
+// GetHealth attempts to get the current Health and set it as a JSON response.
 func (h *HealthHandler) GetHealth(c *gin.Context) {
 	health, err := (*h.healthService).GetHealth()
 

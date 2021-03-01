@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Cfg provides a Config using values obtained from a Viper instance.
 func Cfg(v *viper.Viper) (*cors.Config, error) {
 	maxAge := v.GetDuration("api.cors.maxage")
 	allowedOrigins := v.GetStringSlice("api.cors.origins.allowed")
@@ -26,10 +27,12 @@ func Cfg(v *viper.Viper) (*cors.Config, error) {
 	return &c, nil
 }
 
+// Provide returns the CORSMiddleware configured with the provided Config.
 func Provide(cfg *cors.Config) *CORSMiddleware {
 	return &CORSMiddleware{Config: *cfg}
 }
 
 var (
+	// ProviderProductionSet provides CORSMiddleware for use in production.
 	ProviderProductionSet = wire.NewSet(Provide, Cfg)
 )

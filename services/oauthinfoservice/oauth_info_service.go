@@ -6,11 +6,13 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// OAuthInfoService processes information about OAuthInfos.
 type OAuthInfoService struct {
 	platformService	domain.MeetingPlatformService
 	repo 			domain.OAuthInfoRepository
 }
 
+// CreateOAuthInfo creates an OAuthInfo in the repository by exchanging the given authorization with the MeetingPlatform.
 func (o *OAuthInfoService) CreateOAuthInfo(ctx context.Context, authorization string, userID uint, platform *domain.MeetingPlatform) error {
 	_, err := o.repo.GetByUserIDAndMeetingPlatformID(userID, platform.ID)
 	if err == nil {
@@ -38,6 +40,8 @@ func (o *OAuthInfoService) CreateOAuthInfo(ctx context.Context, authorization st
 	return err
 }
 
+// GetOAuthInfo retrieves the OAuthInfo from the repository for the given User and MeetingPlatform combination. If
+// the access tokens contained withing the OAuthInfo is expired, it is automatically refreshed.
 func (o *OAuthInfoService) GetOAuthInfo(userID uint, platform *domain.MeetingPlatform) (*domain.OAuthInfo, error) {
 	oauthInfo, err := o.repo.GetByUserIDAndMeetingPlatformID(userID, platform.ID)
 	if err != nil {

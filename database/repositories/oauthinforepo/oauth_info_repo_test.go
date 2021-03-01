@@ -150,7 +150,7 @@ func (s *Suite) TestOAuthInfoRepo_GetAllByMeetingPlatformId() {
 				AddRow(append([]driver.Value{0}, rowValues...)...).
 				AddRow(append([]driver.Value{0}, rowValues...)...))
 
-		oauthinfos, err := s.repo.GetAlByMeetingPlatformID(mockOAuthInfo.MeetingPlatformID)
+		oauthinfos, err := s.repo.GetAllByMeetingPlatformID(mockOAuthInfo.MeetingPlatformID)
 		require.NoError(t, err)
 
 		assert.Equal(t, &mockOAuthInfo, oauthinfos[0])
@@ -165,7 +165,7 @@ func (s *Suite) TestOAuthInfoRepo_GetAllByMeetingPlatformId() {
 			WithArgs(mockOAuthInfo.MeetingPlatformID).
 			WillReturnError(errors.New("unknown error"))
 
-		_, err := s.repo.GetAlByMeetingPlatformID(mockOAuthInfo.MeetingPlatformID)
+		_, err := s.repo.GetAllByMeetingPlatformID(mockOAuthInfo.MeetingPlatformID)
 
 		require.Error(t, err)
 	})

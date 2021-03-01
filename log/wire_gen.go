@@ -6,15 +6,14 @@
 package log
 
 import (
-	"github.com/jake-hansen/agora/config"
+	"github.com/spf13/viper"
 )
 
 // Injectors from injector.go:
 
-func Build() (*Log, func(), error) {
-	viper := config.Provide()
-	zapConfig := Cfg(viper)
-	log, cleanup, err := Provide(zapConfig)
+func Build(v *viper.Viper) (*Log, func(), error) {
+	config := Cfg(v)
+	log, cleanup, err := Provide(config)
 	if err != nil {
 		return nil, nil, err
 	}

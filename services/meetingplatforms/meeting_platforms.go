@@ -5,6 +5,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Config contains OAuth configuration information for a MeetingPlatform.
 type Config struct {
 	OAuthRedirectURL 	string
 	OAuthClientID	 	string
@@ -14,6 +15,7 @@ type Config struct {
 	OAuthTokenURL		string
 }
 
+// NewPlatform returns a MeetingPlatform with the given name, actions, and config.
 func NewPlatform(name string, actions domain.MeetingPlatformActions, cfg *Config) *domain.MeetingPlatform {
 	p := &domain.MeetingPlatform{
 		Name:        name,

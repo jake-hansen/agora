@@ -6,6 +6,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// MeetingProviderDomainToDTO converts the given MeetingPlatform from domain representation to DTO representation.
 func MeetingProviderDomainToDTO(meetingProvider domain.MeetingPlatform) *dto.MeetingProvider {
 	convertedMeetingProvider := &dto.MeetingProvider{
 		Name: meetingProvider.Name,

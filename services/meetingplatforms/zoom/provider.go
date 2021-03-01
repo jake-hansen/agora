@@ -2,7 +2,7 @@ package zoom
 
 import "github.com/google/wire"
 
-func Provide() *Zoom {
+func Provide() *ZoomActions {
 	return NewZoom()
 }
 

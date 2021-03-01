@@ -55,6 +55,9 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 	}
 }
 
+// GetUser attempts to get a User object from the provided Context. This
+// is performed by passing the found Token within the request (if any) to
+// an AuthService which performs the User lookup.
 func (a *AuthMiddleware) GetUser(c *gin.Context) (*domain.User, error) {
 	token, err := a.ParseToken(c.Request)
 	if err != nil {

@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Cfg returns a Config for a MeetingPlatform with the provided name using a Viper to get
+// the configuration information.
 func Cfg(v *viper.Viper, name string) *Config {
 	c := Config{
 		OAuthRedirectURL:  v.GetString(fmt.Sprintf("platforms.%s.oauth.url.redirect", name)),
@@ -21,7 +23,8 @@ func Cfg(v *viper.Viper, name string) *Config {
 	return &c
 }
 
-func Provide(zoomActions *zoom.Zoom, v *viper.Viper) meetingplatformservice.ConfiguredPlatforms {
+// Provide returns ConfiguredPlatforms for the application using the provided ZoomActions and Viper.
+func Provide(zoomActions *zoom.ZoomActions, v *viper.Viper) meetingplatformservice.ConfiguredPlatforms {
 	var platforms []*domain.MeetingPlatform
 
 	platforms = append(platforms, NewPlatform("zoom", zoomActions, Cfg(v, "zoom")))
@@ -30,5 +33,6 @@ func Provide(zoomActions *zoom.Zoom, v *viper.Viper) meetingplatformservice.Conf
 }
 
 var (
+	// ProviderSet provides ConfiguredPlatforms for use in production.
 	ProviderSet = wire.NewSet(Provide, zoom.ProviderProductionSet)
 )
