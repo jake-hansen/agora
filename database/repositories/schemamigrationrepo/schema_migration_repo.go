@@ -18,4 +18,10 @@ func (s *SchemaMigrationRepo) GetSchemaMigrationByVersion(version int) (migratio
 	return m, nil
 }
 
-
+func (s *SchemaMigrationRepo) GetSchemaMigration() (*domain.SchemaMigration, error) {
+	m := new(domain.SchemaMigration)
+	if err := s.DB.First(m).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving a schema migration")
+	}
+	return m, nil
+}
