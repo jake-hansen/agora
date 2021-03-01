@@ -11,10 +11,10 @@ import (
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
 	"github.com/jake-hansen/agora/database/repositories/schemamigrationrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
+	"github.com/jake-hansen/agora/platforms"
 	"github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/healthservice"
 	"github.com/jake-hansen/agora/services/jwtservice"
-	"github.com/jake-hansen/agora/services/meetingplatforms"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
@@ -46,7 +46,7 @@ var (
 		healthservice.ProviderProductionSet)
 
 	repos = wire.NewSet(meetingplatformrepo.ProviderSet,
-		meetingplatforms.ProviderSet,
+		platforms.ProviderSet,
 		userrepo.ProviderProductionSet,
 		oauthinforepo.ProviderSet,
 		schemamigrationrepo.ProviderProductionSet)

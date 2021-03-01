@@ -1,10 +1,10 @@
-package meetingplatforms
+package platforms
 
 import (
 	"fmt"
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
+	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/spf13/viper"
 )
