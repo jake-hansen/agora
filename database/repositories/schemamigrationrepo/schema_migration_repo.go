@@ -6,10 +6,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// SchemaMigrationRepo is a repository that holds information about SchemaMigrations
+// backed by a database.
 type SchemaMigrationRepo struct {
 	DB *gorm.DB
 }
 
+// GetSchemaMigrationByVersion retrieves the SchemaMigration by the given version.
 func (s *SchemaMigrationRepo) GetSchemaMigrationByVersion(version int) (migration *domain.SchemaMigration, err error) {
 	m := new(domain.SchemaMigration)
 	if err := s.DB.First(m, version).Error; err != nil {
@@ -18,6 +21,7 @@ func (s *SchemaMigrationRepo) GetSchemaMigrationByVersion(version int) (migratio
 	return m, nil
 }
 
+// GetSchemaMigration gets the first SchemaMigration that is stored in the database.
 func (s *SchemaMigrationRepo) GetSchemaMigration() (*domain.SchemaMigration, error) {
 	m := new(domain.SchemaMigration)
 	if err := s.DB.First(m).Error; err != nil {
