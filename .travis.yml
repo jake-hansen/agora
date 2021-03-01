@@ -1,8 +1,100 @@
+dist: focal
+
+os: linux
+
 language: go
 
 go:
-  - 1.15
+  - "1.15"
 
-script:
-  - go test -v ./...
+before_install:
+- docker --version
+- echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+- sudo service docker restart
 
+jobs:
+  include:
+    - stage: test
+      script: make unit-test
+
+    - stage: build-image-dev
+      before_script:
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        - LAST_COMMIT_SHA=$(git rev-parse --short HEAD)
+        - aws ecr get-login-password --region $AWS_ECR_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
+      script:
+        - make build-image
+        - docker tag agora:latest $AWS_ECR_URL/agora-develop:latest
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate-develop:latest
+        - docker tag agora:latest $AWS_ECR_URL/agora-develop:$LAST_COMMIT_SHA
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate-develop:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-develop:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-migrate-develop:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-develop:latest
+        - docker push $AWS_ECR_URL/agora-migrate-develop:latest
+
+    - stage: build-image-main
+      before_script:
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        - LAST_COMMIT_SHA=$(git rev-parse --short HEAD)
+        - TAG=$(git tag --points-at HEAD)
+        - aws ecr get-login-password --region $AWS_ECR_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
+      script:
+        - make build-image
+        - docker tag agora:latest $AWS_ECR_URL/agora:$TAG
+        - docker tag agora:latest $AWS_ECR_URL/agora:latest
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate:$TAG
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate:latest
+        - docker push $AWS_ECR_URL/agora:$TAG
+        - docker push $AWS_ECR_URL/agora-migrate:$TAG
+        - docker push $AWS_ECR_URL/agora:latest
+        - docker push $AWS_ECR_URL/agora-migrate:latest
+
+    - stage: build-image-release
+      before_script:
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        - LAST_COMMIT_SHA=$(git rev-parse --short HEAD)
+        - TAG=$(git tag --points-at HEAD)
+        - aws ecr get-login-password --region $AWS_ECR_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
+      script:
+        - make build-image
+        - docker tag agora:latest $AWS_ECR_URL/agora-release:latest
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate-release:latest
+        - docker tag agora:latest $AWS_ECR_URL/agora-release:$LAST_COMMIT_SHA
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate-release:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-release:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-migrate-release:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-release:latest
+        - docker push $AWS_ECR_URL/agora-migrate-release:latest
+
+    - stage: build-image-hotfix
+      before_script:
+        - pip install --user awscli
+        - export PATH=$PATH:$HOME/.local/bin
+        - LAST_COMMIT_SHA=$(git rev-parse --short HEAD)
+        - TAG=$(git tag --points-at HEAD)
+        - aws ecr get-login-password --region $AWS_ECR_REGION | docker login --username AWS --password-stdin $AWS_ECR_URL
+      script:
+        - make build-image
+        - docker tag agora:latest $AWS_ECR_URL/agora-hotfix:latest
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate-hotfix:latest
+        - docker tag agora:latest $AWS_ECR_URL/agora-hotfix:$LAST_COMMIT_SHA
+        - docker tag agora-migrate:latest $AWS_ECR_URL/agora-migrate-hotfix:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-hotfix:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-migrate-hotfix:$LAST_COMMIT_SHA
+        - docker push $AWS_ECR_URL/agora-hotfix:latest
+        - docker push $AWS_ECR_URL/agora-migrate-hotfix:latest
+
+stages:
+  - test
+  - name: build-image-dev
+    if: branch = develop AND type=push
+  - name: build-image-release
+    if: branch =~ ^(release\/)[0-9A-Za-z]+$
+  - name: build-image-main
+    if: branch = main AND type=push AND tag IS present
+  - name: build-image-hotfix
+    if: branch =~ ^(hotfix\/)[0-9A-Za-z]+$

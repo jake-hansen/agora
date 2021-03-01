@@ -10,6 +10,14 @@ api:
     # value is set to 'myroot', then the new registed endpoint will be
     # /myroot/v1/example.
     root:
+  cors:
+    # This sets how long the results fo a preflight request can be cached.
+    # Values should be in human readable format. For example '30m', '1h',
+    # or '1d', meaning 30 minutes, 1 hour, and 1 day, respectively.
+    maxage:
+    origins:
+      # List of allowed origins.
+      allowed:
 # This is the environment the application should run in. This controls
 # various things but mainly logging levels. Valid values for this property
 # are 'dev' or 'prod'.
@@ -40,4 +48,24 @@ database:
   port:
   # Name of the database or schema to use.
   name:
+# Configuration details for meeting platforms.
+platforms:
+  zoom:
+    oauth:
+      url:
+        # URL that users should be redirected to after authenticating with
+        # the authorization server.
+        redirect: 
+        # URL that users should be directed to in order to authenticate with
+        # the authorizaton server.
+        auth: 
+        # URL to exhchange an authorization code for access and refresh tokens.
+        token: 
+      client:
+        # ID of this client on the authorization server.
+        id: 
+        # Secret of this client on the authorization server.
+        secret: 
+        # List of scopes to be requested during authorization.
+        scopes:
   

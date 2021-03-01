@@ -38,6 +38,7 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 		if err != nil {
 			apiError := api.NewAPIError(http.StatusUnauthorized, err, err.Error())
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+			c.Abort()
 			return
 		}
 
@@ -46,11 +47,27 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 		if err != nil {
 			apiError := api.NewAPIError(http.StatusUnauthorized, err, "the provided token is not valid")
 			_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+			c.Abort()
 			return
 		}
 
 		c.Next()
 	}
+}
+
+// GetUser attempts to get a User object from the provided Context. This
+// is performed by passing the found Token within the request (if any) to
+// an AuthService which performs the User lookup.
+func (a *AuthMiddleware) GetUser(c *gin.Context) (*domain.User, error) {
+	token, err := a.ParseToken(c.Request)
+	if err != nil {
+		return nil, err
+	}
+	user, err := (*a.AuthService).GetUser(*token)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
 // getTokenFromBearerHeader parses the Authorization header for a Bearer token

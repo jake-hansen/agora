@@ -24,11 +24,6 @@ func Cfg(v *viper.Viper) (*Config, error) {
 	return cfg, nil
 }
 
-// CfgTest provides the passed Config.
-func CfgTest(cfg Config) (*Config, error) {
-	return &cfg, nil
-}
-
 // Provide returns a new JWTService with the specified config.
 func Provide(config *Config) *JWTServiceImpl {
 	return &JWTServiceImpl{*config}
@@ -37,7 +32,4 @@ func Provide(config *Config) *JWTServiceImpl {
 var (
 	// ProviderProductionSet provides a new JWTServiceImpl for use in production.
 	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*JWTServiceImpl)), Cfg)
-
-	// ProviderTestSet provides a new JWTServiceImpl for testing.
-	ProviderTestSet = wire.NewSet(Provide, wire.Bind(new(JWTService), new(*JWTServiceImpl)), CfgTest)
 )

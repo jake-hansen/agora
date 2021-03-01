@@ -2,6 +2,7 @@
 # special thanks to https://github.com/chris-crone/containerized-go-dev
 
 FROM --platform=${BUILDPLATFORM} golang:1.15.7-alpine AS base
+RUN apk --no-cache add curl
 WORKDIR /src
 ENV CGO_ENABLED=0
 COPY go.* .
@@ -38,7 +39,6 @@ COPY --from=unit-test /out/cover.out /cover.out
 FROM base AS build-image
 WORKDIR /app
 COPY --from=build /out/agora .
-COPY config/*.yaml .
 ENTRYPOINT [ "/app/agora" ]
 
 FROM scratch AS bin-unix

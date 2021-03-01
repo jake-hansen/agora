@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/api"
-	"log"
 	"net/http"
 )
 
@@ -38,13 +37,11 @@ func handlePublicErrors() gin.HandlerFunc {
 				displayError := APIErrorJSON{
 					Error: apiError.Message,
 				}
-				log.Println(apiError.Err.Error())
 				c.JSON(apiError.Status, displayError)
 			} else {
 				displayError := APIErrorJSON{
 					Error: "unknown error occurred.",
 				}
-				log.Println(err.Error())
 				c.JSON(http.StatusInternalServerError, displayError)
 			}
 		}

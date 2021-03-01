@@ -9,5 +9,9 @@ type Handler interface {
 
 // HandlerManager manages a set of Handlers.
 type HandlerManager struct {
-	Handlers []Handler
+	Handlers *[]Handler
+}
+
+func NewHandlerManager(handlers *[]Handler) *HandlerManager {
+	return &HandlerManager{Handlers: handlers}
 }

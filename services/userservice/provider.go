@@ -13,7 +13,4 @@ func Provide(repository domain.UserRepository) *UserService {
 var (
 	// ProviderProductionSet provides a new UserService for use in production.
 	ProviderProductionSet = wire.NewSet(Provide, wire.Bind(new(domain.UserService), new(*UserService)))
-
-	// ProviderTestSet provides a new UserService for use in testing.
-	ProviderTestSet = wire.NewSet(Provide, wire.Bind(new(domain.UserService), new(*UserService)))
 )
