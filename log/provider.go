@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+// Provide provides a new Log configured with the given Config.
 func Provide(cfg *zap.Config) (*Log, func(), error) {
 	log, err := NewLog(cfg)
 	cleanup := func() {
@@ -15,6 +16,7 @@ func Provide(cfg *zap.Config) (*Log, func(), error) {
 	return log, cleanup, err
 }
 
+// Cfg returns a Zap Config configured using the provided Viper.
 func Cfg(v *viper.Viper) *zap.Config {
 	switch environment := v.GetString("environment"); environment {
 	case "dev":
@@ -49,5 +51,6 @@ func devZapConfig() *zap.Config {
 }
 
 var (
+	// ProviderProductionSet provides a Log for use in production.
 	ProviderProductionSet = wire.NewSet(Provide, Cfg)
 )
