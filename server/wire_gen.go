@@ -20,12 +20,12 @@ import (
 	"github.com/jake-hansen/agora/database/repositories/schemamigrationrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
+	"github.com/jake-hansen/agora/platforms"
+	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/healthservice"
 	"github.com/jake-hansen/agora/services/jwtservice"
-	"github.com/jake-hansen/agora/services/meetingplatforms"
-	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
@@ -60,7 +60,7 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	authMiddleware := authmiddleware.Provide(simpleAuthService, v3)
 	meetingPlatformRepo := meetingplatformrepo.Provide(db)
 	zoomZoom := zoom.Provide()
-	configuredPlatforms := meetingplatforms.Provide(zoomZoom, v)
+	configuredPlatforms := platforms.Provide(zoomZoom, v)
 	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, configuredPlatforms)
 	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)

@@ -1,11 +1,10 @@
-package meetingplatforms
+package platforms
 
 import (
 	"fmt"
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
-	"github.com/jake-hansen/agora/services/meetingplatformservice"
+	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/spf13/viper"
 )
 
@@ -24,7 +23,7 @@ func Cfg(v *viper.Viper, name string) *Config {
 }
 
 // Provide returns ConfiguredPlatforms for the application using the provided ZoomActions and Viper.
-func Provide(zoomActions *zoom.ZoomActions, v *viper.Viper) meetingplatformservice.ConfiguredPlatforms {
+func Provide(zoomActions *zoom.ZoomActions, v *viper.Viper) domain.ConfiguredPlatforms {
 	var platforms []*domain.MeetingPlatform
 
 	platforms = append(platforms, NewPlatform("zoom", zoomActions, Cfg(v, "zoom")))

@@ -1,4 +1,4 @@
-package meetingplatforms
+package platforms
 
 import (
 	"github.com/jake-hansen/agora/domain"
