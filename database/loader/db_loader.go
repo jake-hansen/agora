@@ -2,14 +2,13 @@ package loader
 
 import (
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/services/meetingplatformservice"
 )
 
 // MeetingPlatformLoader provides functions for loading already configured
 // MeetingPlatforms into a MeetingPlatformRepository.
 type MeetingPlatformLoader struct {
-	PlatformRepo	domain.MeetingPlatformRepository
-	ConfiguredPlatforms	meetingplatformservice.ConfiguredPlatforms
+	PlatformRepo        domain.MeetingPlatformRepository
+	ConfiguredPlatforms domain.ConfiguredPlatforms
 }
 
 // Loader provides functions for loading data into repositories.
