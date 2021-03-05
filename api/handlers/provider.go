@@ -4,6 +4,7 @@ import (
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
 	"github.com/jake-hansen/agora/api/handlers/healthhandler"
+	"github.com/jake-hansen/agora/api/handlers/meetinghandler"
 	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
@@ -25,7 +26,8 @@ import (
 func ProvideAllProductionHandlers(auth *authhandler.AuthHandler,
 		user *userhandler.UserHandler,
 		meetingProvider *meetingplatformhandler.MeetingPlatformHandler,
-		healthHandler *healthhandler.HealthHandler) *[]handlers.Handler {
+		healthHandler *healthhandler.HealthHandler,
+		meetingHandler *meetinghandler.MeetingHandler) *[]handlers.Handler {
 
 	var handlers []handlers.Handler
 
@@ -33,6 +35,7 @@ func ProvideAllProductionHandlers(auth *authhandler.AuthHandler,
 	handlers = append(handlers, user)
 	handlers = append(handlers, meetingProvider)
 	handlers = append(handlers, healthHandler)
+	handlers = append(handlers, meetingHandler)
 
 	return &handlers
 }
@@ -57,7 +60,8 @@ var (
 	handlersSet = wire.NewSet(authhandler.Provide,
 		userhandler.Provide,
 		meetingplatformhandler.Provide,
-		healthhandler.Provide)
+		healthhandler.Provide,
+		meetinghandler.Provide)
 
 	// ProviderProductionSet provides all handlers for production.
 	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers, repos, services, middleware, handlersSet)

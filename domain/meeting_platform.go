@@ -26,7 +26,7 @@ type MeetingPlatformOAuthInfo struct {
 
 // MeetingPlatformActions are implementations of the MeetingPlatform's API.
 type MeetingPlatformActions interface {
-	CreateMeeting()
+	CreateMeeting(oauth OAuthInfo, meeting *Meeting) (*Meeting, error)
 }
 
 // MeetingPlatformRepository stores information about MeetingPlatforms.
