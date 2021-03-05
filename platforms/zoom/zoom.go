@@ -3,10 +3,11 @@ package zoom
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/platforms/zoom/zoomadapter"
-	"io/ioutil"
+	"github.com/jake-hansen/agora/platforms/zoom/zoomdomain"
 	"net/http"
 	"time"
 )
@@ -41,14 +42,6 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := z.Client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
 
 	defer func() error {
 		closeErr := res.Body.Close()
@@ -58,8 +51,20 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 		return err
 	}()
 
-	fmt.Println(string(body))
-	return meeting, nil
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusCreated {
+		return nil, errors.New("could not create meeting with Zoom")
+	}
+
+	var meetingResponse zoomdomain.Meeting
+	err = json.NewDecoder(res.Body).Decode(&meetingResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return zoomadapter.ZoomMeetingToDomainMeeting(meetingResponse), err
 }
 
 

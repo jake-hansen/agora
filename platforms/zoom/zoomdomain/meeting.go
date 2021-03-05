@@ -1,7 +1,5 @@
 package zoomdomain
 
-import "time"
-
 const (
 	TypeInstant              = 1
 	TypeScheduled            = 2
@@ -16,14 +14,16 @@ const (
 type Meeting struct {
 	Topic       string        `json:"topic"`
 	Type        int           `json:"type"`
-	StartTime   time.Time     `json:"start_time"`
-	Duration    string		  `json:"duration"`
+	StartTime   string        `json:"start_time"`
+	Duration    int		  	  `json:"duration"`
 	ScheduleFor string        `json:"schedule_for,omitempty"`
 	Timezone    string        `json:"timezone,omitempty"`
 	Password    string        `json:"password,omitempty"`
 	Agenda      string        `json:"agenda"`
-	Recurrence  *Recurrence    `json:"recurrence,omitempty"`
+	Recurrence  *Recurrence   `json:"recurrence,omitempty"`
 	Settings	*Settings	  `json:"settings,omitempty"`
+	JoinURL		string		  `json:"join_url"`
+	StartURL	string		  `json:"start_url"`
 }
 
 type Recurrence struct {

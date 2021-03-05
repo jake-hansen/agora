@@ -88,5 +88,5 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
-	c.JSON(http.StatusCreated, createdMeeting)
+	c.JSON(http.StatusCreated, adapter.MeetingDomainToDTO(createdMeeting))
 }

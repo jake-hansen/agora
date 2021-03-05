@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"strconv"
 	"strings"
 	"time"
 )
@@ -12,6 +13,13 @@ type Meeting struct {
 	StartTime   time.Time `json:"start_time" binding:"required"`
 	Duration    MeetingDuration `json:"duration" binding:"required"`
 	Description string `json:"description" binding:"required"`
+	JoinURL		string	`json:"join_url,omitempty"`
+	StartURL	string	`json:"start_url,omitempty"`
+}
+
+func (m *MeetingDuration) MarshalJSON() ([]byte, error) {
+	minutes := time.Duration(*m) / time.Minute
+	return []byte(strconv.Itoa(int(minutes))), nil
 }
 
 func (m *MeetingDuration) UnmarshalJSON(data []byte) error {
@@ -23,4 +31,3 @@ func (m *MeetingDuration) UnmarshalJSON(data []byte) error {
 	*m = MeetingDuration(dur)
 	return nil
 }
-

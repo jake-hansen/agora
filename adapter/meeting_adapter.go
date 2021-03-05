@@ -22,6 +22,8 @@ func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
 		StartTime:   meeting.StartTime,
 		Duration:    dto.MeetingDuration(meeting.Duration),
 		Description: meeting.Description,
+		JoinURL: 	 meeting.JoinURL,
+		StartURL: 	 meeting.StartURL,
 	}
 	return dtoMeeting
 }
