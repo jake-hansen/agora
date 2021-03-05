@@ -8,8 +8,8 @@ package loader
 import (
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
-	"github.com/jake-hansen/agora/services/meetingplatforms"
-	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
+	"github.com/jake-hansen/agora/platforms"
+	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/spf13/viper"
 )
 
@@ -18,7 +18,7 @@ import (
 func Build(db *database.Manager, v *viper.Viper) (*Loader, error) {
 	meetingPlatformRepo := meetingplatformrepo.Provide(db)
 	zoomZoom := zoom.Provide()
-	configuredPlatforms := meetingplatforms.Provide(zoomZoom, v)
+	configuredPlatforms := platforms.Provide(zoomZoom, v)
 	meetingPlatformLoader := ProvideMeetingPlatformLoader(meetingPlatformRepo, configuredPlatforms)
 	loader := ProvideLoader(meetingPlatformLoader)
 	return loader, nil
