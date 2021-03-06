@@ -9,6 +9,8 @@ import (
 	"github.com/jake-hansen/agora/platforms/zoom/zoomadapter"
 	"github.com/jake-hansen/agora/platforms/zoom/zoomdomain"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -101,3 +103,45 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo) (*domain.Page, error) 
 
 	return zoomadapter.ZoomMeetingListToDomainMeetingPage(meetings), nil
 }
+
+func (z *ZoomActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
+	reqURL := BaseURLV2 + "/meetings/" + url.QueryEscape(meetingID)
+
+	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", oauth.AccessToken))
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := z.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() error {
+		closeErr := res.Body.Close()
+		if err == nil {
+			err = closeErr
+		}
+		return err
+	}()
+
+
+	if res.StatusCode != http.StatusOK {
+		if res.StatusCode == http.StatusNotFound {
+			return nil, NewNotFoundError("meeting", meetingID, "user", strconv.Itoa(int(oauth.UserID)))
+		}
+		return nil, errors.New("could not retrieve meeting from Zoom")
+	}
+
+	var meeting zoomdomain.Meeting
+	err = json.NewDecoder(res.Body).Decode(&meeting)
+	if err != nil {
+		return nil, err
+	}
+
+	return zoomadapter.ZoomMeetingToDomainMeeting(meeting), nil
+
+}
+

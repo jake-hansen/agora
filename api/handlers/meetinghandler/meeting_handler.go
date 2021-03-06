@@ -10,6 +10,7 @@ import (
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/domain"
+	"github.com/jake-hansen/agora/platforms/zoom"
 	"net/http"
 )
 
@@ -52,6 +53,7 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		meetingHandlerGroup.POST("/me/:platform/meetings", m.CreateMeeting)
 		meetingHandlerGroup.GET("/me/:platform/meetings", m.GetMeetings)
+		meetingHandlerGroup.GET("/me/:platform/meetings/:id", m.GetMeeting)
 	}
 
 	return nil
@@ -118,4 +120,36 @@ func (m *MeetingHandler) GetMeetings(c *gin.Context)  {
 	}
 
 	c.JSON(http.StatusOK, adapter.DomainMeetingPageToDTOMeetingPage(meetings))
+}
+
+func (m *MeetingHandler) GetMeeting(c *gin.Context) {
+	platformName := c.Param("platform")
+	meetingID := c.Param("id")
+
+	platform := m.meetingPlatformValidator(c, platformName)
+	if platform == nil {
+		return
+	}
+
+	user := m.getUser(c)
+	if user == nil {
+		return
+	}
+
+	oauth, err := (*m.OAuthService).GetOAuthInfo(user.ID, platform)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	meeting, err := platform.Actions.GetMeeting(*oauth, meetingID)
+	if err != nil {
+		if errors.Is(err, zoom.ErrNotFound) {
+			err = api.NewAPIError(http.StatusNotFound, err, "the requested meeting was not found")
+		}
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	c.JSON(http.StatusOK, adapter.MeetingDomainToDTO(meeting))
 }
