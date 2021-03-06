@@ -12,6 +12,7 @@ const (
 )
 
 type Meeting struct {
+	ID			int			  `json:"id"`
 	Topic       string        `json:"topic"`
 	Type        int           `json:"type"`
 	StartTime   string        `json:"start_time"`

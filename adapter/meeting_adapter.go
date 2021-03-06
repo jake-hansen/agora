@@ -18,6 +18,7 @@ func MeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 
 func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
 	dtoMeeting := &dto.Meeting{
+		ID:			 meeting.ID,
 		Title:       meeting.Title,
 		StartTime:   meeting.StartTime,
 		Duration:    dto.MeetingDuration(meeting.Duration),

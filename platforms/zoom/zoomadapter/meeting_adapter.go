@@ -3,6 +3,7 @@ package zoomadapter
 import (
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/platforms/zoom/zoomdomain"
+	"strconv"
 	"time"
 )
 
@@ -24,6 +25,7 @@ func ZoomMeetingToDomainMeeting(meeting zoomdomain.Meeting) *domain.Meeting {
 	parsedTime, _ := time.Parse(time.RFC3339, meeting.StartTime)
 
 	domainMeeting := &domain.Meeting {
+		ID:			 strconv.Itoa(meeting.ID),
 		Title:       meeting.Topic,
 		StartTime:   parsedTime,
 		Duration:    time.Duration(meeting.Duration) * time.Minute,

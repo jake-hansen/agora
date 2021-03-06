@@ -9,6 +9,7 @@ import (
 type MeetingDuration time.Duration
 
 type Meeting struct {
+	ID			string	`json:"id,omitempty"`
 	Title       string `json:"title" binding:"required"`
 	StartTime   time.Time `json:"start_time" binding:"required"`
 	Duration    MeetingDuration `json:"duration" binding:"required"`
