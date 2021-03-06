@@ -5,13 +5,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/platforms/zoom/zoomadapter"
-	"github.com/jake-hansen/agora/platforms/zoom/zoomdomain"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/jake-hansen/agora/domain"
+	"github.com/jake-hansen/agora/platforms/zoom/zoomadapter"
+	"github.com/jake-hansen/agora/platforms/zoom/zoomdomain"
 )
 
 const (
@@ -19,12 +20,12 @@ const (
 )
 
 type ZoomActions struct {
-	Client	*http.Client
+	Client *http.Client
 }
 
 func NewZoom() *ZoomActions {
 	return &ZoomActions{Client: &http.Client{
-		Timeout:       time.Minute,
+		Timeout: time.Minute,
 	}}
 }
 
@@ -37,7 +38,7 @@ func (z *ZoomActions) createZoomRequest(httpMethod string, url string, jsonBody 
 		}
 		buffer = bytes.NewBuffer(requestBody)
 	}
-	req, err := http.NewRequest(httpMethod, BaseURLV2 + url, buffer)
+	req, err := http.NewRequest(httpMethod, BaseURLV2+url, buffer)
 	if err != nil {
 		return nil, err
 	}
@@ -59,12 +60,12 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 
 	req, err := z.createZoomRequest(http.MethodPost, url, zoomMeeting, oauth)
 	if err != nil {
-		return nil, NewRequestCreationError(BaseURLV2 + url, err)
+		return nil, NewRequestCreationError(BaseURLV2+url, err)
 	}
 
 	res, err := z.Client.Do(req)
 	if err != nil {
-		return nil, NewRequestExecutionError(BaseURLV2 + url, err)
+		return nil, NewRequestExecutionError(BaseURLV2+url, err)
 	}
 	defer z.closeBody(res)
 
@@ -86,12 +87,12 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo) (*domain.Page, error) 
 
 	req, err := z.createZoomRequest(http.MethodGet, url, nil, oauth)
 	if err != nil {
-		return nil, NewRequestCreationError(BaseURLV2 + url, err)
+		return nil, NewRequestCreationError(BaseURLV2+url, err)
 	}
 
 	res, err := z.Client.Do(req)
 	if err != nil {
-		return nil, NewRequestExecutionError(BaseURLV2 + url, err)
+		return nil, NewRequestExecutionError(BaseURLV2+url, err)
 	}
 	defer z.closeBody(res)
 
@@ -113,12 +114,12 @@ func (z *ZoomActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*dom
 
 	req, err := z.createZoomRequest(http.MethodGet, reqURL, nil, oauth)
 	if err != nil {
-		return nil, NewRequestCreationError(BaseURLV2 + reqURL, err)
+		return nil, NewRequestCreationError(BaseURLV2+reqURL, err)
 	}
 
 	res, err := z.Client.Do(req)
 	if err != nil {
-		return nil, NewRequestExecutionError(BaseURLV2 + reqURL, err)
+		return nil, NewRequestExecutionError(BaseURLV2+reqURL, err)
 	}
 	defer z.closeBody(res)
 

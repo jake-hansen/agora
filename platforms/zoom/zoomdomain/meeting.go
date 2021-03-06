@@ -12,19 +12,19 @@ const (
 )
 
 type Meeting struct {
-	ID			int			  `json:"id"`
-	Topic       string        `json:"topic"`
-	Type        int           `json:"type"`
-	StartTime   string        `json:"start_time"`
-	Duration    int		  	  `json:"duration"`
-	ScheduleFor string        `json:"schedule_for,omitempty"`
-	Timezone    string        `json:"timezone,omitempty"`
-	Password    string        `json:"password,omitempty"`
-	Agenda      string        `json:"agenda"`
-	Recurrence  *Recurrence   `json:"recurrence,omitempty"`
-	Settings	*Settings	  `json:"settings,omitempty"`
-	JoinURL		string		  `json:"join_url"`
-	StartURL	string		  `json:"start_url"`
+	ID          int         `json:"id"`
+	Topic       string      `json:"topic"`
+	Type        int         `json:"type"`
+	StartTime   string      `json:"start_time"`
+	Duration    int         `json:"duration"`
+	ScheduleFor string      `json:"schedule_for,omitempty"`
+	Timezone    string      `json:"timezone,omitempty"`
+	Password    string      `json:"password,omitempty"`
+	Agenda      string      `json:"agenda"`
+	Recurrence  *Recurrence `json:"recurrence,omitempty"`
+	Settings    *Settings   `json:"settings,omitempty"`
+	JoinURL     string      `json:"join_url"`
+	StartURL    string      `json:"start_url"`
 }
 
 type Recurrence struct {
@@ -54,9 +54,9 @@ type Settings struct {
 }
 
 type MeetingList struct {
-	PageCount		int	`json:"page_count"`
-	PageNumber		int	`json:"page_number"`
-	PageSize		int `json:"page_size"`
-	TotalRecords	int	`json:"total_records"`
-	Meetings		[]*Meeting	`json:"meetings"`
+	PageCount    int        `json:"page_count"`
+	PageNumber   int        `json:"page_number"`
+	PageSize     int        `json:"page_size"`
+	TotalRecords int        `json:"total_records"`
+	Meetings     []*Meeting `json:"meetings"`
 }

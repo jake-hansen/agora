@@ -3,16 +3,16 @@ package zoom
 import "fmt"
 
 var (
-	ErrNotFound = NotFoundError{}
-	ErrReqCreation = RequestCreationError{}
+	ErrNotFound     = NotFoundError{}
+	ErrReqCreation  = RequestCreationError{}
 	ErrReqExecution = RequestExecutionError{}
-	ErrResDecoding = ResponseDecodingError{}
+	ErrResDecoding  = ResponseDecodingError{}
 )
 
 type NotFoundError struct {
-	Resource	string
-	ResourceID	string
-	Requester	string
+	Resource    string
+	ResourceID  string
+	Requester   string
 	RequesterID string
 }
 
@@ -22,9 +22,9 @@ func (n NotFoundError) Error() string {
 
 func NewNotFoundError(resource string, resourceID string, requester string, requesterID string) NotFoundError {
 	return NotFoundError{
-		Resource:   resource,
-		ResourceID: resourceID,
-		Requester:  requester,
+		Resource:    resource,
+		ResourceID:  resourceID,
+		Requester:   requester,
 		RequesterID: requesterID,
 	}
 }
@@ -35,7 +35,7 @@ func (n NotFoundError) Is(tgt error) bool {
 }
 
 type RequestCreationError struct {
-	Err	error
+	Err error
 	URL string
 }
 
@@ -77,8 +77,8 @@ func NewRequestExecutionError(url string, err error) RequestExecutionError {
 }
 
 type ZoomAPIError struct {
-	Action  string
-	Code	int
+	Action string
+	Code   int
 }
 
 func (z ZoomAPIError) Error() string {
@@ -98,7 +98,7 @@ func NewZoomAPIError(action string, code int) ZoomAPIError {
 }
 
 type ResponseDecodingError struct {
-	Err	error
+	Err error
 	URL string
 }
 

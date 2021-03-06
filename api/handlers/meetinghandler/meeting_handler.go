@@ -3,6 +3,8 @@ package meetinghandler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/adapter"
@@ -11,13 +13,12 @@ import (
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/platforms/zoom"
-	"net/http"
 )
 
 type MeetingHandler struct {
-	AuthMiddleware	*authmiddleware.AuthMiddleware
+	AuthMiddleware  *authmiddleware.AuthMiddleware
 	PlatformService *domain.MeetingPlatformService
-	OAuthService	*domain.OAuthInfoService
+	OAuthService    *domain.OAuthInfoService
 }
 
 func (m *MeetingHandler) meetingPlatformValidator(c *gin.Context, platformName string) *domain.MeetingPlatform {
@@ -110,7 +111,7 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	c.JSON(http.StatusCreated, adapter.MeetingDomainToDTO(createdMeeting))
 }
 
-func (m *MeetingHandler) GetMeetings(c *gin.Context)  {
+func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	platformName := c.Param("platform")
 
 	platform := m.meetingPlatformValidator(c, platformName)

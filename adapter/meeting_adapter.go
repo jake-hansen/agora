@@ -1,9 +1,10 @@
 package adapter
 
 import (
+	"time"
+
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/domain"
-	"time"
 )
 
 func MeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
@@ -18,13 +19,13 @@ func MeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 
 func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
 	dtoMeeting := &dto.Meeting{
-		ID:			 meeting.ID,
+		ID:          meeting.ID,
 		Title:       meeting.Title,
 		StartTime:   meeting.StartTime,
 		Duration:    dto.MeetingDuration(meeting.Duration),
 		Description: meeting.Description,
-		JoinURL: 	 meeting.JoinURL,
-		StartURL: 	 meeting.StartURL,
+		JoinURL:     meeting.JoinURL,
+		StartURL:    meeting.StartURL,
 	}
 	return dtoMeeting
 }
