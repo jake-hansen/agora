@@ -51,3 +51,11 @@ type Settings struct {
 	Audio            string `json:"audio"`
 	AutoRecording    string `json:"auto_recording"`
 }
+
+type MeetingList struct {
+	PageCount		int	`json:"page_count"`
+	PageNumber		int	`json:"page_number"`
+	PageSize		int `json:"page_size"`
+	TotalRecords	int	`json:"total_records"`
+	Meetings		[]*Meeting	`json:"meetings"`
+}

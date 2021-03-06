@@ -51,6 +51,7 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
 		meetingHandlerGroup.POST("/me/:platform/meetings", m.CreateMeeting)
+		meetingHandlerGroup.GET("/me/:platform/meetings", m.GetMeetings)
 	}
 
 	return nil
@@ -89,4 +90,32 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, adapter.MeetingDomainToDTO(createdMeeting))
+}
+
+func (m *MeetingHandler) GetMeetings(c *gin.Context)  {
+	platformName := c.Param("platform")
+
+	platform := m.meetingPlatformValidator(c, platformName)
+	if platform == nil {
+		return
+	}
+
+	user := m.getUser(c)
+	if user == nil {
+		return
+	}
+
+	oauth, err := (*m.OAuthService).GetOAuthInfo(user.ID, platform)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	meetings, err := platform.Actions.GetMeetings(*oauth)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	c.JSON(http.StatusOK, adapter.DomainMeetingPageToDTOMeetingPage(meetings))
 }

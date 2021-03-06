@@ -33,3 +33,19 @@ func ZoomMeetingToDomainMeeting(meeting zoomdomain.Meeting) *domain.Meeting {
 	}
 	return domainMeeting
 }
+
+func ZoomMeetingListToDomainMeetingPage(meetingList zoomdomain.MeetingList) *domain.Page {
+	var meetings []interface{}
+	for _, meeting := range meetingList.Meetings {
+		meetings = append(meetings, ZoomMeetingToDomainMeeting(*meeting))
+	}
+
+	page := &domain.Page{
+		PageCount:    meetingList.PageCount,
+		PageNumber:   meetingList.PageNumber,
+		PageSize:     meetingList.PageSize,
+		TotalRecords: meetingList.TotalRecords,
+		Records:      meetings,
+	}
+	return page
+}

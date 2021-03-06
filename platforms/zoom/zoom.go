@@ -67,6 +67,37 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 	return zoomadapter.ZoomMeetingToDomainMeeting(meetingResponse), err
 }
 
+func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo) (*domain.Page, error) {
 
+	req, err := http.NewRequest(http.MethodGet, BaseURLV2 + "/users/me/meetings", nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", oauth.AccessToken))
+	req.Header.Set("Content-Type", "application/json")
 
+	res, err := z.Client.Do(req)
 
+	defer func() error {
+		closeErr := res.Body.Close()
+		if err == nil {
+			err = closeErr
+		}
+		return err
+	}()
+
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New("could not retrieve meetings from Zoom")
+	}
+
+	var meetings zoomdomain.MeetingList
+	err = json.NewDecoder(res.Body).Decode(&meetings)
+	if err != nil {
+		return nil, err
+	}
+
+	return zoomadapter.ZoomMeetingListToDomainMeetingPage(meetings), nil
+}
