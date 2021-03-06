@@ -59,6 +59,21 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	return nil
 }
 
+func (m *MeetingHandler) platformErrorConverter(err error) error {
+	var apiErr = err
+	if errors.Is(err, zoom.ErrReqCreation) {
+		apiErr = api.NewAPIError(http.StatusInternalServerError, err,
+			"An error occurred while formulating the request. Please try again later.")
+	} else if errors.Is(err, zoom.ErrReqExecution) {
+		apiErr = api.NewAPIError(http.StatusInternalServerError, err,
+			"An error occurred while executing the request. Please try again later.")
+	} else if errors.Is(err, zoom.ErrResDecoding) {
+		apiErr = api.NewAPIError(http.StatusInternalServerError, err,
+			"An error occurred while decoding the performed request. Please try again later.")
+	}
+	return apiErr
+}
+
 func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
 
@@ -88,6 +103,7 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 
 	createdMeeting, err := platform.Actions.CreateMeeting(*oauth, adapter.MeetingDTOToDomain(&meeting))
 	if err != nil {
+		err = m.platformErrorConverter(err)
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
@@ -115,6 +131,7 @@ func (m *MeetingHandler) GetMeetings(c *gin.Context)  {
 
 	meetings, err := platform.Actions.GetMeetings(*oauth)
 	if err != nil {
+		err = m.platformErrorConverter(err)
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
@@ -144,6 +161,7 @@ func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 
 	meeting, err := platform.Actions.GetMeeting(*oauth, meetingID)
 	if err != nil {
+		err = m.platformErrorConverter(err)
 		if errors.Is(err, zoom.ErrNotFound) {
 			err = api.NewAPIError(http.StatusNotFound, err, "the requested meeting was not found")
 		}

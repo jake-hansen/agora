@@ -28,69 +28,73 @@ func NewZoom() *ZoomActions {
 	}}
 }
 
-func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meeting) (*domain.Meeting, error) {
-	zoomMeeting := zoomadapter.DomainMeetingToZoomMeeting(*meeting)
-
-	requestBody, err := json.Marshal(zoomMeeting)
-	if err != nil {
-		return nil, err
+func (z *ZoomActions) createZoomRequest(httpMethod string, url string, jsonBody interface{}, oauth domain.OAuthInfo) (*http.Request, error) {
+	buffer := bytes.NewBuffer(nil)
+	if jsonBody != nil {
+		requestBody, err := json.Marshal(jsonBody)
+		if err != nil {
+			return nil, err
+		}
+		buffer = bytes.NewBuffer(requestBody)
 	}
-
-	req, err := http.NewRequest(http.MethodPost, BaseURLV2 + "/users/me/meetings", bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest(httpMethod, BaseURLV2 + url, buffer)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", oauth.AccessToken))
 	req.Header.Set("Content-Type", "application/json")
 
-	res, err := z.Client.Do(req)
+	return req, nil
+}
 
-	defer func() error {
-		closeErr := res.Body.Close()
-		if err == nil {
-			err = closeErr
-		}
-		return err
-	}()
+func (z *ZoomActions) closeBody(res *http.Response) error {
+	err := res.Body.Close()
+	return err
+}
 
+func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meeting) (*domain.Meeting, error) {
+	url := "/users/me/meetings"
+
+	zoomMeeting := zoomadapter.DomainMeetingToZoomMeeting(*meeting)
+
+	req, err := z.createZoomRequest(http.MethodPost, url, zoomMeeting, oauth)
 	if err != nil {
-		return nil, err
+		return nil, NewRequestCreationError(BaseURLV2 + url, err)
 	}
+
+	res, err := z.Client.Do(req)
+	if err != nil {
+		return nil, NewRequestExecutionError(BaseURLV2 + url, err)
+	}
+	defer z.closeBody(res)
+
 	if res.StatusCode != http.StatusCreated {
-		return nil, errors.New("could not create meeting with Zoom")
+		return nil, NewZoomAPIError("create meeting", res.StatusCode)
 	}
 
 	var meetingResponse zoomdomain.Meeting
 	err = json.NewDecoder(res.Body).Decode(&meetingResponse)
 	if err != nil {
-		return nil, err
+		return nil, NewResponseDecodingError(url, err)
 	}
 
 	return zoomadapter.ZoomMeetingToDomainMeeting(meetingResponse), err
 }
 
 func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo) (*domain.Page, error) {
+	url := "/users/me/meetings"
 
-	req, err := http.NewRequest(http.MethodGet, BaseURLV2 + "/users/me/meetings", nil)
+	req, err := z.createZoomRequest(http.MethodGet, url, nil, oauth)
 	if err != nil {
-		return nil, err
+		return nil, NewRequestCreationError(BaseURLV2 + url, err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", oauth.AccessToken))
-	req.Header.Set("Content-Type", "application/json")
 
 	res, err := z.Client.Do(req)
-
-	defer func() error {
-		closeErr := res.Body.Close()
-		if err == nil {
-			err = closeErr
-		}
-		return err
-	}()
-
 	if err != nil {
-		return nil, err
+		return nil, NewRequestExecutionError(BaseURLV2 + url, err)
 	}
+	defer z.closeBody(res)
+
 	if res.StatusCode != http.StatusOK {
 		return nil, errors.New("could not retrieve meetings from Zoom")
 	}
@@ -98,50 +102,38 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo) (*domain.Page, error) 
 	var meetings zoomdomain.MeetingList
 	err = json.NewDecoder(res.Body).Decode(&meetings)
 	if err != nil {
-		return nil, err
+		return nil, NewResponseDecodingError(url, err)
 	}
 
 	return zoomadapter.ZoomMeetingListToDomainMeetingPage(meetings), nil
 }
 
 func (z *ZoomActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
-	reqURL := BaseURLV2 + "/meetings/" + url.QueryEscape(meetingID)
+	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 
-	req, err := http.NewRequest(http.MethodGet, reqURL, nil)
+	req, err := z.createZoomRequest(http.MethodGet, reqURL, nil, oauth)
 	if err != nil {
-		return nil, err
+		return nil, NewRequestCreationError(BaseURLV2 + reqURL, err)
 	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", oauth.AccessToken))
-	req.Header.Set("Content-Type", "application/json")
 
 	res, err := z.Client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, NewRequestExecutionError(BaseURLV2 + reqURL, err)
 	}
-
-	defer func() error {
-		closeErr := res.Body.Close()
-		if err == nil {
-			err = closeErr
-		}
-		return err
-	}()
-
+	defer z.closeBody(res)
 
 	if res.StatusCode != http.StatusOK {
 		if res.StatusCode == http.StatusNotFound {
 			return nil, NewNotFoundError("meeting", meetingID, "user", strconv.Itoa(int(oauth.UserID)))
 		}
-		return nil, errors.New("could not retrieve meeting from Zoom")
+		return nil, NewZoomAPIError("retrieve meeting", res.StatusCode)
 	}
 
 	var meeting zoomdomain.Meeting
 	err = json.NewDecoder(res.Body).Decode(&meeting)
 	if err != nil {
-		return nil, err
+		return nil, NewResponseDecodingError(reqURL, err)
 	}
 
 	return zoomadapter.ZoomMeetingToDomainMeeting(meeting), nil
-
 }
-
