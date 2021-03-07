@@ -54,9 +54,10 @@ type Settings struct {
 }
 
 type MeetingList struct {
-	PageCount    int        `json:"page_count"`
-	PageNumber   int        `json:"page_number"`
-	PageSize     int        `json:"page_size"`
-	TotalRecords int        `json:"total_records"`
-	Meetings     []*Meeting `json:"meetings"`
+	PageCount     int        `json:"page_count"`
+	PageNumber    int        `json:"page_number"`
+	PageSize      int        `json:"page_size"`
+	TotalRecords  int        `json:"total_records"`
+	NextPageToken string     `json:"next_page_token"`
+	Meetings      []*Meeting `json:"meetings"`
 }

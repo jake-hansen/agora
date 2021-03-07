@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -113,6 +114,19 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 
 func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	platformName := c.Param("platform")
+	pageSize := c.Query("page_size")
+	nextPage := c.Query("next_page")
+
+	var size int
+	var err error
+	if pageSize != "" {
+		size, err = strconv.Atoi(pageSize)
+		if err != nil {
+			err = api.NewAPIError(http.StatusBadRequest, err, "could not parse page_size")
+			_ = c.Error(err).SetType(gin.ErrorTypePublic)
+			return
+		}
+	}
 
 	platform := m.meetingPlatformValidator(c, platformName)
 	if platform == nil {
@@ -130,14 +144,16 @@ func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 		return
 	}
 
-	meetings, err := platform.Actions.GetMeetings(*oauth)
+	pageReq := dto.NewPageReq(size, nextPage)
+
+	meetings, err := platform.Actions.GetMeetings(*oauth, *adapter.PageRequestDTOToDomain(pageReq))
 	if err != nil {
 		err = m.platformErrorConverter(err)
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
 
-	c.JSON(http.StatusOK, adapter.DomainMeetingPageToDTOMeetingPage(meetings))
+	c.JSON(http.StatusOK, adapter.MeetingPageDomainToDTO(meetings))
 }
 
 func (m *MeetingHandler) GetMeeting(c *gin.Context) {

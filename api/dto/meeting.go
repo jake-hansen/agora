@@ -34,9 +34,10 @@ func (m *MeetingDuration) UnmarshalJSON(data []byte) error {
 }
 
 type MeetingPage struct {
-	PageCount    int        `json:"page_count"`
-	PageNumber   int        `json:"page_number"`
-	PageSize     int        `json:"page_size"`
-	TotalRecords int        `json:"total_records"`
-	Records      []*Meeting `json:"meetings"`
+	PageCount     int        `json:"page_count,omitempty"`
+	PageNumber    int        `json:"page_number,omitempty"`
+	PageSize      int        `json:"page_size,omitempty"`
+	TotalRecords  int        `json:"total_records,omitempty"`
+	NextPageToken string     `json:"next_page_token,omitempty"`
+	Records       []*Meeting `json:"meetings"`
 }

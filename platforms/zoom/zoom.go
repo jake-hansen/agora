@@ -3,7 +3,6 @@ package zoom
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -82,28 +81,41 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 	return zoomadapter.ZoomMeetingToDomainMeeting(meetingResponse), err
 }
 
-func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo) (*domain.Page, error) {
-	url := "/users/me/meetings"
-
-	req, err := z.createZoomRequest(http.MethodGet, url, nil, oauth)
+func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRequest) (*domain.Page, error) {
+	path := "/users/me/meetings"
+	u, err := url.Parse("/users/me/meetings")
 	if err != nil {
-		return nil, NewRequestCreationError(BaseURLV2+url, err)
+		return nil, NewRequestCreationError(BaseURLV2 + path, err)
+	}
+
+	q := u.Query()
+	if pageReq.PageSize != 0 {
+		q.Add("page_size", strconv.Itoa(pageReq.PageSize))
+	}
+	if pageReq.RequestedPage != "" {
+		q.Add("next_page_token", pageReq.RequestedPage)
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := z.createZoomRequest(http.MethodGet, u.String(), nil, oauth)
+	if err != nil {
+		return nil, NewRequestCreationError(BaseURLV2 + u.String(), err)
 	}
 
 	res, err := z.Client.Do(req)
 	if err != nil {
-		return nil, NewRequestExecutionError(BaseURLV2+url, err)
+		return nil, NewRequestExecutionError(BaseURLV2 + u.String(), err)
 	}
 	defer z.closeBody(res)
 
 	if res.StatusCode != http.StatusOK {
-		return nil, errors.New("could not retrieve meetings from Zoom")
+		return nil, NewZoomAPIError("retrieve meetings", res.StatusCode)
 	}
 
 	var meetings zoomdomain.MeetingList
 	err = json.NewDecoder(res.Body).Decode(&meetings)
 	if err != nil {
-		return nil, NewResponseDecodingError(url, err)
+		return nil, NewResponseDecodingError(BaseURLV2 + u.String(), err)
 	}
 
 	return zoomadapter.ZoomMeetingListToDomainMeetingPage(meetings), nil

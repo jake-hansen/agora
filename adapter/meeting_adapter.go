@@ -30,18 +30,19 @@ func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
 	return dtoMeeting
 }
 
-func DomainMeetingPageToDTOMeetingPage(page *domain.Page) *dto.MeetingPage {
+func MeetingPageDomainToDTO(page *domain.Page) *dto.MeetingPage {
 	var meetings []*dto.Meeting
 	for _, meeting := range page.Records {
 		meetings = append(meetings, MeetingDomainToDTO(meeting.(*domain.Meeting)))
 	}
 
 	dtoMeetingPage := &dto.MeetingPage{
-		PageCount:    page.PageCount,
-		PageNumber:   page.PageNumber,
-		PageSize:     page.PageSize,
-		TotalRecords: page.TotalRecords,
-		Records:      meetings,
+		PageCount:     page.PageCount,
+		PageNumber:    page.PageNumber,
+		PageSize:      page.PageSize,
+		TotalRecords:  page.TotalRecords,
+		NextPageToken: page.NextPageToken,
+		Records:       meetings,
 	}
 	return dtoMeetingPage
 }

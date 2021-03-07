@@ -48,6 +48,7 @@ func ZoomMeetingListToDomainMeetingPage(meetingList zoomdomain.MeetingList) *dom
 		PageNumber:   meetingList.PageNumber,
 		PageSize:     meetingList.PageSize,
 		TotalRecords: meetingList.TotalRecords,
+		NextPageToken: meetingList.NextPageToken,
 		Records:      meetings,
 	}
 	return page
