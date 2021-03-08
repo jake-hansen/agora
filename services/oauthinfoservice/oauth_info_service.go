@@ -53,7 +53,7 @@ func (o *OAuthInfoService) GetOAuthInfo(userID uint, platform *domain.MeetingPla
 	if token.Valid() {
 		return oauthInfo, nil
 	} else {
-		newToken, err := o.platformService.RefreshOAuthToken(nil, &token, platform)
+		newToken, err := o.platformService.RefreshOAuthToken(context.Background(), &token, platform)
 		if err != nil {
 			return nil, err
 		} else {
