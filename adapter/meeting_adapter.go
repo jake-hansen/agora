@@ -10,22 +10,33 @@ import (
 func MeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 	domainMeeting := &domain.Meeting{
 		Title:       meeting.Title,
-		StartTime:   meeting.StartTime,
 		Duration:    time.Duration(meeting.Duration),
 		Description: meeting.Description,
+		Type: 		 meeting.Type,
+	}
+
+	if meeting.StartTime != nil {
+		domainMeeting.StartTime = *meeting.StartTime
 	}
 	return domainMeeting
 }
 
 func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
+	var t *time.Time = nil
+
+	if !meeting.StartTime.IsZero() {
+		t = &meeting.StartTime
+	}
+
 	dtoMeeting := &dto.Meeting{
 		ID:          meeting.ID,
 		Title:       meeting.Title,
-		StartTime:   meeting.StartTime,
+		StartTime:   t,
 		Duration:    dto.MeetingDuration(meeting.Duration),
 		Description: meeting.Description,
 		JoinURL:     meeting.JoinURL,
 		StartURL:    meeting.StartURL,
+		Type:		 meeting.Type,
 	}
 	return dtoMeeting
 }

@@ -11,11 +11,12 @@ type MeetingDuration time.Duration
 type Meeting struct {
 	ID          string          `json:"id,omitempty"`
 	Title       string          `json:"title" binding:"required"`
-	StartTime   time.Time       `json:"start_time" binding:"required"`
-	Duration    MeetingDuration `json:"duration" binding:"required"`
+	StartTime   *time.Time       `json:"start_time,omitempty"`
+	Duration    MeetingDuration `json:"duration,omitempty"`
 	Description string          `json:"description" binding:"required"`
 	JoinURL     string          `json:"join_url,omitempty"`
 	StartURL    string          `json:"start_url,omitempty"`
+	Type		int				`json:"type,omitempty" binding:"required"`
 }
 
 func (m *MeetingDuration) MarshalJSON() ([]byte, error) {
