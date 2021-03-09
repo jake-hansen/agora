@@ -2,9 +2,9 @@ package router
 
 import (
 	"fmt"
+	"github.com/jake-hansen/agora/api/validator"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/router/handlers"
 )
 
@@ -14,9 +14,10 @@ type Config struct {
 	Middleware     []gin.HandlerFunc
 	HandlerManager *handlers.HandlerManager
 	RootEndpoint   string
+	Validator	   *validator.Validator
 }
 
-// Router contains the Engine and Config for routing requests.
+// Router contains the engine and Config for routing requests.
 type Router struct {
 	engine *gin.Engine
 	config *Config
@@ -25,7 +26,6 @@ type Router struct {
 func (r *Router) init() {
 	r.engine = gin.New()
 	r.setGinEnvironment(r.config.Environment)
-	api.RegisterCustomValidation()
 
 	for _, middleware := range r.config.Middleware {
 		r.engine.Use(middleware)
