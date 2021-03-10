@@ -18,7 +18,8 @@ func Provide(config Config) (*Validator, error) {
 }
 
 func ProvideCustomValidationFuncs() []CustomValidationFunc {
-	var funcs = make([]CustomValidationFunc, 0)
+	var funcs []CustomValidationFunc
+	funcs = append(funcs, MeetingTimeValidator)
 	return funcs
 }
 

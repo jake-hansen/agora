@@ -28,6 +28,7 @@ type Validator struct {
 func NewValidator(config Config) (*Validator, error) {
 	v := &Validator{
 		engine: config.Engine,
+		customValidationFuncs: config.CustomValidationFuncs,
 	}
 	err := v.init()
 	if err != nil {
@@ -41,7 +42,7 @@ func (v *Validator) init() error {
 	if err != nil {
 		return err
 	}
-	err = v.registerCustomTagNameFunc()
+	err = v.registerCustomValidations()
 	if err != nil {
 		return err
 	}

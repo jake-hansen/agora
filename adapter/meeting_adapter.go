@@ -15,29 +15,29 @@ func MeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 		Type: 		 meeting.Type,
 	}
 
-	if meeting.StartTime != nil {
-		domainMeeting.StartTime = *meeting.StartTime
+	if meeting.StartTime != "" {
+		domainMeeting.StartTime, _ = time.Parse(time.RFC3339, meeting.StartTime)
 	}
+
 	return domainMeeting
 }
 
 func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
-	var t *time.Time = nil
-
-	if !meeting.StartTime.IsZero() {
-		t = &meeting.StartTime
-	}
 
 	dtoMeeting := &dto.Meeting{
 		ID:          meeting.ID,
 		Title:       meeting.Title,
-		StartTime:   t,
 		Duration:    dto.MeetingDuration(meeting.Duration),
 		Description: meeting.Description,
 		JoinURL:     meeting.JoinURL,
 		StartURL:    meeting.StartURL,
 		Type:		 meeting.Type,
 	}
+
+	if !meeting.StartTime.IsZero() {
+		dtoMeeting.StartTime = meeting.StartTime.Format(time.RFC3339)
+	}
+
 	return dtoMeeting
 }
 

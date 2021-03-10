@@ -11,7 +11,7 @@ type MeetingDuration time.Duration
 type Meeting struct {
 	ID          string          `json:"id,omitempty"`
 	Title       string          `json:"title" binding:"required"`
-	StartTime   *time.Time       `json:"start_time,omitempty"`
+	StartTime   string			`json:"start_time,omitempty" binding:"required,valid meeting time"`
 	Duration    MeetingDuration `json:"duration,omitempty"`
 	Description string          `json:"description" binding:"required"`
 	JoinURL     string          `json:"join_url,omitempty"`
@@ -34,6 +34,7 @@ func (m *MeetingDuration) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+
 type MeetingPage struct {
 	PageCount     int        `json:"page_count,omitempty"`
 	PageNumber    int        `json:"page_number,omitempty"`
@@ -42,3 +43,4 @@ type MeetingPage struct {
 	NextPageToken string     `json:"next_page_token,omitempty"`
 	Records       []*Meeting `json:"meetings"`
 }
+
