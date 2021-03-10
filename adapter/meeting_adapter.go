@@ -7,16 +7,26 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
-func MeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
+func ScheduledMeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 	domainMeeting := &domain.Meeting{
 		Title:       meeting.Title,
 		Duration:    time.Duration(meeting.Duration),
 		Description: meeting.Description,
-		Type: 		 meeting.Type,
+		Type:        domain.TypeScheduled,
 	}
 
 	if meeting.StartTime != "" {
 		domainMeeting.StartTime, _ = time.Parse(time.RFC3339, meeting.StartTime)
+	}
+
+	return domainMeeting
+}
+
+func InstantMeetingDTOToDomain(meeting *dto.InstantMeeting) *domain.Meeting {
+	domainMeeting := &domain.Meeting{
+		Title:       meeting.Title,
+		Description: meeting.Description,
+		Type:        domain.TypeInstant,
 	}
 
 	return domainMeeting
@@ -31,7 +41,6 @@ func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
 		Description: meeting.Description,
 		JoinURL:     meeting.JoinURL,
 		StartURL:    meeting.StartURL,
-		Type:		 meeting.Type,
 	}
 
 	if !meeting.StartTime.IsZero() {

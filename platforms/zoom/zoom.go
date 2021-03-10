@@ -85,7 +85,7 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 	path := "/users/me/meetings"
 	u, err := url.Parse("/users/me/meetings")
 	if err != nil {
-		return nil, NewRequestCreationError(BaseURLV2 + path, err)
+		return nil, NewRequestCreationError(BaseURLV2+path, err)
 	}
 
 	q := u.Query()
@@ -99,12 +99,12 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 
 	req, err := z.createZoomRequest(http.MethodGet, u.String(), nil, oauth)
 	if err != nil {
-		return nil, NewRequestCreationError(BaseURLV2 + u.String(), err)
+		return nil, NewRequestCreationError(BaseURLV2+u.String(), err)
 	}
 
 	res, err := z.Client.Do(req)
 	if err != nil {
-		return nil, NewRequestExecutionError(BaseURLV2 + u.String(), err)
+		return nil, NewRequestExecutionError(BaseURLV2+u.String(), err)
 	}
 	defer z.closeBody(res)
 
@@ -115,7 +115,7 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 	var meetings zoomdomain.MeetingList
 	err = json.NewDecoder(res.Body).Decode(&meetings)
 	if err != nil {
-		return nil, NewResponseDecodingError(BaseURLV2 + u.String(), err)
+		return nil, NewResponseDecodingError(BaseURLV2+u.String(), err)
 	}
 
 	return zoomadapter.ZoomMeetingListToDomainMeetingPage(meetings), nil
