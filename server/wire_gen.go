@@ -15,6 +15,7 @@ import (
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/api/middleware/corsmiddleware"
+	"github.com/jake-hansen/agora/api/validator"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
@@ -72,7 +73,13 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	meetingHandler := meetinghandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
 	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler, healthHandler, meetingHandler)
 	handlerManager := handlers2.ProvideHandlerManager(v4)
-	routerConfig, err := router.Cfg(v, v2, handlerManager)
+	v5 := validator.ProvideCustomValidationFuncs()
+	validatorConfig := validator.Cfg(v5)
+	validatorValidator, err := validator.Provide(validatorConfig)
+	if err != nil {
+		return nil, err
+	}
+	routerConfig, err := router.Cfg(v, v2, handlerManager, validatorValidator)
 	if err != nil {
 		return nil, err
 	}

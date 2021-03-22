@@ -2,6 +2,11 @@ package domain
 
 import "time"
 
+const (
+	TypeInstant = 1
+	TypeScheduled = 2
+)
+
 // Meeting represents a meeting on a MeetingPlatform.
 type Meeting struct {
 	ID			string
@@ -11,4 +16,5 @@ type Meeting struct {
 	Description string
 	JoinURL		string
 	StartURL	string
+	Type		int
 }

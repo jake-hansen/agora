@@ -10,12 +10,17 @@ type MeetingDuration time.Duration
 
 type Meeting struct {
 	ID          string          `json:"id,omitempty"`
-	Title       string          `json:"title" binding:"required"`
-	StartTime   time.Time       `json:"start_time" binding:"required"`
-	Duration    MeetingDuration `json:"duration" binding:"required"`
-	Description string          `json:"description" binding:"required"`
+	Title       string          `json:"title,omitempty" binding:"required"`
+	StartTime   string          `json:"start_time,omitempty" binding:"required,valid meeting time"`
+	Duration    MeetingDuration `json:"duration,omitempty" binding:"required"`
+	Description string          `json:"description,omitempty" binding:"required"`
 	JoinURL     string          `json:"join_url,omitempty"`
 	StartURL    string          `json:"start_url,omitempty"`
+}
+
+type InstantMeeting struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
 }
 
 func (m *MeetingDuration) MarshalJSON() ([]byte, error) {
