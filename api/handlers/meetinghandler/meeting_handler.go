@@ -89,9 +89,27 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 		return
 	}
 
-	var meeting dto.Meeting
-	err := c.ShouldBind(&meeting)
+	meetingTypeString := c.Query("type")
+	meetingType, _ := strconv.Atoi(meetingTypeString)
+	if !(meetingType == 1 || meetingType == 2) {
+		apiErr := api.NewAPIError(http.StatusBadRequest, errors.New("bad request"), "meeting type should be 1 (instant) or 2 (scheduled)")
+		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	var scheduledMeeting dto.Meeting
+	var instantMeeting dto.InstantMeeting
+	var domainMeeting *domain.Meeting
+	var err error
+	if meetingType == 1 {
+		err = c.ShouldBind(&instantMeeting)
+		domainMeeting = adapter.InstantMeetingDTOToDomain(&instantMeeting)
+	} else if meetingType == 2 {
+		err = c.ShouldBind(&scheduledMeeting)
+		domainMeeting = adapter.ScheduledMeetingDTOToDomain(&scheduledMeeting)
+	}
 	err = m.validateHelper(err)
+
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
@@ -103,7 +121,7 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 		return
 	}
 
-	createdMeeting, err := platform.Actions.CreateMeeting(*oauth, adapter.MeetingDTOToDomain(&meeting))
+	createdMeeting, err := platform.Actions.CreateMeeting(*oauth, domainMeeting)
 	if err != nil {
 		err = m.platformErrorConverter(err)
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)

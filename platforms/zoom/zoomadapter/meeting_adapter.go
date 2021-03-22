@@ -14,7 +14,7 @@ func DomainMeetingToZoomMeeting(meeting domain.Meeting) *zoomdomain.Meeting {
 
 	zoom := &zoomdomain.Meeting{
 		Topic:     meeting.Title,
-		Type:      zoomdomain.TypeScheduled,
+		Type:      meetingTypeConverter(meeting.Type),
 		StartTime: gmt,
 		Duration:  int(durationMinutes.Minutes()),
 		Agenda:    meeting.Description,
@@ -52,4 +52,14 @@ func ZoomMeetingListToDomainMeetingPage(meetingList zoomdomain.MeetingList) *dom
 		Records:      meetings,
 	}
 	return page
+}
+
+func meetingTypeConverter(domainType int) int {
+	switch domainType {
+	case domain.TypeInstant:
+		return zoomdomain.TypeInstant
+	case domain.TypeScheduled:
+		return zoomdomain.TypeScheduled
+	}
+	return 0
 }
