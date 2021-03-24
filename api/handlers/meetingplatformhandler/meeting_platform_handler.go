@@ -25,7 +25,7 @@ type MeetingPlatformHandler struct {
 // :platform/auth (POST) - Attempts to authenticate to the specified MeetingPlatform
 // :platform/auth (GET)	 - Attempts to get the Auth for the specified MeetingPlatform
 func (m *MeetingPlatformHandler) Register(parentGroup *gin.RouterGroup) error {
-	meetingHandlerGroup := parentGroup.Group("platform")
+	meetingHandlerGroup := parentGroup.Group("platforms")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
 		meetingHandlerGroup.GET("", m.GetAllPlatforms)

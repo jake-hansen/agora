@@ -8,10 +8,6 @@ import (
 	"strings"
 )
 
-// ConfiguredPlatforms are a slice of MeetingPlatforms that are configured for
-// the application.
-type ConfiguredPlatforms []*domain.MeetingPlatform
-
 // MeetingPlatformService manages processing information for MeetingPlatforms as well
 // as OAuth authentication for MeetingPlatforms.
 type MeetingPlatformService struct {
@@ -21,7 +17,7 @@ type MeetingPlatformService struct {
 
 // New returns a MeetingPlatformService that is backed by the provided repository and contains the
 // provided ConfiguredPlatforms.
-func New(repository domain.MeetingPlatformRepository, configuredPlatforms ConfiguredPlatforms) *MeetingPlatformService {
+func New(repository domain.MeetingPlatformRepository, configuredPlatforms domain.ConfiguredPlatforms) *MeetingPlatformService {
 	p := MeetingPlatformService{
 		dbRepo:              repository,
 		configuredPlatforms: make(map[string]*domain.MeetingPlatform),

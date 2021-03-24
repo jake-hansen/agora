@@ -9,23 +9,25 @@ import (
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
 	"github.com/jake-hansen/agora/api/handlers/healthhandler"
+	"github.com/jake-hansen/agora/api/handlers/meetinghandler"
 	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/api/middleware/corsmiddleware"
+	"github.com/jake-hansen/agora/api/validator"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
 	"github.com/jake-hansen/agora/database/repositories/schemamigrationrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
+	"github.com/jake-hansen/agora/platforms"
+	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
 	"github.com/jake-hansen/agora/services/healthservice"
 	"github.com/jake-hansen/agora/services/jwtservice"
-	"github.com/jake-hansen/agora/services/meetingplatforms"
-	"github.com/jake-hansen/agora/services/meetingplatforms/zoom"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
@@ -59,8 +61,8 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	v3 := authmiddleware.ProvideAuthorizationHeaderParser()
 	authMiddleware := authmiddleware.Provide(simpleAuthService, v3)
 	meetingPlatformRepo := meetingplatformrepo.Provide(db)
-	zoomZoom := zoom.Provide()
-	configuredPlatforms := meetingplatforms.Provide(zoomZoom, v)
+	zoomActions := zoom.Provide()
+	configuredPlatforms := platforms.Provide(zoomActions, v)
 	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, configuredPlatforms)
 	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)
@@ -68,9 +70,16 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	schemaMigrationRepo := schemamigrationrepo.Provide(db)
 	healthService := healthservice.Provide(schemaMigrationRepo)
 	healthHandler := healthhandler.Provide(healthService)
-	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler, healthHandler)
+	meetingHandler := meetinghandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
+	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler, healthHandler, meetingHandler)
 	handlerManager := handlers2.ProvideHandlerManager(v4)
-	routerConfig, err := router.Cfg(v, v2, handlerManager)
+	v5 := validator.ProvideCustomValidationFuncs()
+	validatorConfig := validator.Cfg(v5)
+	validatorValidator, err := validator.Provide(validatorConfig)
+	if err != nil {
+		return nil, err
+	}
+	routerConfig, err := router.Cfg(v, v2, handlerManager, validatorValidator)
 	if err != nil {
 		return nil, err
 	}

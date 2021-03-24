@@ -2,10 +2,6 @@ package api
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
-
-	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -34,19 +30,6 @@ func (e *APIError) Error() string {
 // Unwrap returns the underlying error that caused the APIError.
 func (e *APIError) Unwrap() error {
 	return e.Err
-}
-
-// RegisterCustomValidation registers a custom tag name func to gin's validator
-func RegisterCustomValidation() {
-	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-			name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-			if name == "-" {
-				return ""
-			}
-			return name
-		})
-	}
 }
 
 // ValidationError represents an error that was caused by an invalid request.
