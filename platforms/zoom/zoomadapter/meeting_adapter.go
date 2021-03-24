@@ -44,12 +44,12 @@ func ZoomMeetingListToDomainMeetingPage(meetingList zoomdomain.MeetingList) *dom
 	}
 
 	page := &domain.Page{
-		PageCount:    meetingList.PageCount,
-		PageNumber:   meetingList.PageNumber,
-		PageSize:     meetingList.PageSize,
-		TotalRecords: meetingList.TotalRecords,
+		PageCount:     meetingList.PageCount,
+		PageNumber:    meetingList.PageNumber,
+		PageSize:      meetingList.PageSize,
+		TotalRecords:  meetingList.TotalRecords,
 		NextPageToken: meetingList.NextPageToken,
-		Records:      meetings,
+		Records:       meetings,
 	}
 	return page
 }

@@ -18,16 +18,21 @@ const (
 	BaseURLV2 = "https://api.zoom.us/v2"
 )
 
+// ZoomActions contains the functions necessary to interact with the Zoom API.
 type ZoomActions struct {
 	Client *http.Client
 }
 
+// NewZoom returns a new ZoomActions configured with an http.Client configured with a timeout
+// of one minute for requests.
 func NewZoom() *ZoomActions {
 	return &ZoomActions{Client: &http.Client{
 		Timeout: time.Minute,
 	}}
 }
 
+// createZoomRequest is a helper function that creates a request to be sent to Zoom. This function appends
+// the provided OAuth token to the request in the necesseary headers.
 func (z *ZoomActions) createZoomRequest(httpMethod string, url string, jsonBody interface{}, oauth domain.OAuthInfo) (*http.Request, error) {
 	buffer := bytes.NewBuffer(nil)
 	if jsonBody != nil {
@@ -52,6 +57,7 @@ func (z *ZoomActions) closeBody(res *http.Response) error {
 	return err
 }
 
+// CreateMeeting creates a meeting
 func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meeting) (*domain.Meeting, error) {
 	url := "/users/me/meetings"
 
@@ -81,6 +87,7 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 	return zoomadapter.ZoomMeetingToDomainMeeting(meetingResponse), err
 }
 
+// GetMeetings retrieves all meetings
 func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRequest) (*domain.Page, error) {
 	path := "/users/me/meetings"
 	u, err := url.Parse("/users/me/meetings")
@@ -121,6 +128,7 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 	return zoomadapter.ZoomMeetingListToDomainMeetingPage(meetings), nil
 }
 
+// GetMeeting retrieves a single meeting by ID
 func (z *ZoomActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
 	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 

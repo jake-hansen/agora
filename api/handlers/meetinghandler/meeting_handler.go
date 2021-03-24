@@ -16,6 +16,7 @@ import (
 	"github.com/jake-hansen/agora/platforms/zoom"
 )
 
+// MeetingHandler is the handler that manages operations on Meetings for the API.
 type MeetingHandler struct {
 	AuthMiddleware  *authmiddleware.AuthMiddleware
 	PlatformService *domain.MeetingPlatformService
@@ -49,6 +50,10 @@ func (m *MeetingHandler) validateHelper(err error) error {
 	return err
 }
 
+// Register creates 3 endpoints to manage meetings
+// /me/platforms/:platform/meetings (GET) - retrieves all meetings for the authenticated user on the specified platform
+// /me/platforms/:platform/meetings (POST) - creates a new meeting for the authenticated user on the specified platform
+// /me/platforms/:platform/meetings/:id (GET) - retrieves the specified meeting for the authenticated user on the specified platform
 func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup := parentGroup.Group("users")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
@@ -76,6 +81,7 @@ func (m *MeetingHandler) platformErrorConverter(err error) error {
 	return apiErr
 }
 
+// CreateMeeting creates a meeting
 func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
 
@@ -130,6 +136,7 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	c.JSON(http.StatusCreated, adapter.MeetingDomainToDTO(createdMeeting))
 }
 
+// GetMeeting gets all meetings
 func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	platformName := c.Param("platform")
 	pageSize := c.Query("page_size")
@@ -174,6 +181,7 @@ func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	c.JSON(http.StatusOK, adapter.MeetingPageDomainToDTO(meetings))
 }
 
+// GetMeeting gets a single meeting
 func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
 	meetingID := c.Param("id")

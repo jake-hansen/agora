@@ -2,32 +2,38 @@ package validator
 
 import (
 	"errors"
-	"github.com/go-playground/validator/v10"
 	"reflect"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type ValidationEngine interface{}
 
+// CustomValidationFunc represents a custom validation function and other associated properties.
 type CustomValidationFunc struct {
-	Tag  string
-	Func validator.Func
+	Tag                      string
+	Func                     validator.Func
 	CallValidationEvenIfNull bool
 }
 
+// Config is used to configure a Validator with the containing Engine and CustomValidationFuncs.
 type Config struct {
 	Engine                ValidationEngine
 	CustomValidationFuncs []CustomValidationFunc
 }
 
+// Validator contains the components needed to perform validation within the application.
 type Validator struct {
-	engine 				  ValidationEngine
+	engine                ValidationEngine
 	customValidationFuncs []CustomValidationFunc
 }
 
+// NewValidator returns a new Validator configured using the provided Config and also
+// initializes the Validator for use.
 func NewValidator(config Config) (*Validator, error) {
 	v := &Validator{
-		engine: config.Engine,
+		engine:                config.Engine,
 		customValidationFuncs: config.CustomValidationFuncs,
 	}
 	err := v.init()
@@ -62,7 +68,6 @@ func (v *Validator) registerCustomValidations() error {
 	return errors.New("provided validation engine is not of type *validator.Validate")
 }
 
-// RegisterCustomValidation registers a custom tag name func to gin's validator
 func (v *Validator) registerCustomTagNameFunc() error {
 	if vl, ok := v.engine.(*validator.Validate); ok {
 		vl.RegisterTagNameFunc(func(fld reflect.StructField) string {
