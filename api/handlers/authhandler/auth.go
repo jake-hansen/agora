@@ -2,7 +2,9 @@ package authhandler
 
 import (
 	"errors"
+	"github.com/jake-hansen/agora/services/cookieservice"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -15,6 +17,7 @@ import (
 // AuthHandler is the handler that manages authentication for the API.
 type AuthHandler struct {
 	AuthService *domain.AuthService
+	CookieService *cookieservice.CookieService
 }
 
 // Register creates two endpoints to handle login and logout functionality.
@@ -47,14 +50,17 @@ func (a *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Retrieve token
-	token, err := (*a.AuthService).Authenticate(*adapter.AuthDTOToDomain(&credentials))
+	// Retrieve tokenSet
+	tokenSet, err := (*a.AuthService).Authenticate(*adapter.AuthDTOToDomain(&credentials))
 
 	if err != nil {
 		apiError := api.NewAPIError(http.StatusUnauthorized, err, "the provided credentials could not be validated")
 		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
 	} else {
-		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(token))
+		refreshCookieMaxAge := tokenSet.Refresh.Expires.Sub(time.Now()).Seconds()
+
+		a.CookieService.SetCookie(c, "refresh", tokenSet.Refresh.Value, int(refreshCookieMaxAge), "/", true)
+		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&tokenSet.Auth))
 	}
 }
 

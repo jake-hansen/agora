@@ -14,6 +14,7 @@ import (
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/platforms"
 	"github.com/jake-hansen/agora/router/handlers"
+	"github.com/jake-hansen/agora/services/cookieservice"
 	"github.com/jake-hansen/agora/services/healthservice"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
@@ -46,7 +47,8 @@ var (
 		jwtservice.ProviderProductionSet,
 		oauthinfoservice.ProviderProductionSet,
 		userservice.ProviderProductionSet,
-		healthservice.ProviderProductionSet)
+		healthservice.ProviderProductionSet,
+		cookieservice.ProviderSet)
 
 	repos = wire.NewSet(meetingplatformrepo.ProviderSet,
 		platforms.ProviderSet,

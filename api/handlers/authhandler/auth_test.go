@@ -26,7 +26,7 @@ var domainMockCredentials = domain.Auth{
 	},
 }
 var domainMockToken = domain.Token{
-	Value: "test-token",
+	Auth: "test-token",
 }
 
 var DTOMockCredentials = dto.Auth{
@@ -189,6 +189,6 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, "{\"validation errors\":[{\"field\":\"Value\",\"reason\":\"required\"}]}", w.Body.String())
+		assert.Equal(t, "{\"validation errors\":[{\"field\":\"Auth\",\"reason\":\"required\"}]}", w.Body.String())
 	})
 }

@@ -26,6 +26,7 @@ import (
 	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
+	"github.com/jake-hansen/agora/services/cookieservice"
 	"github.com/jake-hansen/agora/services/healthservice"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
@@ -56,7 +57,9 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	userRepository := userrepo.Provide(db)
 	userService := userservice.Provide(userRepository)
 	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
-	authHandler := authhandler.Provide(simpleAuthService)
+	cookieserviceConfig := cookieservice.Cfg(v)
+	cookieService := cookieservice.Provide(cookieserviceConfig)
+	authHandler := authhandler.Provide(simpleAuthService, cookieService)
 	userHandler := userhandler.Provide(userService)
 	v3 := authmiddleware.ProvideAuthorizationHeaderParser()
 	authMiddleware := authmiddleware.Provide(simpleAuthService, v3)

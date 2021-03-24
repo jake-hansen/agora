@@ -25,19 +25,28 @@ func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
 	return true, nil
 }
 
-// Authenticate attempts to authenticate the given Auth. If authenticated, returns a JWT. Otherwise,
+// Authenticate attempts to authenticate the given Auth. If authenticated, returns a Token. Otherwise,
 // an error is returned.
-func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.Token, error) {
+func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, error) {
 	// Validate credentials with database
 
 	if u, err := s.userService.Validate(auth.Credentials); err != nil {
 		return nil, errors.New("username or password is not correct")
 	} else {
-		token, err := s.jwtService.GenerateToken(*u)
+		authToken, err := s.jwtService.GenerateToken(*u)
 		if err != nil {
 			return nil, err
 		}
-		return &domain.Token{Value: token}, nil
+
+		refreshToken, err := s.jwtService.GenerateRefreshToken(*u, *authToken)
+		if err != nil {
+			return nil, err
+		}
+
+		return &domain.TokenSet{
+			Auth:    *authToken,
+			Refresh: *refreshToken,
+		}, nil
 	}
 }
 

@@ -49,7 +49,7 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 	})
 
 	t.Run("test-invalid-token", func(t *testing.T) {
-		invalidToken := domain.Token{Value: "invalid"}
+		invalidToken := domain.Token{Auth: "invalid"}
 		as, ds, _ := ProvideTest()
 
 		ds.On("ValidateToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.Claims{}, errors.New("invalid token"))
@@ -65,7 +65,7 @@ func TestSimpleAuthService_Authenticate(t *testing.T) {
 }
 
 func TestSimpleAuthService_Deauthenticate(t *testing.T) {
-	invalidToken := domain.Token{Value: "invalid"}
+	invalidToken := domain.Token{Auth: "invalid"}
 	as, _, _ := ProvideTest()
 	err := as.Deauthenticate(invalidToken)
 
