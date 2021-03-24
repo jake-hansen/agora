@@ -2,16 +2,17 @@ package validator
 
 import (
 	"errors"
-	"github.com/go-playground/validator/v10"
 	"reflect"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type ValidationEngine interface{}
 
 type CustomValidationFunc struct {
-	Tag  string
-	Func validator.Func
+	Tag                      string
+	Func                     validator.Func
 	CallValidationEvenIfNull bool
 }
 
@@ -21,13 +22,13 @@ type Config struct {
 }
 
 type Validator struct {
-	engine 				  ValidationEngine
+	engine                ValidationEngine
 	customValidationFuncs []CustomValidationFunc
 }
 
 func NewValidator(config Config) (*Validator, error) {
 	v := &Validator{
-		engine: config.Engine,
+		engine:                config.Engine,
 		customValidationFuncs: config.CustomValidationFuncs,
 	}
 	err := v.init()

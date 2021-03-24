@@ -3,8 +3,9 @@ package domain
 import (
 	"context"
 	"fmt"
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // OAuthInfo represents OAuth token information.
@@ -44,11 +45,10 @@ func (O OAuthInfo) TableName() string {
 // TokenExistsError is an error that occurs when an OAuthInfo already exists for a User and MeetingPlatform
 // combination, but a new OAuthInfo is trying to be created.
 type TokenExistsError struct {
-	UserID		uint
-	Platform	string
+	UserID   uint
+	Platform string
 }
 
 func (t TokenExistsError) Error() string {
 	return fmt.Sprintf("OAuth tokens already exist for user with id %d for platform %s", t.UserID, t.Platform)
 }
-

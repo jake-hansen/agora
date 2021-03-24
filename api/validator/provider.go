@@ -6,7 +6,7 @@ import (
 )
 
 func Cfg(customValidationFuncs []CustomValidationFunc) Config {
-	c := Config {
+	c := Config{
 		Engine:                binding.Validator.Engine(),
 		CustomValidationFuncs: customValidationFuncs,
 	}

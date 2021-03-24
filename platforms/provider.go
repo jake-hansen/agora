@@ -2,6 +2,7 @@ package platforms
 
 import (
 	"fmt"
+
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/platforms/zoom"
