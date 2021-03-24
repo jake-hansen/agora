@@ -7,6 +7,7 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
+// ScheduledMeetingDTOToDomain converts the given scheduled Meeting from DTO representation to domain representation.
 func ScheduledMeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 	domainMeeting := &domain.Meeting{
 		Title:       meeting.Title,
@@ -22,6 +23,7 @@ func ScheduledMeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 	return domainMeeting
 }
 
+// InstantMeetingDTOToDomain conversts the given instant Meeting from DTO representation to domain representation.
 func InstantMeetingDTOToDomain(meeting *dto.InstantMeeting) *domain.Meeting {
 	domainMeeting := &domain.Meeting{
 		Title:       meeting.Title,
@@ -32,6 +34,7 @@ func InstantMeetingDTOToDomain(meeting *dto.InstantMeeting) *domain.Meeting {
 	return domainMeeting
 }
 
+// MeetingDomainToDTO converts the given Meeting from domain representation to DTO representation.
 func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
 
 	dtoMeeting := &dto.Meeting{
@@ -50,6 +53,7 @@ func MeetingDomainToDTO(meeting *domain.Meeting) *dto.Meeting {
 	return dtoMeeting
 }
 
+// MeetingPageDomainToDTO converts the given Page from domain representation to MeetingPage representation.
 func MeetingPageDomainToDTO(page *domain.Page) *dto.MeetingPage {
 	var meetings []*dto.Meeting
 	for _, meeting := range page.Records {

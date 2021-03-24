@@ -1,5 +1,6 @@
 package domain
 
+// Page represents a paginated response.
 type Page struct {
 	PageCount         int
 	PageNumber        int
@@ -10,6 +11,7 @@ type Page struct {
 	Records           []interface{}
 }
 
+// PageRequest represents a paginated request.
 type PageRequest struct {
 	PageSize      int
 	RequestedPage string
