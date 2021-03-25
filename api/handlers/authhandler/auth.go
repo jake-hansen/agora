@@ -31,12 +31,9 @@ func (a *AuthHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		authGroup.POST("", a.Login)
 		authGroup.DELETE("", a.Logout)
+		authGroup.POST("/refresh", a.Refresh)
 	}
 
-	refreshGroup := parentGroup.Group("refresh")
-	{
-		refreshGroup.POST("", a.Refresh)
-	}
 	return nil
 }
 
