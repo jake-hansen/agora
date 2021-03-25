@@ -36,23 +36,25 @@ func ProvideTest() (*simpleauthservice.SimpleAuthService, *jwtservicemock.Servic
 func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 	t.Run("test-valid-token", func(t *testing.T) {
 		as, js, us := ProvideTest()
-		js.On("GenerateToken", mock.Anything).Return("test-token", nil)
+		testToken := domain.Token{Value: "test-token"}
+		js.On("GenerateToken", mock.Anything).Return(&testToken, nil)
+		js.On("GenerateRefreshToken", mock.Anything, mock.Anything, mock.Anything).Return(&testToken, nil)
 		us.On("Validate", mock.Anything).Return(&domain.User{}, nil)
 		token, err := as.Authenticate(testAuth)
 
 		assert.NoError(t, err)
 
-		js.On("ValidateToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.Claims{}, nil)
-		valid, err := as.IsAuthenticated(*token)
+		js.On("ValidateAuthToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.Claims{}, nil)
+		valid, err := as.IsAuthenticated(token.Auth)
 		assert.NoError(t, err)
 		assert.True(t, valid)
 	})
 
 	t.Run("test-invalid-token", func(t *testing.T) {
-		invalidToken := domain.Token{Auth: "invalid"}
+		invalidToken := domain.Token{Value: "invalid"}
 		as, ds, _ := ProvideTest()
 
-		ds.On("ValidateToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.Claims{}, errors.New("invalid token"))
+		ds.On("ValidateAuthToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.Claims{}, errors.New("invalid token"))
 		valid, err := as.IsAuthenticated(invalidToken)
 		assert.Error(t, err)
 		assert.False(t, valid)
@@ -65,7 +67,7 @@ func TestSimpleAuthService_Authenticate(t *testing.T) {
 }
 
 func TestSimpleAuthService_Deauthenticate(t *testing.T) {
-	invalidToken := domain.Token{Auth: "invalid"}
+	invalidToken := domain.Token{Value: "invalid"}
 	as, _, _ := ProvideTest()
 	err := as.Deauthenticate(invalidToken)
 

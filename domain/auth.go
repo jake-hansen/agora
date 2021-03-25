@@ -17,6 +17,7 @@ type Credentials struct {
 type AuthService interface {
 	IsAuthenticated(token Token) (bool, error)
 	Authenticate(auth Auth) (*TokenSet, error)
+	RefreshToken(tokens TokenSet) (*TokenSet, error)
 	Deauthenticate(token Token) error
 	GetUser(token Token) (*User, error)
 }

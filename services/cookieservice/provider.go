@@ -2,6 +2,7 @@ package cookieservice
 
 import (
 	"github.com/google/wire"
+	"github.com/jake-hansen/agora/domain"
 	"github.com/spf13/viper"
 )
 
@@ -24,5 +25,5 @@ func Provide(cfg *Config) *CookieService {
 }
 
 var (
-	ProviderSet = wire.NewSet(Provide, Cfg)
+	ProviderSet = wire.NewSet(Provide, wire.Bind(new(domain.CookieService), new(*CookieService)),Cfg)
 )

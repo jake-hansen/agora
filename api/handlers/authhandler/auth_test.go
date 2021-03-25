@@ -4,19 +4,19 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/stretchr/testify/mock"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
-
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
 	"github.com/jake-hansen/agora/api/middleware"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/mocks/authservicemock"
+	"github.com/jake-hansen/agora/services/mocks/cookieservicemock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
 )
 
 var domainMockCredentials = domain.Auth{
@@ -25,8 +25,13 @@ var domainMockCredentials = domain.Auth{
 		Password: "test",
 	},
 }
-var domainMockToken = domain.Token{
-	Auth: "test-token",
+var domainMockToken = domain.TokenSet{
+	Auth:    domain.Token{
+		Value:   "test-token",
+	},
+	Refresh: domain.Token{
+		Value:   "test-token",
+	},
 }
 
 var DTOMockCredentials = dto.Auth{
@@ -44,11 +49,13 @@ func TestAuthHandler_Login(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockAuthService := authservicemock.Provide()
 		mockAuthService.On("Authenticate", mock.AnythingOfType("domain.Auth")).Return(&domainMockToken, nil)
+		mockCookieService := cookieservicemock.Provide()
+		mockCookieService.On("SetCookie", mock.AnythingOfType("*gin.Context"), "refresh", "test-token", mock.AnythingOfType("int"), "/", true)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 
-		h := authhandler.Provide(mockAuthService)
+		h := authhandler.Provide(mockAuthService, mockCookieService, nil)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -81,7 +88,7 @@ func TestAuthHandler_Login(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.Provide(mockAuthService)
+		h := authhandler.Provide(mockAuthService, nil, nil)
 		_ = h.Register(router.Group("test"))
 
 		badRequest := `{}`
@@ -110,13 +117,13 @@ func TestAuthHandler_Login(t *testing.T) {
 
 	t.Run("invalid-credentials", func(t *testing.T) {
 		mockAuthService := authservicemock.Provide()
-		var token *domain.Token = nil
+		var token *domain.TokenSet = nil
 		mockAuthService.On("Authenticate", mock.AnythingOfType("domain.Auth")).Return(token,
 			errors.New("username or password not correct"))
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.Provide(mockAuthService)
+		h := authhandler.Provide(mockAuthService, nil, nil)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -139,7 +146,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.Provide(mockAuthService)
+		h := authhandler.Provide(mockAuthService, nil, nil)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -159,7 +166,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.Provide(mockAuthService)
+		h := authhandler.Provide(mockAuthService, nil, nil)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -178,7 +185,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
-		h := authhandler.Provide(mockAuthService)
+		h := authhandler.Provide(mockAuthService, nil, nil)
 		_ = h.Register(router.Group("test"))
 
 		badRequest := `{}`
@@ -189,6 +196,6 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, "{\"validation errors\":[{\"field\":\"Auth\",\"reason\":\"required\"}]}", w.Body.String())
+		assert.Equal(t, "{\"validation errors\":[{\"field\":\"Value\",\"reason\":\"required\"}]}", w.Body.String())
 	})
 }

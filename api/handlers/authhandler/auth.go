@@ -2,7 +2,9 @@ package authhandler
 
 import (
 	"errors"
-	"github.com/jake-hansen/agora/services/cookieservice"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
+	"github.com/jake-hansen/agora/services/jwtservice"
 	"net/http"
 	"time"
 
@@ -17,7 +19,8 @@ import (
 // AuthHandler is the handler that manages authentication for the API.
 type AuthHandler struct {
 	AuthService *domain.AuthService
-	CookieService *cookieservice.CookieService
+	CookieService *domain.CookieService
+	AuthMiddleware  *authmiddleware.AuthMiddleware
 }
 
 // Register creates two endpoints to handle login and logout functionality.
@@ -28,6 +31,11 @@ func (a *AuthHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		authGroup.POST("", a.Login)
 		authGroup.DELETE("", a.Logout)
+	}
+
+	refreshGroup := parentGroup.Group("refresh")
+	{
+		refreshGroup.POST("", a.Refresh)
 	}
 	return nil
 }
@@ -59,7 +67,7 @@ func (a *AuthHandler) Login(c *gin.Context) {
 	} else {
 		refreshCookieMaxAge := tokenSet.Refresh.Expires.Sub(time.Now()).Seconds()
 
-		a.CookieService.SetCookie(c, "refresh", tokenSet.Refresh.Value, int(refreshCookieMaxAge), "/", true)
+		(*a.CookieService).SetCookie(c, "refresh", tokenSet.Refresh.Value, int(refreshCookieMaxAge), "/", true)
 		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&tokenSet.Auth))
 	}
 }
@@ -77,7 +85,50 @@ func (a *AuthHandler) Logout(c *gin.Context) {
 	err = (*a.AuthService).Deauthenticate(*adapter.TokenDTOToDomain(&token))
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func (a *AuthHandler) Refresh(c *gin.Context) {
+	refreshToken, err := c.Cookie("refresh")
+	if err != nil {
+		apiError := api.NewAPIError(http.StatusBadRequest, err, "the refresh token cookie could not be found or parsed")
+		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	authToken, err := (*a.AuthMiddleware).ParseToken(c.Request)
+	if err != nil {
+		apiError := api.NewAPIError(http.StatusBadRequest, err, "the access token could not be found or parsed")
+		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	tokenSet := domain.TokenSet{
+		Auth:    *authToken,
+		Refresh: domain.Token{
+			Value:   refreshToken,
+		},
+	}
+
+	newTokenSet, err := (*a.AuthService).RefreshToken(tokenSet)
+	if err != nil {
+		var jwtValidErr *jwt.ValidationError
+		if errors.As(err, &jwtValidErr) {
+			if errors.As(err.(*jwt.ValidationError).Inner, &jwtservice.ErrInvalidTokenPair) {
+				err = api.NewAPIError(http.StatusBadRequest, err, "invalid token pair")
+			} else {
+				err = api.NewAPIError(http.StatusBadRequest, err, "error validating token(s)")
+			}
+		}
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	} else {
+		refreshCookieMaxAge := newTokenSet.Refresh.Expires.Sub(time.Now()).Seconds()
+
+		(*a.CookieService).SetCookie(c, "refresh", newTokenSet.Refresh.Value, int(refreshCookieMaxAge), "/", true)
+		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&newTokenSet.Auth))
+	}
 }

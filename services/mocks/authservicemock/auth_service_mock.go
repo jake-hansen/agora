@@ -23,9 +23,14 @@ func (s *AuthService) IsAuthenticated(token domain.Token) (bool, error) {
 }
 
 // Authenticate mocks AuthService's Authenticate function.
-func (s *AuthService) Authenticate(auth domain.Auth) (*domain.Token, error) {
+func (s *AuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, error) {
 	args := s.Called(auth)
-	return args.Get(0).(*domain.Token), args.Error(1)
+	return args.Get(0).(*domain.TokenSet), args.Error(1)
+}
+
+func (s *AuthService) RefreshToken(tokens domain.TokenSet) (*domain.TokenSet, error) {
+	args := s.Called(tokens)
+	return args.Get(0).(*domain.TokenSet), args.Error(1)
 }
 
 // Deauthenticate mocks AuthService's Deauthenticate function.
