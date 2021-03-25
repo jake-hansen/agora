@@ -11,7 +11,8 @@ api:
     # /myroot/v1/example.
     root:
   # This is the domain name the API is running on. This is used for things
-  # such as setting cookies, so it is important to include this value.
+  # such as setting cookies, so it is important to include this value. Do not
+  # include the protocol or port. For example: mywebsite.com would be appropriate.
   domain:
   cors:
     # This sets how long the results fo a preflight request can be cached.
