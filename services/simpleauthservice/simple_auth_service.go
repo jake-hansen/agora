@@ -2,6 +2,7 @@ package simpleauthservice
 
 import (
 	"errors"
+	"gorm.io/gorm"
 	"time"
 
 	"github.com/jake-hansen/agora/domain"
@@ -77,7 +78,7 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 	foundToken, err := s.refreshTokenService.GetRefreshTokenByParentTokenHash(claims.ParentTokenHash, claims.Nonce)
 	if err != nil {
 		err = s.refreshTokenService.RevokeRefreshTokenByNonce(claims.Nonce)
-		if err != nil {
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound){
 			return nil, err
 		}
 		return nil, NewRefreshTokenReuseError()
