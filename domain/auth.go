@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"gorm.io/gorm"
+	"time"
+)
 
 // Auth contains the credentials needed to begin the authentication process.
 type Auth struct {
@@ -23,6 +26,12 @@ type AuthService interface {
 }
 
 type Token struct {
+	Value string
+	Expires time.Time
+}
+
+type RefreshToken struct {
+	gorm.Model
 	Value string
 	Expires time.Time
 }

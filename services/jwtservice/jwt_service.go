@@ -13,9 +13,9 @@ import (
 // JWTService is a service for generating and validating JWTs.
 type JWTService interface {
 	GenerateToken(user domain.User) (*domain.Token, error)
-	GenerateRefreshToken(user domain.User, authToken domain.Token, expiry *time.Time) (*domain.Token, error)
-	ValidateAuthToken(token string) (*jwt.Token, *Claims, error)
-	ValidateRefreshToken(tokenSet domain.TokenSet) (*jwt.Token, *RefreshClaims, error)
+	GenerateRefreshToken(user domain.User, authToken domain.Token, parentToken *string, expiry *time.Time) (*domain.Token, error)
+	ValidateAuthToken(token string) (*jwt.Token, *AuthClaims, error)
+	ValidateRefreshToken(token string) (*jwt.Token, *RefreshClaims, error)
 }
 
 // Config contains the parameters for configuring a JWTService.
@@ -31,7 +31,7 @@ type JWTServiceImpl struct {
 	config Config
 }
 
-type Claims struct {
+type AuthClaims struct {
 	jwt.StandardClaims
 	UserID	uint	`json:"user_id"`
 }
@@ -40,6 +40,7 @@ type RefreshClaims struct {
 	jwt.StandardClaims
 	UserID uint	`json:"user_id"`
 	AuthTokenHash string	`json:"auth_token_hash"`
+	ParentTokenHash string	`json:"parent_token_hash"`
 }
 
 // GenerateToken creates a JWT for the specified User and returns the token as a string.
@@ -47,7 +48,7 @@ func (j *JWTServiceImpl) GenerateToken(user domain.User) (*domain.Token, error) 
 	now := time.Now()
 	expiry := now.Add(j.config.Duration)
 
-	claims := &Claims{
+	claims := &AuthClaims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiry.Unix(),
 			IssuedAt:  now.Unix(),
@@ -73,7 +74,7 @@ func (j *JWTServiceImpl) GenerateToken(user domain.User) (*domain.Token, error) 
 	return domainToken, nil
 }
 
-func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain.Token, expiry *time.Time) (*domain.Token, error) {
+func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain.Token, parentToken *string, expiry *time.Time) (*domain.RefreshToken, error) {
 	now := time.Now()
 
 	newExpiry := now.Add(j.config.RefreshDuration)
@@ -83,7 +84,14 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 
 	hasher := sha256.New()
 	hasher.Write([]byte(authToken.Value))
-	sha := hex.EncodeToString(hasher.Sum(nil))
+	authSHA := hex.EncodeToString(hasher.Sum(nil))
+
+	parentRefreshSHA := ""
+	if parentToken != nil {
+		hasher.Reset()
+		hasher.Write([]byte(*parentToken))
+		parentRefreshSHA = hex.EncodeToString(hasher.Sum(nil))
+	}
 
 	claims := &RefreshClaims{
 		StandardClaims: jwt.StandardClaims{
@@ -93,8 +101,9 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 			NotBefore: now.Unix(),
 			Subject:   user.Username,
 		},
-		UserID:         user.ID,
-		AuthTokenHash:  sha,
+		UserID:        user.ID,
+		AuthTokenHash: authSHA,
+		ParentTokenHash: parentRefreshSHA,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -104,7 +113,7 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 		return nil, err
 	}
 
-	domainToken := &domain.Token{
+	domainToken := &domain.RefreshToken{
 		Value:   t,
 		Expires: newExpiry,
 	}
@@ -114,13 +123,13 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 
 // ValidateToken validates the given token string. If the token is valid, the token string is return as a jwt.Token.
 // Otherwise, a nil token is returned along with an error.
-func (j *JWTServiceImpl) ValidateAuthToken(token string) (*jwt.Token, *Claims, error) {
-	var returnClaims *Claims
-	t, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func (j *JWTServiceImpl) ValidateAuthToken(token string) (*jwt.Token, *AuthClaims, error) {
+	var returnClaims *AuthClaims
+	t, err := jwt.ParseWithClaims(token, &AuthClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		if tclaims, ok := token.Claims.(*Claims); ok {
+		if tclaims, ok := token.Claims.(*AuthClaims); ok {
 			returnClaims = tclaims
 		}
 
@@ -130,22 +139,14 @@ func (j *JWTServiceImpl) ValidateAuthToken(token string) (*jwt.Token, *Claims, e
 	return t, returnClaims, err
 }
 
-func (j *JWTServiceImpl) ValidateRefreshToken(tokenSet domain.TokenSet) (*jwt.Token, *RefreshClaims, error) {
+func (j *JWTServiceImpl) ValidateRefreshToken(token string) (*jwt.Token, *RefreshClaims, error) {
 	var returnClaims *RefreshClaims
-	t, err := jwt.ParseWithClaims(tokenSet.Refresh.Value, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
+	t, err := jwt.ParseWithClaims(token, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		if tclaims, ok := token.Claims.(*RefreshClaims); ok {
-			hasher := sha256.New()
-			hasher.Write([]byte(tokenSet.Auth.Value))
-			sha := hex.EncodeToString(hasher.Sum(nil))
-
-			if tclaims.AuthTokenHash != sha {
-				return nil, new(InvalidTokenPair)
-			} else {
-				returnClaims = tclaims
-			}
+			returnClaims = tclaims
 		}
 
 		return []byte(j.config.SigningKey), nil

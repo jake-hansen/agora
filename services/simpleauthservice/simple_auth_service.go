@@ -38,7 +38,7 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, er
 			return nil, err
 		}
 
-		refreshToken, err := s.jwtService.GenerateRefreshToken(*u, *authToken, nil)
+		refreshToken, err := s.jwtService.GenerateRefreshToken(*u, *authToken, nil, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -50,13 +50,13 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, er
 	}
 }
 
-func (s *SimpleAuthService) RefreshToken(tokens domain.TokenSet) (*domain.TokenSet, error) {
-	_, claims, err := s.jwtService.ValidateRefreshToken(tokens)
+func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.TokenSet, error) {
+	_, claims, err := s.jwtService.ValidateRefreshToken(token.Value)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := s.GetUser(tokens.Auth)
+	user, err := s.GetUserFromAuthToken(tokens.Auth)
 	if err != nil {
 		return nil, err
 	}
@@ -85,19 +85,32 @@ func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
 }
 
-// GetUser retrieves the User that the provided Token belongs to.
-func (s *SimpleAuthService) GetUser(token domain.Token) (*domain.User, error) {
+// GetUserFromAuthToken retrieves the User that the provided Token belongs to.
+func (s *SimpleAuthService) GetUserFromAuthToken(token domain.Token) (*domain.User, error) {
 	_, claims, err := s.jwtService.ValidateAuthToken(token.Value)
 
 	if claims != nil {
-		user, err := s.userService.GetByID(claims.UserID)
-		if err != nil {
-			return nil, err
-		}
-
-		return user, nil
+		return s.getUserHelper(claims.UserID)
 	} else {
 		return nil, err
 	}
+}
 
+func (s *SimpleAuthService) GetUserFromRefreshToken(token domain.RefreshToken) (*domain.User, error) {
+	_, claims, err := s.jwtService.ValidateRefreshToken(token.Value)
+
+	if claims != nil {
+		return s.getUserHelper(claims.UserID)
+	} else {
+		return nil, err
+	}
+}
+
+func (s *SimpleAuthService) getUserHelper(userID uint) (*domain.User, error) {
+	user, err := s.userService.GetByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

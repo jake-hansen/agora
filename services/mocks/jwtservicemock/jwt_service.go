@@ -20,9 +20,9 @@ func (j *Service) GenerateToken(user domain.User) (*domain.Token, error) {
 }
 
 // ValidateToken mocks JWTService's ValidateToken function.
-func (j *Service) ValidateAuthToken(token string) (*jwt.Token, *jwtservice.Claims, error) {
+func (j *Service) ValidateAuthToken(token string) (*jwt.Token, *jwtservice.AuthClaims, error) {
 	args := j.Mock.Called(token)
-	return args.Get(0).(*jwt.Token), args.Get(1).(*jwtservice.Claims), args.Error(2)
+	return args.Get(0).(*jwt.Token), args.Get(1).(*jwtservice.AuthClaims), args.Error(2)
 }
 
 func (j *Service) GenerateRefreshToken(user domain.User, authToken domain.Token, expiry *time.Time) (*domain.Token, error) {
