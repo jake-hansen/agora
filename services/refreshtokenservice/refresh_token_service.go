@@ -18,8 +18,8 @@ func (r *RefreshTokenService) GetRefreshTokenByHash(hash string) (*domain.Refres
 	return r.repo.GetByTokenHash(hash)
 }
 
-func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(hash string) (*domain.RefreshToken, error) {
-	return r.repo.GetByParentTokenHash(hash)
+func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(hash string, nonce string) (*domain.RefreshToken, error) {
+	return r.repo.GetByParentTokenHash(hash, r.sha256(nonce))
 }
 
 func (r *RefreshTokenService) GetRefreshTokenByTokenNonceHash(nonceHash string) (*domain.RefreshToken, error) {
@@ -43,12 +43,8 @@ func (r *RefreshTokenService) ReplaceRefreshToken(token domain.RefreshToken) err
 	return err
 }
 
-func (r *RefreshTokenService) RevokeRefreshTokenByNonce(nonceHash string) error {
-	hasher := sha256.New()
-	hasher.Write([]byte(nonceHash))
-	hash := hex.EncodeToString(hasher.Sum(nil))
-
-	foundToken, err := r.repo.GetByTokenNonceHash(hash)
+func (r *RefreshTokenService) RevokeRefreshTokenByNonce(nonce string) error {
+	foundToken, err := r.repo.GetByTokenNonceHash(r.sha256(nonce))
 	if err != nil {
 		return err
 	}
@@ -56,5 +52,11 @@ func (r *RefreshTokenService) RevokeRefreshTokenByNonce(nonceHash string) error 
 	foundToken.Revoked = true
 
 	return r.repo.Update(foundToken)
+}
+
+func (r *RefreshTokenService) sha256(v string) string {
+	hasher := sha256.New()
+	hasher.Write([]byte(v))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 

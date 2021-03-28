@@ -71,7 +71,7 @@ type RefreshTokenRepository interface {
 	GetAll() ([]*RefreshToken, error)
 	GetByToken(token RefreshToken) (*RefreshToken, error)
 	GetByTokenHash(hash string) (*RefreshToken, error)
-	GetByParentTokenHash(hash string) (*RefreshToken, error)
+	GetByParentTokenHash(hash string, nonceHash string) (*RefreshToken, error)
 	GetByTokenNonceHash(nonceHash string) (*RefreshToken, error)
 	Update(token *RefreshToken) error
 	Delete(ID uint) error
@@ -81,8 +81,8 @@ type RefreshTokenService interface {
 	SaveNewRefreshToken(token RefreshToken) (uint, error)
 	GetRefreshTokenByHash(hash string) (*RefreshToken, error)
 	ReplaceRefreshToken(token RefreshToken) error
-	GetRefreshTokenByParentTokenHash(hash string) (*RefreshToken, error)
-	RevokeRefreshTokenByNonce(nonceHash string) error
+	GetRefreshTokenByParentTokenHash(hash string, nonce string) (*RefreshToken, error)
+	RevokeRefreshTokenByNonce(nonce string) error
 }
 
 type TokenSet struct {

@@ -66,10 +66,10 @@ func (r *RefreshTokenRepo) GetByTokenHash(hash string) (*domain.RefreshToken, er
 	return foundToken, nil
 }
 
-func (r *RefreshTokenRepo) GetByParentTokenHash(hash string) (*domain.RefreshToken, error) {
+func (r *RefreshTokenRepo) GetByParentTokenHash(hash string, nonceHash string) (*domain.RefreshToken, error) {
 	var foundToken = new(domain.RefreshToken)
 
-	if err := r.DB.Where("parent_token_hash = ?", hash).First(foundToken).Error; err != nil {
+	if err := r.DB.Where("parent_token_hash = ? AND token_nonce_hash = ?", hash, nonceHash).First(foundToken).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving Refresh Token with parent hash %s: %w", hash, err)
 	}
 	return foundToken, nil

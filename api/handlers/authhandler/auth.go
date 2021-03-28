@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
+	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"net/http"
 	"time"
 
@@ -102,8 +103,14 @@ func (a *AuthHandler) Refresh(c *gin.Context) {
 	newTokenSet, err := (*a.AuthService).RefreshToken(refreshToken)
 	if err != nil {
 		var jwtValidErr *jwt.ValidationError
+		var tokenReuseErr simpleauthservice.RefreshTokenReuse
+		var tokenRevokedErr simpleauthservice.RefreshTokenRevoked
 		if errors.As(err, &jwtValidErr) {
 			err = api.NewAPIError(http.StatusBadRequest, err, "error validating token(s)")
+		} else if errors.As(err, &tokenReuseErr) {
+			err = api.NewAPIError(http.StatusForbidden, err, "refresh token reuse detected")
+		} else if errors.As(err, &tokenRevokedErr) {
+			err = api.NewAPIError(http.StatusForbidden, err, "refresh token was revoked")
 		}
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return

@@ -74,7 +74,7 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 
 	var newRefreshToken *domain.RefreshToken
 
-	foundToken, err := s.refreshTokenService.GetRefreshTokenByParentTokenHash(claims.ParentTokenHash)
+	foundToken, err := s.refreshTokenService.GetRefreshTokenByParentTokenHash(claims.ParentTokenHash, claims.Nonce)
 	if err != nil {
 		err = s.refreshTokenService.RevokeRefreshTokenByNonce(claims.Nonce)
 		if err != nil {
