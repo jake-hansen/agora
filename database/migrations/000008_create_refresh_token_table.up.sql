@@ -4,6 +4,7 @@ create table if not exists refresh_tokens
     deleted_at timestamp null,
 	updated_at timestamp null,
 	created_at timestamp not null,
+    revoked int not null,
     expires_at timestamp not null,
 	token_hash char(64) not null,
 	token_nonce_hash char(64) not null,

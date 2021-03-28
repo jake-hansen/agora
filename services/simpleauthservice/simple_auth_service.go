@@ -12,8 +12,8 @@ import (
 // and password combination. SimpleAuthService uses a JWT as a token which is not stored or persisted
 // in any way. It is up to the consumer to reauthenticate upon JWT expiry to ensure continued access.
 type SimpleAuthService struct {
-	jwtService  jwtservice.JWTService
-	userService domain.UserService
+	jwtService          jwtservice.JWTService
+	userService         domain.UserService
 	refreshTokenService domain.RefreshTokenService
 }
 
@@ -72,8 +72,28 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 		return nil, err
 	}
 
+	var newRefreshToken *domain.RefreshToken
+
+	foundToken, err := s.refreshTokenService.GetRefreshTokenByParentTokenHash(claims.ParentTokenHash)
+	if err != nil {
+		err = s.refreshTokenService.RevokeRefreshTokenByNonce(claims.Nonce)
+		if err != nil {
+			return nil, err
+		}
+		return nil, NewRefreshTokenReuseError()
+	} else {
+		if foundToken.Revoked == true {
+			return nil, NewRefreshTokenRevokedError()
+		}
+	}
+
 	expiry := time.Unix(claims.ExpiresAt, 0)
-	newRefreshToken, err := s.jwtService.GenerateRefreshToken(*user, *newAuthToken, &token.Value, &expiry)
+	newRefreshToken, err = s.jwtService.GenerateRefreshToken(*user, *newAuthToken, &token.Value, &expiry)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.refreshTokenService.ReplaceRefreshToken(*newRefreshToken)
 	if err != nil {
 		return nil, err
 	}

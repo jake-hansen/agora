@@ -37,7 +37,17 @@ func (r *RefreshTokenRepo) GetByToken(token domain.RefreshToken) (*domain.Refres
 }
 
 func (r *RefreshTokenRepo) Update(token *domain.RefreshToken) error {
-	panic("implement me")
+	if err := r.DB.Model(token).Updates(domain.RefreshToken{
+		Value:           token.Value,
+		ExpiresAt:       token.ExpiresAt,
+		TokenNonceHash:  token.TokenNonceHash,
+		ParentTokenHash: token.ParentTokenHash,
+		UserID:          token.UserID,
+		Revoked:         token.Revoked,
+	}).Error; err != nil {
+		return fmt.Errorf("error updating Refresh Token with id %d: %w", token.ID, err)
+	}
+	return nil
 }
 
 func (r *RefreshTokenRepo) Delete(ID uint) error {
@@ -45,4 +55,31 @@ func (r *RefreshTokenRepo) Delete(ID uint) error {
 		return fmt.Errorf("error deleting Refresh Token with id %d: %w", ID, err)
 	}
 	return nil
+}
+
+func (r *RefreshTokenRepo) GetByTokenHash(hash string) (*domain.RefreshToken, error) {
+	var foundToken = new(domain.RefreshToken)
+
+	if err := r.DB.Where("token_hash = ? AND deleted_at IS NULL", hash).First(foundToken).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving Refresh Token with hash %s: %w", hash, err)
+	}
+	return foundToken, nil
+}
+
+func (r *RefreshTokenRepo) GetByParentTokenHash(hash string) (*domain.RefreshToken, error) {
+	var foundToken = new(domain.RefreshToken)
+
+	if err := r.DB.Where("parent_token_hash = ?", hash).First(foundToken).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving Refresh Token with parent hash %s: %w", hash, err)
+	}
+	return foundToken, nil
+}
+
+func (r *RefreshTokenRepo) GetByTokenNonceHash(nonceHash string) (*domain.RefreshToken, error) {
+	var foundToken = new(domain.RefreshToken)
+
+	if err := r.DB.Where("token_nonce_hash = ?", nonceHash).First(foundToken).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving Refresh Token with nonce hash %s: %w", nonceHash, err)
+	}
+	return foundToken, nil
 }
