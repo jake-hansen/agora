@@ -33,14 +33,14 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, er
 	if u, err := s.userService.Validate(auth.Credentials); err != nil {
 		return nil, errors.New("username or password is not correct")
 	} else {
-		authToken, err := s.jwtService.GenerateToken(*u)
-		if err != nil {
+		authToken, err2 := s.jwtService.GenerateToken(*u)
+		if err2 != nil {
 			return nil, err
 		}
 
-		refreshToken, err := s.jwtService.GenerateRefreshToken(*u, *authToken, nil, nil)
-		if err != nil {
-			return nil, err
+		refreshToken, err2 := s.jwtService.GenerateRefreshToken(*u, *authToken, nil, nil)
+		if err2 != nil {
+			return nil, err2
 		}
 
 		return &domain.TokenSet{
@@ -56,7 +56,7 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 		return nil, err
 	}
 
-	user, err := s.GetUserFromAuthToken(tokens.Auth)
+	user, err := s.userService.GetByID(claims.UserID)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 	}
 
 	expiry := time.Unix(claims.ExpiresAt, 0)
-	newRefreshToken, err := s.jwtService.GenerateRefreshToken(*user, *newAuthToken, &expiry)
+	newRefreshToken, err := s.jwtService.GenerateRefreshToken(*user, *newAuthToken, &token.Value, &expiry)
 	if err != nil {
 		return nil, err
 	}
@@ -83,34 +83,4 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
 func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
 	return nil
-}
-
-// GetUserFromAuthToken retrieves the User that the provided Token belongs to.
-func (s *SimpleAuthService) GetUserFromAuthToken(token domain.Token) (*domain.User, error) {
-	_, claims, err := s.jwtService.ValidateAuthToken(token.Value)
-
-	if claims != nil {
-		return s.getUserHelper(claims.UserID)
-	} else {
-		return nil, err
-	}
-}
-
-func (s *SimpleAuthService) GetUserFromRefreshToken(token domain.RefreshToken) (*domain.User, error) {
-	_, claims, err := s.jwtService.ValidateRefreshToken(token.Value)
-
-	if claims != nil {
-		return s.getUserHelper(claims.UserID)
-	} else {
-		return nil, err
-	}
-}
-
-func (s *SimpleAuthService) getUserHelper(userID uint) (*domain.User, error) {
-	user, err := s.userService.GetByID(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	return user, nil
 }
