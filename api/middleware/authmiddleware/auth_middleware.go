@@ -12,7 +12,7 @@ import (
 
 // ParseTokenFunc defines a function which parses an HTTP request for
 // an authorization token.
-type ParseTokenFunc = func(r *http.Request) (*domain.Token, error)
+type ParseTokenFunc = func(r *http.Request) (*domain.AuthToken, error)
 
 // AuthMiddleware handles authentication by using AuthService to determine if
 // a request is authenticated.
@@ -56,14 +56,14 @@ func (a *AuthMiddleware) HandleAuth() gin.HandlerFunc {
 }
 
 // GetUser attempts to get a User object from the provided Context. This
-// is performed by passing the found Token within the request (if any) to
+// is performed by passing the found AuthToken within the request (if any) to
 // an AuthService which performs the User lookup.
 func (a *AuthMiddleware) GetUser(c *gin.Context) (*domain.User, error) {
 	token, err := a.ParseToken(c.Request)
 	if err != nil {
 		return nil, err
 	}
-	user, err := (*a.AuthService).GetUser(*token)
+	user, err := (*a.AuthService).GetUserFromAuthToken(*token)
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +71,8 @@ func (a *AuthMiddleware) GetUser(c *gin.Context) (*domain.User, error) {
 }
 
 // getTokenFromBearerHeader parses the Authorization header for a Bearer token
-// and returns the parsed result as a domain.Token.
-func getTokenFromBearerHeader(r *http.Request) (*domain.Token, error) {
+// and returns the parsed result as a domain.AuthToken.
+func getTokenFromBearerHeader(r *http.Request) (*domain.AuthToken, error) {
 	t := r.Header.Get("Authorization")
 	if t == "" {
 		return nil, errors.New("token not found")
@@ -81,6 +81,6 @@ func getTokenFromBearerHeader(r *http.Request) (*domain.Token, error) {
 	if len(splitToken) != 2 {
 		return nil, errors.New("could not parse token")
 	}
-	token := domain.Token{Value: splitToken[1]}
+	token := domain.AuthToken{Value: splitToken[1]}
 	return &token, nil
 }

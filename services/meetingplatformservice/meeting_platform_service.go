@@ -82,13 +82,13 @@ func (m *MeetingPlatformService) GetByPlatformName(name string) (*domain.Meeting
 	return m.combine(dbPlatform)
 }
 
-// GetOAuthToken retrieves a Token from a MeetingPlatform by exchanging the provided authorization.
+// GetOAuthToken retrieves a AuthToken from a MeetingPlatform by exchanging the provided authorization.
 func (m *MeetingPlatformService) GetOAuthToken(ctx context.Context, authorization string, platform *domain.MeetingPlatform) (*oauth2.Token, error) {
 	token, err := platform.OAuth.Config.Exchange(ctx, authorization)
 	return token, err
 }
 
-// RefreshOAuthToken refreshes the provided Token against the provided MeetingPlatform and returns the new Token.
+// RefreshOAuthToken refreshes the provided AuthToken against the provided MeetingPlatform and returns the new AuthToken.
 func (m *MeetingPlatformService) RefreshOAuthToken(ctx context.Context, token *oauth2.Token, platform *domain.MeetingPlatform) (*oauth2.Token, error) {
 	tokenSource := platform.OAuth.Config.TokenSource(ctx, token)
 	newToken, err := tokenSource.Token()

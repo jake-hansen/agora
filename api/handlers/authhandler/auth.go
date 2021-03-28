@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
-	"github.com/jake-hansen/agora/services/jwtservice"
 	"net/http"
 	"time"
 
@@ -89,36 +88,22 @@ func (a *AuthHandler) Logout(c *gin.Context) {
 }
 
 func (a *AuthHandler) Refresh(c *gin.Context) {
-	refreshToken, err := c.Cookie("refresh")
+	refreshTokenCookie, err := c.Cookie("refresh")
 	if err != nil {
 		apiError := api.NewAPIError(http.StatusBadRequest, err, "the refresh token cookie could not be found or parsed")
 		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
 		return
 	}
 
-	authToken, err := (*a.AuthMiddleware).ParseToken(c.Request)
-	if err != nil {
-		apiError := api.NewAPIError(http.StatusBadRequest, err, "the access token could not be found or parsed")
-		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
-		return
+	refreshToken := domain.RefreshToken{
+		Value: refreshTokenCookie,
 	}
 
-	tokenSet := domain.TokenSet{
-		Auth:    *authToken,
-		Refresh: domain.Token{
-			Value:   refreshToken,
-		},
-	}
-
-	newTokenSet, err := (*a.AuthService).RefreshToken(tokenSet)
+	newTokenSet, err := (*a.AuthService).RefreshToken(refreshToken)
 	if err != nil {
 		var jwtValidErr *jwt.ValidationError
 		if errors.As(err, &jwtValidErr) {
-			if errors.As(err.(*jwt.ValidationError).Inner, &jwtservice.ErrInvalidTokenPair) {
-				err = api.NewAPIError(http.StatusBadRequest, err, "invalid token pair")
-			} else {
-				err = api.NewAPIError(http.StatusBadRequest, err, "error validating token(s)")
-			}
+			err = api.NewAPIError(http.StatusBadRequest, err, "error validating token(s)")
 		}
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return

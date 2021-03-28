@@ -18,14 +18,14 @@ type Credentials struct {
 
 // AuthService manages authentication based on Auths and Tokens.
 type AuthService interface {
-	IsAuthenticated(token Token) (bool, error)
+	IsAuthenticated(token AuthToken) (bool, error)
 	Authenticate(auth Auth) (*TokenSet, error)
-	RefreshToken(tokens TokenSet) (*TokenSet, error)
-	Deauthenticate(token Token) error
-	GetUser(token Token) (*User, error)
+	RefreshToken(token RefreshToken) (*TokenSet, error)
+	Deauthenticate(token AuthToken) error
+	GetUserFromAuthToken(token AuthToken) (*User, error)
 }
 
-type Token struct {
+type AuthToken struct {
 	Value string
 	Expires time.Time
 }
@@ -37,6 +37,6 @@ type RefreshToken struct {
 }
 
 type TokenSet struct {
-	Auth    Token
-	Refresh Token
+	Auth    AuthToken
+	Refresh RefreshToken
 }

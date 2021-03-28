@@ -18,7 +18,7 @@ type SimpleAuthService struct {
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
 // if the contained JWT is valid.
-func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
+func (s *SimpleAuthService) IsAuthenticated(token domain.AuthToken) (bool, error) {
 	_, _, err := s.jwtService.ValidateAuthToken(token.Value)
 	if err != nil {
 		return false, err
@@ -26,14 +26,14 @@ func (s *SimpleAuthService) IsAuthenticated(token domain.Token) (bool, error) {
 	return true, nil
 }
 
-// Authenticate attempts to authenticate the given Auth. If authenticated, returns a Token. Otherwise,
+// Authenticate attempts to authenticate the given Auth. If authenticated, returns a AuthToken. Otherwise,
 // an error is returned.
 func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, error) {
 	// Validate credentials with database
 	if u, err := s.userService.Validate(auth.Credentials); err != nil {
 		return nil, errors.New("username or password is not correct")
 	} else {
-		authToken, err2 := s.jwtService.GenerateToken(*u)
+		authToken, err2 := s.jwtService.GenerateAuthToken(*u)
 		if err2 != nil {
 			return nil, err
 		}
@@ -61,7 +61,7 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 		return nil, err
 	}
 
-	newAuthToken, err := s.jwtService.GenerateToken(*user)
+	newAuthToken, err := s.jwtService.GenerateAuthToken(*user)
 	if err != nil {
 		return nil, err
 	}
@@ -81,6 +81,17 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 }
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
-func (s *SimpleAuthService) Deauthenticate(token domain.Token) error {
+func (s *SimpleAuthService) Deauthenticate(token domain.AuthToken) error {
 	return nil
+}
+
+// GetUserFromAuthToken retrieves the User that the provided Token belongs to.
+func (s *SimpleAuthService) GetUserFromAuthToken(token domain.AuthToken) (*domain.User, error) {
+	_, claims, err := s.jwtService.ValidateAuthToken(token.Value)
+
+	if err == nil && claims != nil {
+		return s.userService.GetByID(claims.UserID)
+	} else {
+		return nil, err
+	}
 }

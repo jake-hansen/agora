@@ -12,8 +12,8 @@ import (
 
 // JWTService is a service for generating and validating JWTs.
 type JWTService interface {
-	GenerateToken(user domain.User) (*domain.Token, error)
-	GenerateRefreshToken(user domain.User, authToken domain.Token, parentToken *string, expiry *time.Time) (*domain.Token, error)
+	GenerateAuthToken(user domain.User) (*domain.AuthToken, error)
+	GenerateRefreshToken(user domain.User, authToken domain.AuthToken, parentToken *string, expiry *time.Time) (*domain.RefreshToken, error)
 	ValidateAuthToken(token string) (*jwt.Token, *AuthClaims, error)
 	ValidateRefreshToken(token string) (*jwt.Token, *RefreshClaims, error)
 }
@@ -44,7 +44,7 @@ type RefreshClaims struct {
 }
 
 // GenerateToken creates a JWT for the specified User and returns the token as a string.
-func (j *JWTServiceImpl) GenerateToken(user domain.User) (*domain.Token, error) {
+func (j *JWTServiceImpl) GenerateAuthToken(user domain.User) (*domain.AuthToken, error) {
 	now := time.Now()
 	expiry := now.Add(j.config.Duration)
 
@@ -66,7 +66,7 @@ func (j *JWTServiceImpl) GenerateToken(user domain.User) (*domain.Token, error) 
 		return nil, err
 	}
 
-	domainToken := &domain.Token{
+	domainToken := &domain.AuthToken{
 		Value:   t,
 		Expires: expiry,
 	}
@@ -74,7 +74,7 @@ func (j *JWTServiceImpl) GenerateToken(user domain.User) (*domain.Token, error) 
 	return domainToken, nil
 }
 
-func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain.Token, parentToken *string, expiry *time.Time) (*domain.RefreshToken, error) {
+func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain.AuthToken, parentToken *string, expiry *time.Time) (*domain.RefreshToken, error) {
 	now := time.Now()
 
 	newExpiry := now.Add(j.config.RefreshDuration)
