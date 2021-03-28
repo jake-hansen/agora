@@ -10,6 +10,7 @@ import (
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
+	"github.com/jake-hansen/agora/database/repositories/refreshtokenrepo"
 	"github.com/jake-hansen/agora/database/repositories/schemamigrationrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/platforms"
@@ -19,6 +20,7 @@ import (
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
+	"github.com/jake-hansen/agora/services/refreshtokenservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
 )
@@ -48,13 +50,15 @@ var (
 		oauthinfoservice.ProviderProductionSet,
 		userservice.ProviderProductionSet,
 		healthservice.ProviderProductionSet,
-		cookieservice.ProviderSet)
+		cookieservice.ProviderSet,
+		refreshtokenservice.ProviderProductionSet)
 
 	repos = wire.NewSet(meetingplatformrepo.ProviderSet,
 		platforms.ProviderSet,
 		userrepo.ProviderProductionSet,
 		oauthinforepo.ProviderSet,
-		schemamigrationrepo.ProviderProductionSet)
+		schemamigrationrepo.ProviderProductionSet,
+		refreshtokenrepo.ProviderSet)
 
 	middleware = wire.NewSet(authmiddleware.Provide,
 		authmiddleware.ProvideAuthorizationHeaderParser)

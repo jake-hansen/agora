@@ -14,6 +14,7 @@ import (
 type SimpleAuthService struct {
 	jwtService  jwtservice.JWTService
 	userService domain.UserService
+	refreshTokenService domain.RefreshTokenService
 }
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
@@ -41,6 +42,11 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, er
 		refreshToken, err2 := s.jwtService.GenerateRefreshToken(*u, *authToken, nil, nil)
 		if err2 != nil {
 			return nil, err2
+		}
+
+		_, err = s.refreshTokenService.SaveNewRefreshToken(*refreshToken)
+		if err != nil {
+			return nil, err
 		}
 
 		return &domain.TokenSet{

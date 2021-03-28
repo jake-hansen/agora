@@ -61,9 +61,9 @@ func (a *AuthHandler) Login(c *gin.Context) {
 		apiError := api.NewAPIError(http.StatusUnauthorized, err, "the provided credentials could not be validated")
 		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
 	} else {
-		refreshCookieMaxAge := tokenSet.Refresh.Expires.Sub(time.Now()).Seconds()
+		refreshCookieMaxAge := tokenSet.Refresh.ExpiresAt.Sub(time.Now()).Seconds()
 
-		(*a.CookieService).SetCookie(c, "refresh", tokenSet.Refresh.Value, int(refreshCookieMaxAge), "/", true)
+		(*a.CookieService).SetCookie(c, "refresh", string(tokenSet.Refresh.Value), int(refreshCookieMaxAge), "/", true)
 		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&tokenSet.Auth))
 	}
 }
@@ -96,7 +96,7 @@ func (a *AuthHandler) Refresh(c *gin.Context) {
 	}
 
 	refreshToken := domain.RefreshToken{
-		Value: refreshTokenCookie,
+		Value: domain.RefreshTokenValue(refreshTokenCookie),
 	}
 
 	newTokenSet, err := (*a.AuthService).RefreshToken(refreshToken)
@@ -108,9 +108,9 @@ func (a *AuthHandler) Refresh(c *gin.Context) {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	} else {
-		refreshCookieMaxAge := newTokenSet.Refresh.Expires.Sub(time.Now()).Seconds()
+		refreshCookieMaxAge := newTokenSet.Refresh.ExpiresAt.Sub(time.Now()).Seconds()
 
-		(*a.CookieService).SetCookie(c, "refresh", newTokenSet.Refresh.Value, int(refreshCookieMaxAge), "/", true)
+		(*a.CookieService).SetCookie(c, "refresh", string(newTokenSet.Refresh.Value), int(refreshCookieMaxAge), "/", true)
 		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&newTokenSet.Auth))
 	}
 }

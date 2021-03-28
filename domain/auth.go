@@ -1,6 +1,9 @@
 package domain
 
 import (
+	"crypto/sha256"
+	"database/sql/driver"
+	"encoding/hex"
 	"gorm.io/gorm"
 	"time"
 )
@@ -30,10 +33,34 @@ type AuthToken struct {
 	Expires time.Time
 }
 
+type RefreshTokenValue string
+
 type RefreshToken struct {
 	gorm.Model
-	Value string
-	Expires time.Time
+	Value           RefreshTokenValue	`gorm:"column:token_hash"`
+	ExpiresAt       time.Time
+	TokenNonceHash  string
+	ParentTokenHash string
+	UserID			uint
+}
+
+func (r RefreshTokenValue) Value() (driver.Value, error) {
+	hasher := sha256.New()
+	hasher.Write([]byte(r))
+	value := hex.EncodeToString(hasher.Sum(nil))
+	return value, nil
+}
+
+type RefreshTokenRepository interface {
+	Create(token RefreshToken) (uint, error)
+	GetAll() ([]*RefreshToken, error)
+	GetByToken(token RefreshToken) (*RefreshToken, error)
+	Update(token *RefreshToken) error
+	Delete(ID uint) error
+}
+
+type RefreshTokenService interface {
+	SaveNewRefreshToken(token RefreshToken) (uint, error)
 }
 
 type TokenSet struct {

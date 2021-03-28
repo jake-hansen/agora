@@ -19,6 +19,7 @@ import (
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
+	"github.com/jake-hansen/agora/database/repositories/refreshtokenrepo"
 	"github.com/jake-hansen/agora/database/repositories/schemamigrationrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
@@ -31,6 +32,7 @@ import (
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
+	"github.com/jake-hansen/agora/services/refreshtokenservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
 	"github.com/spf13/viper"
@@ -56,7 +58,9 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	jwtServiceImpl := jwtservice.Provide(jwtserviceConfig)
 	userRepository := userrepo.Provide(db)
 	userService := userservice.Provide(userRepository)
-	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
+	refreshTokenRepo := refreshtokenrepo.Provide(db)
+	refreshTokenService := refreshtokenservice.Provide(refreshTokenRepo)
+	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService, refreshTokenService)
 	cookieserviceConfig := cookieservice.Cfg(v)
 	cookieService := cookieservice.Provide(cookieserviceConfig)
 	v3 := authmiddleware.ProvideAuthorizationHeaderParser()

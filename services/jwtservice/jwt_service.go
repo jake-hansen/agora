@@ -1,6 +1,7 @@
 package jwtservice
 
 import (
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
@@ -13,9 +14,9 @@ import (
 // JWTService is a service for generating and validating JWTs.
 type JWTService interface {
 	GenerateAuthToken(user domain.User) (*domain.AuthToken, error)
-	GenerateRefreshToken(user domain.User, authToken domain.AuthToken, parentToken *string, expiry *time.Time) (*domain.RefreshToken, error)
+	GenerateRefreshToken(user domain.User, authToken domain.AuthToken, parentToken *domain.RefreshTokenValue, expiry *time.Time) (*domain.RefreshToken, error)
 	ValidateAuthToken(token string) (*jwt.Token, *AuthClaims, error)
-	ValidateRefreshToken(token string) (*jwt.Token, *RefreshClaims, error)
+	ValidateRefreshToken(token domain.RefreshTokenValue) (*jwt.Token, *RefreshClaims, error)
 }
 
 // Config contains the parameters for configuring a JWTService.
@@ -41,6 +42,7 @@ type RefreshClaims struct {
 	UserID uint	`json:"user_id"`
 	AuthTokenHash string	`json:"auth_token_hash"`
 	ParentTokenHash string	`json:"parent_token_hash"`
+	Nonce	string	`json:"nonce"`
 }
 
 // GenerateToken creates a JWT for the specified User and returns the token as a string.
@@ -74,7 +76,7 @@ func (j *JWTServiceImpl) GenerateAuthToken(user domain.User) (*domain.AuthToken,
 	return domainToken, nil
 }
 
-func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain.AuthToken, parentToken *string, expiry *time.Time) (*domain.RefreshToken, error) {
+func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain.AuthToken, parentToken *domain.RefreshTokenValue, expiry *time.Time) (*domain.RefreshToken, error) {
 	now := time.Now()
 
 	newExpiry := now.Add(j.config.RefreshDuration)
@@ -87,11 +89,28 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 	authSHA := hex.EncodeToString(hasher.Sum(nil))
 
 	parentRefreshSHA := ""
+	nonce := ""
 	if parentToken != nil {
 		hasher.Reset()
 		hasher.Write([]byte(*parentToken))
 		parentRefreshSHA = hex.EncodeToString(hasher.Sum(nil))
+
+		parentNonce, err := j.getNonce(string(*parentToken))
+		if err != nil {
+			return nil, err
+		}
+		nonce = parentNonce
+	} else {
+		generatedNonce, err := j.generateNonce()
+		if err != nil {
+			return nil, err
+		}
+		nonce = generatedNonce
 	}
+
+	hasher.Reset()
+	hasher.Write([]byte(nonce))
+	nonceSHA := hex.EncodeToString(hasher.Sum(nil))
 
 	claims := &RefreshClaims{
 		StandardClaims: jwt.StandardClaims{
@@ -104,6 +123,7 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 		UserID:        user.ID,
 		AuthTokenHash: authSHA,
 		ParentTokenHash: parentRefreshSHA,
+		Nonce: nonce,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -114,8 +134,11 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 	}
 
 	domainToken := &domain.RefreshToken{
-		Value:   t,
-		Expires: newExpiry,
+		Value:           domain.RefreshTokenValue(t),
+		ExpiresAt:       newExpiry,
+		ParentTokenHash: parentRefreshSHA,
+		TokenNonceHash:  nonceSHA,
+		UserID: user.ID,
 	}
 
 	return domainToken, nil
@@ -139,9 +162,9 @@ func (j *JWTServiceImpl) ValidateAuthToken(token string) (*jwt.Token, *AuthClaim
 	return t, returnClaims, err
 }
 
-func (j *JWTServiceImpl) ValidateRefreshToken(token string) (*jwt.Token, *RefreshClaims, error) {
+func (j *JWTServiceImpl) ValidateRefreshToken(token domain.RefreshTokenValue) (*jwt.Token, *RefreshClaims, error) {
 	var returnClaims *RefreshClaims
-	t, err := jwt.ParseWithClaims(token, &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
+	t, err := jwt.ParseWithClaims(string(token), &RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
@@ -153,4 +176,22 @@ func (j *JWTServiceImpl) ValidateRefreshToken(token string) (*jwt.Token, *Refres
 	})
 
 	return t, returnClaims, err
+}
+
+func (j *JWTServiceImpl) getNonce(token string) (string, error)  {
+	_, claims, err := j.ValidateRefreshToken(domain.RefreshTokenValue(token))
+
+	if claims != nil {
+		return claims.Nonce, nil
+	} else {
+		return "", err
+	}
+}
+
+func (j *JWTServiceImpl) generateNonce() (string, error) {
+	b := make([]byte, 64)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
