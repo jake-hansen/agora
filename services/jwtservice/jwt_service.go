@@ -4,11 +4,17 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/domain"
+)
+
+const (
+	USAGE_AUTH = "auth"
+	USAGE_REFRESH = "refresh"
 )
 
 // JWTService is a service for generating and validating JWTs.
@@ -35,6 +41,7 @@ type JWTServiceImpl struct {
 type AuthClaims struct {
 	jwt.StandardClaims
 	UserID	uint	`json:"user_id"`
+	Usage 	string	`json:"usage"`
 }
 
 type RefreshClaims struct {
@@ -43,6 +50,7 @@ type RefreshClaims struct {
 	AuthTokenHash string	`json:"auth_token_hash"`
 	ParentTokenHash string	`json:"parent_token_hash"`
 	Nonce	string	`json:"nonce"`
+	Usage 	string	`json:"usage"`
 }
 
 // GenerateToken creates a JWT for the specified User and returns the token as a string.
@@ -59,6 +67,7 @@ func (j *JWTServiceImpl) GenerateAuthToken(user domain.User) (*domain.AuthToken,
 			Subject:   user.Username,
 		},
 		UserID: user.ID,
+		Usage: USAGE_AUTH,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -124,6 +133,7 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 		AuthTokenHash: authSHA,
 		ParentTokenHash: parentRefreshSHA,
 		Nonce: nonce,
+		Usage: USAGE_REFRESH,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -153,6 +163,9 @@ func (j *JWTServiceImpl) ValidateAuthToken(token string) (*jwt.Token, *AuthClaim
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		if tclaims, ok := token.Claims.(*AuthClaims); ok {
+			if tclaims.Usage != USAGE_AUTH {
+				return nil, errors.New("token is not an auth token")
+			}
 			returnClaims = tclaims
 		}
 
@@ -169,6 +182,9 @@ func (j *JWTServiceImpl) ValidateRefreshToken(token domain.RefreshTokenValue) (*
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		if tclaims, ok := token.Claims.(*RefreshClaims); ok {
+			if tclaims.Usage != USAGE_REFRESH {
+				return nil, errors.New("token is not an refresh token")
+			}
 			returnClaims = tclaims
 		}
 
