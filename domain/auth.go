@@ -24,7 +24,7 @@ type AuthService interface {
 	IsAuthenticated(token AuthToken) (bool, error)
 	Authenticate(auth Auth) (*TokenSet, error)
 	RefreshToken(token RefreshToken) (*TokenSet, error)
-	Deauthenticate(token AuthToken) error
+	Deauthenticate(token RefreshToken) error
 	GetUserFromAuthToken(token AuthToken) (*User, error)
 }
 

@@ -108,8 +108,13 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 }
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
-func (s *SimpleAuthService) Deauthenticate(token domain.AuthToken) error {
-	return nil
+func (s *SimpleAuthService) Deauthenticate(token domain.RefreshToken) error {
+	_, claims, err := s.jwtService.ValidateRefreshToken(token.Value)
+	if err != nil {
+		return err
+	}
+
+	return s.refreshTokenService.RevokeRefreshTokenByNonce(claims.Nonce)
 }
 
 // GetUserFromAuthToken retrieves the User that the provided Token belongs to.

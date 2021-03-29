@@ -71,21 +71,24 @@ func (a *AuthHandler) Login(c *gin.Context) {
 
 // Logout attempts to unauthenticate the given credentials retrieved from the body as JSON.
 func (a *AuthHandler) Logout(c *gin.Context) {
-	var token dto.Token
-	err := c.ShouldBind(&token)
-	err = validateHelper(err)
+	refreshTokenCookie, err := c.Cookie("refresh")
+	if err != nil {
+		apiError := api.NewAPIError(http.StatusBadRequest, err, "the refresh token cookie could not be found or parsed")
+		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	refreshToken := domain.RefreshToken{
+		Value: domain.RefreshTokenValue(refreshTokenCookie),
+	}
+
+	err = (*a.AuthService).Deauthenticate(refreshToken)
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
 
-	err = (*a.AuthService).Deauthenticate(*adapter.TokenDTOToDomain(&token))
-	if err != nil {
-		_ = c.Error(err).SetType(gin.ErrorTypePublic)
-		return
-	}
-
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 func (a *AuthHandler) Refresh(c *gin.Context) {
