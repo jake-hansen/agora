@@ -11,7 +11,7 @@ type AuthService struct {
 }
 
 // GetUser mocks AuthService's GetUser function.
-func (s *AuthService) GetUser(token domain.AuthToken) (*domain.User, error) {
+func (s *AuthService) GetUserFromAuthToken(token domain.AuthToken) (*domain.User, error) {
 	args := s.Called(token)
 	return args.Get(0).(*domain.User), args.Error(1)
 }
@@ -28,13 +28,13 @@ func (s *AuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, error) {
 	return args.Get(0).(*domain.TokenSet), args.Error(1)
 }
 
-func (s *AuthService) RefreshToken(tokens domain.TokenSet) (*domain.TokenSet, error) {
-	args := s.Called(tokens)
+func (s *AuthService) RefreshToken(token domain.RefreshToken) (*domain.TokenSet, error) {
+	args := s.Called(token)
 	return args.Get(0).(*domain.TokenSet), args.Error(1)
 }
 
 // Deauthenticate mocks AuthService's Deauthenticate function.
-func (s *AuthService) Deauthenticate(token domain.AuthToken) error {
+func (s *AuthService) Deauthenticate(token domain.RefreshToken) error {
 	args := s.Called(token)
 	return args.Error(0)
 }

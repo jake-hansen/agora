@@ -29,7 +29,7 @@ var domainMockToken = domain.TokenSet{
 	Auth:    domain.AuthToken{
 		Value:   "test-token",
 	},
-	Refresh: domain.AuthToken{
+	Refresh: domain.RefreshToken{
 		Value:   "test-token",
 	},
 }
@@ -142,36 +142,44 @@ func TestAuthHandler_Login(t *testing.T) {
 func TestAuthHandler_Logout(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockAuthService := authservicemock.Provide()
-		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.AuthToken")).Return(nil)
+		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.RefreshToken")).Return(nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 		h := authhandler.Provide(mockAuthService, nil, nil)
 		_ = h.Register(router.Group("test"))
 
-		payloadBuf := new(bytes.Buffer)
-		json.NewEncoder(payloadBuf).Encode(DTOMockToken)
-		req, err := http.NewRequest("DELETE", "/test/auth", payloadBuf)
+		refreshTokenCookie := http.Cookie{
+			Name:  "refresh",
+			Value: string(domainMockToken.Refresh.Value),
+		}
+
+		req, err := http.NewRequest("DELETE", "/test/auth", nil)
+		req.AddCookie(&refreshTokenCookie)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusNoContent, w.Code)
 	})
 
 	t.Run("failure", func(t *testing.T) {
 		mockAuthService := authservicemock.Provide()
-		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.AuthToken")).Return(errors.New("test error"))
+		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.RefreshToken")).Return(errors.New("test error"))
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 		h := authhandler.Provide(mockAuthService, nil, nil)
 		_ = h.Register(router.Group("test"))
 
-		payloadBuf := new(bytes.Buffer)
-		json.NewEncoder(payloadBuf).Encode(DTOMockToken)
-		req, err := http.NewRequest("DELETE", "/test/auth", payloadBuf)
+		refreshTokenCookie := http.Cookie{
+			Name:  "refresh",
+			Value: string(domainMockToken.Refresh.Value),
+		}
+
+		req, err := http.NewRequest("DELETE", "/test/auth", nil)
+		req.AddCookie(&refreshTokenCookie)
 		req.Header.Set("Content-Type", "application/json")
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
@@ -196,6 +204,6 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, http.StatusBadRequest, w.Code)
-		assert.Equal(t, "{\"validation errors\":[{\"field\":\"Value\",\"reason\":\"required\"}]}", w.Body.String())
+		assert.Equal(t, "{\"error\":\"the refresh token cookie could not be found or parsed\"}", w.Body.String())
 	})
 }
