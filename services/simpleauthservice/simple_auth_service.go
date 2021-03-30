@@ -2,11 +2,9 @@ package simpleauthservice
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"time"
-
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
+	"gorm.io/gorm"
 )
 
 // SimpleAuthService is an AuthenticationService which authenticates credentials based on a username
@@ -20,8 +18,8 @@ type SimpleAuthService struct {
 
 // IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
 // if the contained JWT is valid.
-func (s *SimpleAuthService) IsAuthenticated(token domain.AuthToken) (bool, error) {
-	_, _, err := s.jwtService.ValidateAuthToken(token.Value)
+func (s *SimpleAuthService) IsAuthenticated(token domain.TokenValue) (bool, error) {
+	_, err := s.jwtService.ValidateAuthToken(token)
 	if err != nil {
 		return false, err
 	}
@@ -40,7 +38,7 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, er
 			return nil, err
 		}
 
-		refreshToken, err2 := s.jwtService.GenerateRefreshToken(*u, *authToken, nil, nil)
+		refreshToken, err2 := s.jwtService.GenerateRefreshToken(*u, *authToken, nil)
 		if err2 != nil {
 			return nil, err2
 		}
@@ -57,27 +55,22 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, er
 	}
 }
 
-func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.TokenSet, error) {
-	_, claims, err := s.jwtService.ValidateRefreshToken(token.Value)
+func (s *SimpleAuthService) RefreshToken(token domain.TokenValue) (*domain.TokenSet, error) {
+	parsedToken, err := s.jwtService.ValidateRefreshToken(token)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := s.userService.GetByID(claims.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	newAuthToken, err := s.jwtService.GenerateAuthToken(*user)
+	user, err := s.userService.GetByID(parsedToken.UserID)
 	if err != nil {
 		return nil, err
 	}
 
 	var newRefreshToken *domain.RefreshToken
 
-	foundToken, err := s.refreshTokenService.GetRefreshTokenByParentTokenHash(claims.ParentTokenHash, claims.Nonce)
+	foundToken, err := s.refreshTokenService.GetRefreshTokenByParentTokenHash(parsedToken)
 	if err != nil {
-		err = s.refreshTokenService.RevokeRefreshTokenByNonce(claims.Nonce)
+		err = s.refreshTokenService.RevokeLatestRefreshTokenByNonce(parsedToken)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound){
 			return nil, err
 		}
@@ -88,8 +81,12 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 		}
 	}
 
-	expiry := time.Unix(claims.ExpiresAt, 0)
-	newRefreshToken, err = s.jwtService.GenerateRefreshToken(*user, *newAuthToken, &token.Value, &expiry)
+	newAuthToken, err := s.jwtService.GenerateAuthToken(*user)
+	if err != nil {
+		return nil, err
+	}
+
+	newRefreshToken, err = s.jwtService.GenerateRefreshToken(*user, *newAuthToken, &parsedToken)
 	if err != nil {
 		return nil, err
 	}
@@ -108,21 +105,21 @@ func (s *SimpleAuthService) RefreshToken(token domain.RefreshToken) (*domain.Tok
 }
 
 // Deauthenticate is not implemented since JWTs are not persisted in a database.
-func (s *SimpleAuthService) Deauthenticate(token domain.RefreshToken) error {
-	_, claims, err := s.jwtService.ValidateRefreshToken(token.Value)
+func (s *SimpleAuthService) Deauthenticate(token domain.TokenValue) error {
+	parsedToken, err := s.jwtService.ValidateRefreshToken(token)
 	if err != nil {
 		return err
 	}
 
-	return s.refreshTokenService.RevokeRefreshTokenByNonce(claims.Nonce)
+	return s.refreshTokenService.RevokeLatestRefreshTokenByNonce(parsedToken)
 }
 
 // GetUserFromAuthToken retrieves the User that the provided Token belongs to.
-func (s *SimpleAuthService) GetUserFromAuthToken(token domain.AuthToken) (*domain.User, error) {
-	_, claims, err := s.jwtService.ValidateAuthToken(token.Value)
+func (s *SimpleAuthService) GetUserFromAuthToken(token domain.TokenValue) (*domain.User, error) {
+	parsedToken, err := s.jwtService.ValidateAuthToken(token)
 
-	if err == nil && claims != nil {
-		return s.userService.GetByID(claims.UserID)
+	if err == nil {
+		return s.userService.GetByID(parsedToken.JWTClaims.UserID)
 	} else {
 		return nil, err
 	}

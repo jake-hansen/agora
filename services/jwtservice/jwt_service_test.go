@@ -36,9 +36,9 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		token, err := service.GenerateAuthToken(testUser)
 		assert.NoError(t, err)
 
-		parsedToken, _, err := service.ValidateAuthToken(token.Value)
+		parsedToken, err := service.ValidateAuthToken(token.Value)
 		assert.NoError(t, err)
-		assert.Equal(t, token.Value, parsedToken.Raw)
+		assert.Equal(t, token.Value, parsedToken.Value)
 	})
 
 	t.Run("fail-expired", func(t *testing.T) {
@@ -50,7 +50,7 @@ func TestJWTService_ValidateToken(t *testing.T) {
 		assert.NoError(t, err)
 
 		time.Sleep(1 * time.Second)
-		_, _, err = service.ValidateAuthToken(token.Value)
+		_, err = service.ValidateAuthToken(token.Value)
 		assert.Error(t, err)
 	})
 }

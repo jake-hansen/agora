@@ -14,23 +14,18 @@ func (r *RefreshTokenService) SaveNewRefreshToken(token domain.RefreshToken) (ui
 	return uint(args.Int(0)), args.Error(1)
 }
 
-func (r *RefreshTokenService) GetRefreshTokenByHash(hash string) (*domain.RefreshToken, error) {
-	args := r.Called(hash)
-	return args.Get(0).(*domain.RefreshToken), args.Error(1)
-}
-
 func (r *RefreshTokenService) ReplaceRefreshToken(token domain.RefreshToken) error {
 	args := r.Called(token)
 	return args.Error(0)
 }
 
-func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(hash string, nonce string) (*domain.RefreshToken, error) {
-	args := r.Called(hash, nonce)
+func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(token domain.RefreshToken) (*domain.RefreshToken, error) {
+	args := r.Called(token)
 	return args.Get(0).(*domain.RefreshToken), args.Error(1)
 }
 
-func (r *RefreshTokenService) RevokeRefreshTokenByNonce(nonce string) error {
-	args := r.Called(nonce)
+func (r *RefreshTokenService) RevokeLatestRefreshTokenByNonce(token domain.RefreshToken) error {
+	args := r.Called(token)
 	return args.Error(0)
 }
 

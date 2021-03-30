@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"database/sql/driver"
 	"encoding/hex"
+	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
 	"time"
 )
@@ -21,48 +22,69 @@ type Credentials struct {
 
 // AuthService manages authentication based on Auths and Tokens.
 type AuthService interface {
-	IsAuthenticated(token AuthToken) (bool, error)
+	IsAuthenticated(token TokenValue) (bool, error)
 	Authenticate(auth Auth) (*TokenSet, error)
-	RefreshToken(token RefreshToken) (*TokenSet, error)
-	Deauthenticate(token RefreshToken) error
-	GetUserFromAuthToken(token AuthToken) (*User, error)
+	RefreshToken(token TokenValue) (*TokenSet, error)
+	Deauthenticate(token TokenValue) error
+	GetUserFromAuthToken(token TokenValue) (*User, error)
+}
+
+type AuthClaims struct {
+	jwt.StandardClaims
+	UserID	uint	`json:"user_id"`
+	Usage 	string	`json:"usage"`
 }
 
 type AuthToken struct {
-	Value string
+	Value TokenValue
 	Expires time.Time
+	JWTClaims	AuthClaims
 }
 
-type RefreshTokenValue string
+type TokenValue string
 
 type RefreshToken struct {
 	gorm.Model
-	Value           RefreshTokenValue	`gorm:"column:token_hash"`
+	Value           TokenValue `gorm:"column:token_hash"`
 	ExpiresAt       time.Time
 	TokenNonceHash  string
 	ParentTokenHash string
-	UserID			uint
-	Revoked			bool
+	UserID          uint
+	Revoked         bool
+	JWTClaims       RefreshClaims	`gorm:"-"`
+}
+
+type RefreshClaims struct {
+	jwt.StandardClaims
+	UserID uint	`json:"user_id"`
+	AuthTokenHash string	`json:"auth_token_hash"`
+	ParentTokenHash string	`json:"parent_token_hash"`
+	Nonce	string	`json:"nonce"`
+	Usage 	string	`json:"usage"`
 }
 
 func (r RefreshToken) Hash() string {
 	return r.Value.hash()
 }
 
-func (r RefreshTokenValue) hash() string {
+func (r TokenValue) hash() string {
+	return hash(string(r))
+}
+
+func hash(v string) string {
 	hasher := sha256.New()
-	hasher.Write([]byte(r))
+	hasher.Write([]byte(v))
 	value := hex.EncodeToString(hasher.Sum(nil))
 	return value
 }
 
-func (r RefreshTokenValue) Value() (driver.Value, error) {
+func (r TokenValue) Value() (driver.Value, error) {
 	return r.hash(), nil
 }
 
-func (r *RefreshTokenValue) Scan(src interface{}) error {
+func (r *TokenValue) Scan(src interface{}) error {
 	bytes := src.([]byte)
-	*r = RefreshTokenValue(bytes)
+	*r = TokenValue(bytes)
 	return nil
 }
 
@@ -79,10 +101,9 @@ type RefreshTokenRepository interface {
 
 type RefreshTokenService interface {
 	SaveNewRefreshToken(token RefreshToken) (uint, error)
-	GetRefreshTokenByHash(hash string) (*RefreshToken, error)
 	ReplaceRefreshToken(token RefreshToken) error
-	GetRefreshTokenByParentTokenHash(hash string, nonce string) (*RefreshToken, error)
-	RevokeRefreshTokenByNonce(nonce string) error
+	GetRefreshTokenByParentTokenHash(token RefreshToken) (*RefreshToken, error)
+	RevokeLatestRefreshTokenByNonce(token RefreshToken) error
 }
 
 type TokenSet struct {

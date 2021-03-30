@@ -78,9 +78,7 @@ func (a *AuthHandler) Logout(c *gin.Context) {
 		return
 	}
 
-	refreshToken := domain.RefreshToken{
-		Value: domain.RefreshTokenValue(refreshTokenCookie),
-	}
+	refreshToken := domain.TokenValue(refreshTokenCookie)
 
 	err = (*a.AuthService).Deauthenticate(refreshToken)
 	if err != nil {
@@ -99,9 +97,7 @@ func (a *AuthHandler) Refresh(c *gin.Context) {
 		return
 	}
 
-	refreshToken := domain.RefreshToken{
-		Value: domain.RefreshTokenValue(refreshTokenCookie),
-	}
+	refreshToken := domain.TokenValue(refreshTokenCookie)
 
 	newTokenSet, err := (*a.AuthService).RefreshToken(refreshToken)
 	if err != nil {

@@ -142,7 +142,7 @@ func TestAuthHandler_Login(t *testing.T) {
 func TestAuthHandler_Logout(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockAuthService := authservicemock.Provide()
-		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.RefreshToken")).Return(nil)
+		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.TokenValue")).Return(nil)
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
@@ -166,7 +166,7 @@ func TestAuthHandler_Logout(t *testing.T) {
 
 	t.Run("failure", func(t *testing.T) {
 		mockAuthService := authservicemock.Provide()
-		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.RefreshToken")).Return(errors.New("test error"))
+		mockAuthService.On("Deauthenticate", mock.AnythingOfType("domain.TokenValue")).Return(errors.New("test error"))
 
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())

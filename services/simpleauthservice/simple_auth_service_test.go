@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/mocks/jwtservicemock"
@@ -41,15 +40,15 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 		testAuthToken := domain.AuthToken{Value: "test-token"}
 		testRefreshToken := domain.RefreshToken{Value: "test-refresh-token"}
 		js.On("GenerateAuthToken", mock.Anything).Return(&testAuthToken, nil)
-		js.On("GenerateRefreshToken", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(&testRefreshToken, nil)
+		js.On("GenerateRefreshToken", mock.Anything, mock.Anything, mock.Anything).Return(&testRefreshToken, nil)
 		us.On("Validate", mock.Anything).Return(&domain.User{}, nil)
 		rs.On("SaveNewRefreshToken", mock.AnythingOfType("domain.RefreshToken")).Return(0, nil)
 		token, err := as.Authenticate(testAuth)
 
 		assert.NoError(t, err)
 
-		js.On("ValidateAuthToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.AuthClaims{}, nil)
-		valid, err := as.IsAuthenticated(token.Auth)
+		js.On("ValidateAuthToken", mock.Anything).Return(domain.AuthToken{}, nil)
+		valid, err := as.IsAuthenticated(token.Auth.Value)
 		assert.NoError(t, err)
 		assert.True(t, valid)
 	})
@@ -58,8 +57,8 @@ func TestSimpleAuthService_IsAuthenticated(t *testing.T) {
 		invalidToken := domain.AuthToken{Value: "invalid"}
 		as, ds, _, _ := ProvideTest()
 
-		ds.On("ValidateAuthToken", mock.Anything).Return(&jwt.Token{}, &jwtservice.AuthClaims{}, errors.New("invalid token"))
-		valid, err := as.IsAuthenticated(invalidToken)
+		ds.On("ValidateAuthToken", mock.Anything).Return(domain.AuthToken{}, errors.New("invalid token"))
+		valid, err := as.IsAuthenticated(invalidToken.Value)
 		assert.Error(t, err)
 		assert.False(t, valid)
 	})
@@ -73,8 +72,8 @@ func TestSimpleAuthService_Authenticate(t *testing.T) {
 func TestSimpleAuthService_Deauthenticate(t *testing.T) {
 	invalidToken := domain.RefreshToken{Value: "invalid"}
 	as, js, _, _ := ProvideTest()
-	js.On("ValidateRefreshToken", mock.AnythingOfType("domain.RefreshTokenValue")).Return(new(jwt.Token), new(jwtservice.RefreshClaims), errors.New("test error"))
-	err := as.Deauthenticate(invalidToken)
+	js.On("ValidateRefreshToken", mock.AnythingOfType("domain.TokenValue")).Return(domain.RefreshToken{}, errors.New("test error"))
+	err := as.Deauthenticate(invalidToken.Value)
 
 	assert.Error(t, err)
 }

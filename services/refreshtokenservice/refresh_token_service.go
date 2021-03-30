@@ -1,8 +1,6 @@
 package refreshtokenservice
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"github.com/jake-hansen/agora/domain"
 )
 
@@ -14,16 +12,8 @@ func (r *RefreshTokenService) SaveNewRefreshToken(token domain.RefreshToken) (ui
 	return r.repo.Create(token)
 }
 
-func (r *RefreshTokenService) GetRefreshTokenByHash(hash string) (*domain.RefreshToken, error) {
-	return r.repo.GetByTokenHash(hash)
-}
-
-func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(hash string, nonce string) (*domain.RefreshToken, error) {
-	return r.repo.GetByParentTokenHash(hash, r.sha256(nonce))
-}
-
-func (r *RefreshTokenService) GetRefreshTokenByTokenNonceHash(nonceHash string) (*domain.RefreshToken, error) {
-	return r.repo.GetByTokenNonceHash(nonceHash)
+func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(token domain.RefreshToken) (*domain.RefreshToken, error) {
+	return r.repo.GetByParentTokenHash(token.ParentTokenHash, token.TokenNonceHash)
 }
 
 func (r *RefreshTokenService) ReplaceRefreshToken(token domain.RefreshToken) error {
@@ -43,8 +33,8 @@ func (r *RefreshTokenService) ReplaceRefreshToken(token domain.RefreshToken) err
 	return err
 }
 
-func (r *RefreshTokenService) RevokeRefreshTokenByNonce(nonce string) error {
-	foundToken, err := r.repo.GetByTokenNonceHash(r.sha256(nonce))
+func (r *RefreshTokenService) RevokeLatestRefreshTokenByNonce(token domain.RefreshToken) error {
+	foundToken, err := r.repo.GetByTokenNonceHash(token.TokenNonceHash)
 	if err != nil {
 		return err
 	}
@@ -53,10 +43,3 @@ func (r *RefreshTokenService) RevokeRefreshTokenByNonce(nonce string) error {
 
 	return r.repo.Update(foundToken)
 }
-
-func (r *RefreshTokenService) sha256(v string) string {
-	hasher := sha256.New()
-	hasher.Write([]byte(v))
-	return hex.EncodeToString(hasher.Sum(nil))
-}
-
