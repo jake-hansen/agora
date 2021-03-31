@@ -29,11 +29,7 @@ type AuthService interface {
 	GetUserFromAuthToken(token TokenValue) (*User, error)
 }
 
-type AuthClaims struct {
-	jwt.StandardClaims
-	UserID	uint	`json:"user_id"`
-	Usage 	string	`json:"usage"`
-}
+type TokenValue string
 
 type AuthToken struct {
 	Value TokenValue
@@ -41,7 +37,11 @@ type AuthToken struct {
 	JWTClaims	AuthClaims
 }
 
-type TokenValue string
+type AuthClaims struct {
+	jwt.StandardClaims
+	UserID	uint	`json:"user_id"`
+	Usage 	string	`json:"usage"`
+}
 
 type RefreshToken struct {
 	gorm.Model
@@ -92,8 +92,6 @@ type RefreshTokenRepository interface {
 	Create(token RefreshToken) (uint, error)
 	GetAll() ([]*RefreshToken, error)
 	GetByToken(token RefreshToken) (*RefreshToken, error)
-	GetByTokenHash(hash string) (*RefreshToken, error)
-	GetByParentTokenHash(hash string, nonceHash string) (*RefreshToken, error)
 	GetByTokenNonceHash(nonceHash string) (*RefreshToken, error)
 	Update(token *RefreshToken) error
 	Delete(ID uint) error
@@ -102,7 +100,7 @@ type RefreshTokenRepository interface {
 type RefreshTokenService interface {
 	SaveNewRefreshToken(token RefreshToken) (uint, error)
 	ReplaceRefreshToken(token RefreshToken) error
-	GetRefreshTokenByParentTokenHash(token RefreshToken) (*RefreshToken, error)
+	GetLatestTokenInSession(token RefreshToken) (*RefreshToken, error)
 	RevokeLatestRefreshTokenByNonce(token RefreshToken) error
 }
 

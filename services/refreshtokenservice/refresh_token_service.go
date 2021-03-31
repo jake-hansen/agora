@@ -12,10 +12,6 @@ func (r *RefreshTokenService) SaveNewRefreshToken(token domain.RefreshToken) (ui
 	return r.repo.Create(token)
 }
 
-func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(token domain.RefreshToken) (*domain.RefreshToken, error) {
-	return r.repo.GetByParentTokenHash(token.ParentTokenHash, token.TokenNonceHash)
-}
-
 func (r *RefreshTokenService) ReplaceRefreshToken(token domain.RefreshToken) error {
 	nonceFamily := token.TokenNonceHash
 
@@ -42,4 +38,8 @@ func (r *RefreshTokenService) RevokeLatestRefreshTokenByNonce(token domain.Refre
 	foundToken.Revoked = true
 
 	return r.repo.Update(foundToken)
+}
+
+func (r *RefreshTokenService) GetLatestTokenInSession(token domain.RefreshToken) (*domain.RefreshToken, error) {
+	return r.repo.GetByTokenNonceHash(token.TokenNonceHash)
 }

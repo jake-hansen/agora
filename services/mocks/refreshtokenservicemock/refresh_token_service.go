@@ -19,13 +19,12 @@ func (r *RefreshTokenService) ReplaceRefreshToken(token domain.RefreshToken) err
 	return args.Error(0)
 }
 
-func (r *RefreshTokenService) GetRefreshTokenByParentTokenHash(token domain.RefreshToken) (*domain.RefreshToken, error) {
-	args := r.Called(token)
-	return args.Get(0).(*domain.RefreshToken), args.Error(1)
-}
-
 func (r *RefreshTokenService) RevokeLatestRefreshTokenByNonce(token domain.RefreshToken) error {
 	args := r.Called(token)
 	return args.Error(0)
 }
 
+func (r *RefreshTokenService) GetLatestTokenInSession(token domain.RefreshToken) (*domain.RefreshToken, error) {
+	args := r.Called(token)
+	return args.Get(0).(*domain.RefreshToken), args.Error(1)
+}

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
-	"gorm.io/gorm"
 )
 
 // SimpleAuthService is an AuthenticationService which authenticates credentials based on a username
@@ -60,6 +59,17 @@ func (s *SimpleAuthService) RefreshToken(token domain.TokenValue) (*domain.Token
 	if err != nil {
 		return nil, err
 	}
+	latestToken, err := s.refreshTokenService.GetLatestTokenInSession(parsedToken)
+	if err != nil {
+		return nil, err
+	} else {
+		if string(latestToken.Value) != parsedToken.ParentTokenHash && latestToken.ParentTokenHash != "" {
+			_ = s.refreshTokenService.RevokeLatestRefreshTokenByNonce(parsedToken)
+			return nil, NewRefreshTokenReuseError()
+		} else if latestToken.Revoked {
+			return nil, NewRefreshTokenRevokedError()
+		}
+	}
 
 	user, err := s.userService.GetByID(parsedToken.UserID)
 	if err != nil {
@@ -67,19 +77,6 @@ func (s *SimpleAuthService) RefreshToken(token domain.TokenValue) (*domain.Token
 	}
 
 	var newRefreshToken *domain.RefreshToken
-
-	foundToken, err := s.refreshTokenService.GetRefreshTokenByParentTokenHash(parsedToken)
-	if err != nil {
-		err = s.refreshTokenService.RevokeLatestRefreshTokenByNonce(parsedToken)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound){
-			return nil, err
-		}
-		return nil, NewRefreshTokenReuseError()
-	} else {
-		if foundToken.Revoked == true {
-			return nil, NewRefreshTokenRevokedError()
-		}
-	}
 
 	newAuthToken, err := s.jwtService.GenerateAuthToken(*user)
 	if err != nil {
@@ -91,9 +88,8 @@ func (s *SimpleAuthService) RefreshToken(token domain.TokenValue) (*domain.Token
 		return nil, err
 	}
 
-	err = s.refreshTokenService.ReplaceRefreshToken(*newRefreshToken)
-	if err != nil {
-		return nil, err
+	if parsedToken.ParentTokenHash != "" {
+		err = s.refreshTokenService.ReplaceRefreshToken(parsedToken)
 	}
 
 	newTokenSet := &domain.TokenSet{

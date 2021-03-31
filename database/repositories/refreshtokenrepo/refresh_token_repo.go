@@ -27,22 +27,16 @@ func (r *RefreshTokenRepo) GetAll() ([]*domain.RefreshToken, error) {
 }
 
 func (r *RefreshTokenRepo) GetByToken(token domain.RefreshToken) (*domain.RefreshToken, error) {
-	hash, _ := token.Value.Value()
 	var foundToken *domain.RefreshToken
 
-	if err := r.DB.Where("token_hash = ?", hash).Find(&foundToken).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving Refresh Token with hash %s: %w", hash, err)
+	if err := r.DB.Where("token_hash = ?", token.Value).Find(&foundToken).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving Refresh Token with hash %s: %w", token.Value, err)
 	}
 	return foundToken, nil
 }
 
 func (r *RefreshTokenRepo) Update(token *domain.RefreshToken) error {
 	if err := r.DB.Model(token).Updates(domain.RefreshToken{
-		Value:           token.Value,
-		ExpiresAt:       token.ExpiresAt,
-		TokenNonceHash:  token.TokenNonceHash,
-		ParentTokenHash: token.ParentTokenHash,
-		UserID:          token.UserID,
 		Revoked:         token.Revoked,
 	}).Error; err != nil {
 		return fmt.Errorf("error updating Refresh Token with id %d: %w", token.ID, err)
@@ -55,24 +49,6 @@ func (r *RefreshTokenRepo) Delete(ID uint) error {
 		return fmt.Errorf("error deleting Refresh Token with id %d: %w", ID, err)
 	}
 	return nil
-}
-
-func (r *RefreshTokenRepo) GetByTokenHash(hash string) (*domain.RefreshToken, error) {
-	var foundToken = new(domain.RefreshToken)
-
-	if err := r.DB.Where("token_hash = ? AND deleted_at IS NULL", hash).First(foundToken).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving Refresh Token with hash %s: %w", hash, err)
-	}
-	return foundToken, nil
-}
-
-func (r *RefreshTokenRepo) GetByParentTokenHash(hash string, nonceHash string) (*domain.RefreshToken, error) {
-	var foundToken = new(domain.RefreshToken)
-
-	if err := r.DB.Where("parent_token_hash = ? AND token_nonce_hash = ?", hash, nonceHash).First(foundToken).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving Refresh Token with parent hash %s: %w", hash, err)
-	}
-	return foundToken, nil
 }
 
 func (r *RefreshTokenRepo) GetByTokenNonceHash(nonceHash string) (*domain.RefreshToken, error) {
