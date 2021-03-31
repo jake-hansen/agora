@@ -24,7 +24,7 @@ api:
       allowed:
 # This is the environment the application should run in. This controls
 # various things but mainly logging levels. Valid values for this property
-# are 'dev' or 'prod'.
+# are 'dev', 'prod', or 'staging'.
 environment:
 jwtservice:
   # This is the duration of the JWT token that is issued when using the 
