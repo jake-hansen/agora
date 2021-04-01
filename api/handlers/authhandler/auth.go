@@ -65,7 +65,7 @@ func (a *AuthHandler) Login(c *gin.Context) {
 		refreshCookieMaxAge := tokenSet.Refresh.ExpiresAt.Sub(time.Now()).Seconds()
 
 		(*a.CookieService).SetCookie(c, "refresh", string(tokenSet.Refresh.Value), int(refreshCookieMaxAge), "/", true)
-		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&tokenSet.Auth))
+		c.JSON(http.StatusNoContent, adapter.TokenDomainToDTO(&tokenSet.Auth))
 	}
 }
 
@@ -117,6 +117,6 @@ func (a *AuthHandler) Refresh(c *gin.Context) {
 		refreshCookieMaxAge := newTokenSet.Refresh.ExpiresAt.Sub(time.Now()).Seconds()
 
 		(*a.CookieService).SetCookie(c, "refresh", string(newTokenSet.Refresh.Value), int(refreshCookieMaxAge), "/", true)
-		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&newTokenSet.Auth))
+		c.JSON(http.StatusNoContent, adapter.TokenDomainToDTO(&newTokenSet.Auth))
 	}
 }
