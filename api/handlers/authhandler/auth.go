@@ -65,7 +65,7 @@ func (a *AuthHandler) Login(c *gin.Context) {
 		refreshCookieMaxAge := tokenSet.Refresh.ExpiresAt.Sub(time.Now()).Seconds()
 
 		(*a.CookieService).SetCookie(c, "refresh", string(tokenSet.Refresh.Value), int(refreshCookieMaxAge), "/", true)
-		c.JSON(http.StatusNoContent, adapter.TokenDomainToDTO(&tokenSet.Auth))
+		c.JSON(http.StatusOK, adapter.TokenDomainToDTO(&tokenSet.Auth))
 	}
 }
 
