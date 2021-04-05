@@ -28,6 +28,7 @@ func Provide(zoomActions *zoom.ZoomActions, v *viper.Viper) domain.ConfiguredPla
 	var platforms []*domain.MeetingPlatform
 
 	platforms = append(platforms, NewPlatform("zoom", zoomActions, Cfg(v, "zoom")))
+	platforms = append(platforms, NewPlatform("teams", nil, Cfg(v, "teams")))
 
 	return platforms
 }
