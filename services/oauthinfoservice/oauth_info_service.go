@@ -71,6 +71,26 @@ func (o *OAuthInfoService) GetOAuthInfo(userID uint, platform *domain.MeetingPla
 	}
 }
 
+func (o *OAuthInfoService) GetAllAuthenticatedPlatforms(userID uint) ([]*domain.MeetingPlatform, error) {
+	oauthInfos, err := o.repo.GetAllByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var returnPlatforms []*domain.MeetingPlatform
+
+	for _, oauthInfo := range oauthInfos {
+		platform, err := o.platformService.GetByID(oauthInfo.MeetingPlatformID)
+		if err != nil {
+			return nil, err
+		}
+
+		returnPlatforms = append(returnPlatforms, platform)
+	}
+
+	return returnPlatforms, nil
+}
+
 func restoreToken(oauthInfo *domain.OAuthInfo) oauth2.Token {
 	return oauth2.Token{
 		AccessToken: oauthInfo.AccessToken,
