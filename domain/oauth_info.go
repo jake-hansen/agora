@@ -35,6 +35,7 @@ type OAuthInfoRepository interface {
 type OAuthInfoService interface {
 	CreateOAuthInfo(ctx context.Context, authorization string, userID uint, platform *MeetingPlatform) error
 	GetOAuthInfo(userID uint, platform *MeetingPlatform) (*OAuthInfo, error)
+	GetAllAuthenticatedPlatforms(userID uint) ([]*MeetingPlatform, error)
 }
 
 // TableName returns the table name that is used in the database for OAuthInfos.
