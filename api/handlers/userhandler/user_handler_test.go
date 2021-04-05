@@ -42,7 +42,7 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 		router.ServeHTTP(w, req)
 
 		assert.NoError(t, err)
-		assert.Equal(t, http.StatusOK, w.Code)
+		assert.Equal(t, http.StatusCreated, w.Code)
 	})
 
 	t.Run("incorrect-format", func(t *testing.T) {
