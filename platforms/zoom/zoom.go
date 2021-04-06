@@ -96,28 +96,10 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 func (z *ZoomActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
 	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 
-	req, err := common.CreateRequest(http.MethodGet, BaseURLV2+reqURL, nil, oauth)
-	if err != nil {
-		return nil, common.NewRequestCreationError(BaseURLV2+reqURL, err)
-	}
-
-	res, err := z.Client.Do(req)
-	if err != nil {
-		return nil, common.NewRequestExecutionError(BaseURLV2+reqURL, err)
-	}
-	defer z.closeBody(res)
-
-	if res.StatusCode != http.StatusOK {
-		if res.StatusCode == http.StatusNotFound {
-			return nil, common.NewNotFoundError("meeting", meetingID, "user", strconv.Itoa(int(oauth.UserID)))
-		}
-		return nil, common.NewAPIError("Zoom", "retrieve meeting", res.StatusCode)
-	}
-
 	var meeting zoomdomain.Meeting
-	err = json.NewDecoder(res.Body).Decode(&meeting)
+	err := common.GetMeeting("Zoom", z.Client, BaseURLV2+reqURL, oauth, meetingID, &meeting, http.StatusOK)
 	if err != nil {
-		return nil, common.NewResponseDecodingError(reqURL, err)
+		return nil, err
 	}
 
 	return zoomadapter.ZoomMeetingToDomainMeeting(meeting), nil

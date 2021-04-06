@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jake-hansen/agora/domain"
 	"net/http"
+	"strconv"
 )
 
 // CreateRequest is a helper function that creates a request to be sent to a platform API. This function appends
@@ -49,6 +50,33 @@ func CreateMeeting(platformName string, client *http.Client, endpoint string, oa
 
 	if res.StatusCode != successCode{
 		return NewAPIError(platformName, "create meeting", res.StatusCode)
+	}
+
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil {
+		return NewResponseDecodingError(endpoint, err)
+	}
+
+	return nil
+}
+
+func GetMeeting(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, meetingID string, result interface{}, successCode int) error {
+	req, err := CreateRequest(http.MethodGet, endpoint, nil, oauth)
+	if err != nil {
+		return NewRequestCreationError(endpoint, err)
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return NewRequestExecutionError(endpoint, err)
+	}
+	defer CloseBody(res)
+
+	if res.StatusCode != successCode {
+		if res.StatusCode == http.StatusNotFound {
+			return NewNotFoundError("meeting", meetingID, "user", strconv.Itoa(int(oauth.UserID)))
+		}
+		return NewAPIError(platformName, "retrieve meeting", res.StatusCode)
 	}
 
 	err = json.NewDecoder(res.Body).Decode(&result)

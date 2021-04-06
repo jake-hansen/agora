@@ -2,6 +2,7 @@ package webex
 
 import (
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/jake-hansen/agora/domain"
@@ -43,5 +44,13 @@ func (w WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 }
 
 func (w WebexActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
-	panic("implement me")
+	reqURL := "/meetings/" + url.QueryEscape(meetingID)
+
+	var meeting webexdomain.Meeting
+	err := common.GetMeeting("Webex", w.Client, BaseURLV1+reqURL, oauth, meetingID, &meeting, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+
+	return webexadapter.WebexMeetingToDomainMeeting(meeting), nil
 }
