@@ -8,6 +8,10 @@ import (
 )
 
 func DomainMeetingToWebexMeeting(meeting domain.Meeting) *webexdomain.Meeting {
+	if meeting.Type == domain.TypeInstant {
+		meeting.StartTime = time.Now().Add(time.Second * 30)
+		meeting.Duration = time.Minute * 30
+	}
 	endTime := meeting.StartTime.Add(meeting.Duration)
 
 	webex := &webexdomain.Meeting{
