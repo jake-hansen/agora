@@ -37,3 +37,22 @@ func WebexMeetingToDomainMeeting(meeting webexdomain.Meeting) *domain.Meeting {
 	}
 	return domainMeeting
 }
+
+func WebexMeetingListToDomainMeetingPage(meetingList webexdomain.MeetingList) *domain.Page {
+	size := len(meetingList.Items)
+	var meetings []interface{}
+	for _, meeting := range meetingList.Items {
+		meetings = append(meetings, WebexMeetingToDomainMeeting(*meeting))
+	}
+
+	page := &domain.Page{
+		PageCount:         0,
+		PageNumber:        1,
+		PageSize: 		   size,
+		TotalRecords:      size,
+		NextPageToken:     "",
+		PreviousPageToken: "",
+		Records:           meetings,
+	}
+	return page
+}

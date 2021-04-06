@@ -40,7 +40,15 @@ func (w WebexActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 }
 
 func (w WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRequest) (*domain.Page, error) {
-	panic("implement me")
+	reqURL := "/meetings"
+
+	var meetings webexdomain.MeetingList
+	err := common.GetMeetings("Webex", w.Client, BaseURLV1+reqURL, oauth, nil, &meetings, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+
+	return webexadapter.WebexMeetingListToDomainMeetingPage(meetings), nil
 }
 
 func (w WebexActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {

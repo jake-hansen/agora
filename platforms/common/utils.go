@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jake-hansen/agora/domain"
 	"net/http"
+	"net/url"
 	"strconv"
 )
 
@@ -82,6 +83,43 @@ func GetMeeting(platformName string, client *http.Client, endpoint string, oauth
 	err = json.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
 		return NewResponseDecodingError(endpoint, err)
+	}
+
+	return nil
+}
+
+type AddPagination func(url url.URL) url.URL
+
+func GetMeetings(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, paginationFunc AddPagination, result interface{}, successCode int) error {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return NewRequestCreationError(endpoint, err)
+	}
+
+	paginatedURL := u
+	if paginationFunc != nil {
+		newURL := paginationFunc(*u)
+		paginatedURL = &newURL
+	}
+
+	req, err := CreateRequest(http.MethodGet, paginatedURL.String(), nil, oauth)
+	if err != nil {
+		return NewRequestCreationError(paginatedURL.String(), err)
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return NewRequestExecutionError(paginatedURL.String(), err)
+	}
+	defer CloseBody(res)
+
+	if res.StatusCode != http.StatusOK {
+		return NewAPIError(platformName, "retrieve meetings", res.StatusCode)
+	}
+
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil {
+		return NewResponseDecodingError(paginatedURL.String(), err)
 	}
 
 	return nil

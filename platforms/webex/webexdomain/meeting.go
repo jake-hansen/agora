@@ -11,3 +11,7 @@ type Meeting struct {
 	WebLink   string `json:"webLink,omitempty"`
 	SendEmail bool   `json:"sendEmail"`
 }
+
+type MeetingList struct {
+	Items []*Meeting `json:"items"`
+}
