@@ -1,9 +1,7 @@
 package zoom
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/jake-hansen/agora/platforms/common"
 	"net/http"
 	"net/url"
@@ -32,27 +30,6 @@ func NewZoom() *ZoomActions {
 	}}
 }
 
-// createZoomRequest is a helper function that creates a request to be sent to Zoom. This function appends
-// the provided OAuth token to the request in the necesseary headers.
-func (z *ZoomActions) createZoomRequest(httpMethod string, url string, jsonBody interface{}, oauth domain.OAuthInfo) (*http.Request, error) {
-	buffer := bytes.NewBuffer(nil)
-	if jsonBody != nil {
-		requestBody, err := json.Marshal(jsonBody)
-		if err != nil {
-			return nil, err
-		}
-		buffer = bytes.NewBuffer(requestBody)
-	}
-	req, err := http.NewRequest(httpMethod, BaseURLV2+url, buffer)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", oauth.AccessToken))
-	req.Header.Set("Content-Type", "application/json")
-
-	return req, nil
-}
-
 func (z *ZoomActions) closeBody(res *http.Response) error {
 	err := res.Body.Close()
 	return err
@@ -64,25 +41,10 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 
 	zoomMeeting := zoomadapter.DomainMeetingToZoomMeeting(*meeting)
 
-	req, err := z.createZoomRequest(http.MethodPost, url, zoomMeeting, oauth)
-	if err != nil {
-		return nil, common.NewRequestCreationError(BaseURLV2+url, err)
-	}
-
-	res, err := z.Client.Do(req)
-	if err != nil {
-		return nil, common.NewRequestExecutionError(BaseURLV2+url, err)
-	}
-	defer z.closeBody(res)
-
-	if res.StatusCode != http.StatusCreated {
-		return nil, common.NewAPIError("Zoom", "create meeting", res.StatusCode)
-	}
-
 	var meetingResponse zoomdomain.Meeting
-	err = json.NewDecoder(res.Body).Decode(&meetingResponse)
+	err := common.CreateMeeting("Zoom", z.Client, BaseURLV2+url, oauth, zoomMeeting, meetingResponse)
 	if err != nil {
-		return nil, common.NewResponseDecodingError(url, err)
+		return nil, err
 	}
 
 	return zoomadapter.ZoomMeetingToDomainMeeting(meetingResponse), err
@@ -105,7 +67,7 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 	}
 	u.RawQuery = q.Encode()
 
-	req, err := z.createZoomRequest(http.MethodGet, u.String(), nil, oauth)
+	req, err := common.CreateRequest(http.MethodGet, BaseURLV2+u.String(), nil, oauth)
 	if err != nil {
 		return nil, common.NewRequestCreationError(BaseURLV2+u.String(), err)
 	}
@@ -133,7 +95,7 @@ func (z *ZoomActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 func (z *ZoomActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
 	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 
-	req, err := z.createZoomRequest(http.MethodGet, reqURL, nil, oauth)
+	req, err := common.CreateRequest(http.MethodGet, BaseURLV2+reqURL, nil, oauth)
 	if err != nil {
 		return nil, common.NewRequestCreationError(BaseURLV2+reqURL, err)
 	}
