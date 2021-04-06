@@ -1,9 +1,13 @@
 package webex
 
 import (
-	"github.com/jake-hansen/agora/domain"
 	"net/http"
 	"time"
+
+	"github.com/jake-hansen/agora/domain"
+	"github.com/jake-hansen/agora/platforms/common"
+	"github.com/jake-hansen/agora/platforms/webex/webexadapter"
+	"github.com/jake-hansen/agora/platforms/webex/webexdomain"
 )
 
 const (
@@ -21,7 +25,17 @@ func NewWebex() *WebexActions {
 }
 
 func (w WebexActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meeting) (*domain.Meeting, error) {
-	panic("implement me")
+	url := "/meetings"
+
+	webexMeeting := webexadapter.DomainMeetingToWebexMeeting(*meeting)
+
+	var meetingResponse webexdomain.Meeting
+	err := common.CreateMeeting("Webex", w.Client, BaseURLV1+url, oauth, webexMeeting, &meetingResponse, http.StatusOK)
+	if err != nil {
+		return nil, err
+	}
+
+	return webexadapter.WebexMeetingToDomainMeeting(meetingResponse), nil
 }
 
 func (w WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRequest) (*domain.Page, error) {

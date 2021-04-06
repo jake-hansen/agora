@@ -2,11 +2,12 @@ package zoom
 
 import (
 	"encoding/json"
-	"github.com/jake-hansen/agora/platforms/common"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/jake-hansen/agora/platforms/common"
 
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/platforms/zoom/zoomadapter"
@@ -42,7 +43,7 @@ func (z *ZoomActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 	zoomMeeting := zoomadapter.DomainMeetingToZoomMeeting(*meeting)
 
 	var meetingResponse zoomdomain.Meeting
-	err := common.CreateMeeting("Zoom", z.Client, BaseURLV2+url, oauth, zoomMeeting, meetingResponse)
+	err := common.CreateMeeting("Zoom", z.Client, BaseURLV2+url, oauth, zoomMeeting, &meetingResponse, http.StatusCreated)
 	if err != nil {
 		return nil, err
 	}

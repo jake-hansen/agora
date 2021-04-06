@@ -35,7 +35,7 @@ func CloseBody(res *http.Response) error {
 }
 
 // CreateMeeting creates a meeting
-func CreateMeeting(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, meeting interface{}, result interface{}) error {
+func CreateMeeting(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, meeting interface{}, result interface{}, successCode int) error {
 	req, err := CreateRequest(http.MethodPost, endpoint, meeting, oauth)
 	if err != nil {
 		return NewRequestCreationError(endpoint, err)
@@ -47,7 +47,7 @@ func CreateMeeting(platformName string, client *http.Client, endpoint string, oa
 	}
 	defer CloseBody(res)
 
-	if res.StatusCode != http.StatusCreated {
+	if res.StatusCode != successCode{
 		return NewAPIError(platformName, "create meeting", res.StatusCode)
 	}
 
