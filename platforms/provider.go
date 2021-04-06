@@ -2,6 +2,7 @@ package platforms
 
 import (
 	"fmt"
+	"github.com/jake-hansen/agora/platforms/webex"
 
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/domain"
@@ -24,17 +25,17 @@ func Cfg(v *viper.Viper, name string) *Config {
 }
 
 // Provide returns ConfiguredPlatforms for the application using the provided ZoomActions and Viper.
-func Provide(zoomActions *zoom.ZoomActions, v *viper.Viper) domain.ConfiguredPlatforms {
+func Provide(zoomActions *zoom.ZoomActions, webexActions *webex.WebexActions, v *viper.Viper) domain.ConfiguredPlatforms {
 	var platforms []*domain.MeetingPlatform
 
 	platforms = append(platforms, NewPlatform("zoom", zoomActions, Cfg(v, "zoom")))
 	platforms = append(platforms, NewPlatform("teams", nil, Cfg(v, "teams")))
-	platforms = append(platforms, NewPlatform("webex", nil, Cfg(v, "webex")))
+	platforms = append(platforms, NewPlatform("webex", webexActions, Cfg(v, "webex")))
 
 	return platforms
 }
 
 var (
 	// ProviderSet provides ConfiguredPlatforms for use in production.
-	ProviderSet = wire.NewSet(Provide, zoom.ProviderProductionSet)
+	ProviderSet = wire.NewSet(Provide, zoom.ProviderProductionSet, webex.ProviderProductionSet)
 )

@@ -24,6 +24,7 @@ import (
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/platforms"
+	"github.com/jake-hansen/agora/platforms/webex"
 	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
@@ -69,7 +70,8 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	userHandler := userhandler.Provide(userService)
 	meetingPlatformRepo := meetingplatformrepo.Provide(db)
 	zoomActions := zoom.Provide()
-	configuredPlatforms := platforms.Provide(zoomActions, v)
+	webexActions := webex.Provide()
+	configuredPlatforms := platforms.Provide(zoomActions, webexActions, v)
 	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, configuredPlatforms)
 	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)
