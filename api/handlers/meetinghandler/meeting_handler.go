@@ -3,6 +3,7 @@ package meetinghandler
 import (
 	"errors"
 	"fmt"
+	"github.com/jake-hansen/agora/platforms/common"
 	"net/http"
 	"strconv"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/domain"
-	"github.com/jake-hansen/agora/platforms/zoom"
 )
 
 // MeetingHandler is the handler that manages operations on Meetings for the API.
@@ -68,13 +68,13 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 
 func (m *MeetingHandler) platformErrorConverter(err error) error {
 	var apiErr = err
-	if errors.Is(err, zoom.ErrReqCreation) {
+	if errors.Is(err, common.ErrReqCreation) {
 		apiErr = api.NewAPIError(http.StatusInternalServerError, err,
 			"An error occurred while formulating the request. Please try again later.")
-	} else if errors.Is(err, zoom.ErrReqExecution) {
+	} else if errors.Is(err, common.ErrReqExecution) {
 		apiErr = api.NewAPIError(http.StatusInternalServerError, err,
 			"An error occurred while executing the request. Please try again later.")
-	} else if errors.Is(err, zoom.ErrResDecoding) {
+	} else if errors.Is(err, common.ErrResDecoding) {
 		apiErr = api.NewAPIError(http.StatusInternalServerError, err,
 			"An error occurred while decoding the performed request. Please try again later.")
 	}
@@ -205,7 +205,7 @@ func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	meeting, err := platform.Actions.GetMeeting(*oauth, meetingID)
 	if err != nil {
 		err = m.platformErrorConverter(err)
-		if errors.Is(err, zoom.ErrNotFound) {
+		if errors.Is(err, common.ErrNotFound) {
 			err = api.NewAPIError(http.StatusNotFound, err, "the requested meeting was not found")
 		}
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)

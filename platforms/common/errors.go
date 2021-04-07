@@ -1,4 +1,4 @@
-package zoom
+package common
 
 import "fmt"
 
@@ -76,22 +76,24 @@ func NewRequestExecutionError(url string, err error) RequestExecutionError {
 	}
 }
 
-type ZoomAPIError struct {
+type APIError struct {
+	Platform string
 	Action string
 	Code   int
 }
 
-func (z ZoomAPIError) Error() string {
-	return fmt.Sprintf("an error occurred while performing action '%s' with the Zoom API. http code %d", z.Action, z.Code)
+func (z APIError) Error() string {
+	return fmt.Sprintf("an error occurred while performing action '%s' with the %s API. http code %d", z.Action, z.Platform, z.Code)
 }
 
-func (z ZoomAPIError) Is(tgt error) bool {
-	_, ok := tgt.(ZoomAPIError)
+func (z APIError) Is(tgt error) bool {
+	_, ok := tgt.(APIError)
 	return ok
 }
 
-func NewZoomAPIError(action string, code int) ZoomAPIError {
-	return ZoomAPIError{
+func NewAPIError(platform string, action string, code int) APIError {
+	return APIError{
+		Platform: platform,
 		Action: action,
 		Code:   code,
 	}
