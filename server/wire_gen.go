@@ -19,17 +19,21 @@ import (
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
+	"github.com/jake-hansen/agora/database/repositories/refreshtokenrepo"
 	"github.com/jake-hansen/agora/database/repositories/schemamigrationrepo"
 	"github.com/jake-hansen/agora/database/repositories/userrepo"
 	"github.com/jake-hansen/agora/log"
 	"github.com/jake-hansen/agora/platforms"
+	"github.com/jake-hansen/agora/platforms/webex"
 	"github.com/jake-hansen/agora/platforms/zoom"
 	"github.com/jake-hansen/agora/router"
 	handlers2 "github.com/jake-hansen/agora/router/handlers"
+	"github.com/jake-hansen/agora/services/cookieservice"
 	"github.com/jake-hansen/agora/services/healthservice"
 	"github.com/jake-hansen/agora/services/jwtservice"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
+	"github.com/jake-hansen/agora/services/refreshtokenservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
 	"github.com/jake-hansen/agora/services/userservice"
 	"github.com/spf13/viper"
@@ -55,14 +59,19 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	jwtServiceImpl := jwtservice.Provide(jwtserviceConfig)
 	userRepository := userrepo.Provide(db)
 	userService := userservice.Provide(userRepository)
-	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService)
-	authHandler := authhandler.Provide(simpleAuthService)
-	userHandler := userhandler.Provide(userService)
+	refreshTokenRepo := refreshtokenrepo.Provide(db)
+	refreshTokenService := refreshtokenservice.Provide(refreshTokenRepo)
+	simpleAuthService := simpleauthservice.Provide(jwtServiceImpl, userService, refreshTokenService)
+	cookieserviceConfig := cookieservice.Cfg(v)
+	cookieService := cookieservice.Provide(cookieserviceConfig)
 	v3 := authmiddleware.ProvideAuthorizationHeaderParser()
 	authMiddleware := authmiddleware.Provide(simpleAuthService, v3)
+	authHandler := authhandler.Provide(simpleAuthService, cookieService, authMiddleware)
+	userHandler := userhandler.Provide(userService)
 	meetingPlatformRepo := meetingplatformrepo.Provide(db)
 	zoomActions := zoom.Provide()
-	configuredPlatforms := platforms.Provide(zoomActions, v)
+	webexActions := webex.Provide()
+	configuredPlatforms := platforms.Provide(zoomActions, webexActions, v)
 	meetingPlatformService := meetingplatformservice.Provide(meetingPlatformRepo, configuredPlatforms)
 	oAuthInfoRepo := oauthinforepo.Provide(db)
 	oAuthInfoService := oauthinfoservice.Provide(meetingPlatformService, oAuthInfoRepo)

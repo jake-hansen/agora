@@ -25,12 +25,17 @@ type MeetingPlatformHandler struct {
 // :platform/auth (POST) - Attempts to authenticate to the specified MeetingPlatform
 // :platform/auth (GET)	 - Attempts to get the Auth for the specified MeetingPlatform
 func (m *MeetingPlatformHandler) Register(parentGroup *gin.RouterGroup) error {
+	userHandlerGroup := parentGroup.Group("users")
+	userHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
+	{
+		userHandlerGroup.GET("/me/platforms", m.GetAllAuth)
+	}
 	meetingHandlerGroup := parentGroup.Group("platforms")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
 		meetingHandlerGroup.GET("", m.GetAllPlatforms)
-		meetingHandlerGroup.POST(":platform/auth", m.Auth)
-		meetingHandlerGroup.GET(":platform/auth", m.GetAuth)
+		meetingHandlerGroup.POST("/:platform/auth", m.Auth)
+		meetingHandlerGroup.GET("/:platform/auth", m.GetAuth)
 	}
 
 	return nil
@@ -118,10 +123,30 @@ func (m *MeetingPlatformHandler) GetAuth(c *gin.Context) {
 	}
 }
 
+func (m *MeetingPlatformHandler) GetAllAuth(c *gin.Context) {
+	user := m.getUser(c)
+	if user == nil {
+		return
+	}
+	platforms, err := (*m.OAuthService).GetAllAuthenticatedPlatforms(user.ID)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	var returnPlatforms []*dto.MeetingPlatform
+
+	for _, platform := range platforms {
+		returnPlatforms = append(returnPlatforms, adapter.MeetingPlatformDomainToDTO(*platform))
+	}
+
+	c.JSON(http.StatusOK, returnPlatforms)
+}
+
 // GetAllPlatforms retrieves all configured MeetingPlatforms and
 // returns them as a JSON response.
 func (m *MeetingPlatformHandler) GetAllPlatforms(c *gin.Context) {
-	var platforms []dto.MeetingProvider
+	var platforms []dto.MeetingPlatform
 	var retrievedPlatforms []*domain.MeetingPlatform
 	retrievedPlatforms, err := (*m.PlatformService).GetAll()
 	if err != nil {
@@ -130,7 +155,7 @@ func (m *MeetingPlatformHandler) GetAllPlatforms(c *gin.Context) {
 	}
 
 	for _, provider := range retrievedPlatforms {
-		platforms = append(platforms, *adapter.MeetingProviderDomainToDTO(*provider))
+		platforms = append(platforms, *adapter.MeetingPlatformDomainToDTO(*provider))
 	}
 	c.JSON(http.StatusOK, platforms)
 }

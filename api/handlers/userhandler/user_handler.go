@@ -46,11 +46,12 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 	}
 
 	// Register user
-	_, err = (*u.UserService).Register(adapter.UserDTOToDomain(&user))
+	createdUserID, err := (*u.UserService).Register(adapter.UserDTOToDomain(&user))
 	if err != nil {
 		apiError := api.NewAPIError(http.StatusInternalServerError, err, "error occurred during registration")
 		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
 	} else {
-		c.Status(http.StatusOK)
+		resource := &dto.Resource{ID: int(createdUserID)}
+		c.JSON(http.StatusCreated, resource)
 	}
 }

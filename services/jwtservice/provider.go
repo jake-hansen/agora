@@ -15,10 +15,16 @@ func Cfg(v *viper.Viper) (*Config, error) {
 		return nil, fmt.Errorf("jwtservice: %w", err)
 	}
 
+	refreshDur, err := time.ParseDuration(v.GetString("jwtservice.refreshduration"))
+	if err != nil {
+		return nil, fmt.Errorf("jwtservice: %w", err)
+	}
+
 	cfg := &Config{
 		Issuer:     v.GetString("jwtservice.issuer"),
 		SigningKey: v.GetString("jwtservice.signingkey"),
 		Duration:   dur,
+		RefreshDuration: refreshDur,
 	}
 
 	return cfg, nil

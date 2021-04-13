@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var neededSchemaVersion = 7
+var schemaVersion = 8
 
 // HealthService is a service which processes information about the application's health.
 type HealthService struct {
@@ -16,7 +16,7 @@ type HealthService struct {
 
 // GetHealth retrieves the Health of the application.
 func (h *HealthService) GetHealth() (*domain.Health, error) {
-	return h.backwardsCompatibleVersionHealthCheck(7)
+	return h.backwardsCompatibleVersionHealthCheck(schemaVersion)
 }
 
 // specificVersionNeededHealthCheck retrieves the Health of the application when a specific
@@ -27,7 +27,7 @@ func (h *HealthService) specificVersionNeededHealthCheck(neededVersion int) (*do
 	_, err := (*h.schemaRepo).GetSchemaMigrationByVersion(neededVersion)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			health.Reason = fmt.Sprintf("database version is not at needed version %d", neededSchemaVersion)
+			health.Reason = fmt.Sprintf("database version is not at needed version %d", schemaVersion)
 		} else {
 			return nil, err
 		}

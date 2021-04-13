@@ -25,7 +25,7 @@ var testUser = domain.User{
 func TestJWTService_GenerateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		service := jwtservice.Provide(&testConfig)
-		_, err := service.GenerateToken(testUser)
+		_, err := service.GenerateAuthToken(testUser)
 		assert.NoError(t, err)
 	})
 }
@@ -33,24 +33,24 @@ func TestJWTService_GenerateToken(t *testing.T) {
 func TestJWTService_ValidateToken(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		service := jwtservice.Provide(&testConfig)
-		token, err := service.GenerateToken(testUser)
+		token, err := service.GenerateAuthToken(testUser)
 		assert.NoError(t, err)
 
-		parsedToken, _, err := service.ValidateToken(token)
+		parsedToken, err := service.ValidateAuthToken(token.Value)
 		assert.NoError(t, err)
-		assert.Equal(t, token, parsedToken.Raw)
+		assert.Equal(t, token.Value, parsedToken.Value)
 	})
 
 	t.Run("fail-expired", func(t *testing.T) {
 		c := testConfig
 		c.Duration = 1 * time.Microsecond
 		service := jwtservice.Provide(&c)
-		token, err := service.GenerateToken(testUser)
+		token, err := service.GenerateAuthToken(testUser)
 
 		assert.NoError(t, err)
 
 		time.Sleep(1 * time.Second)
-		_, _, err = service.ValidateToken(token)
+		_, err = service.ValidateAuthToken(token.Value)
 		assert.Error(t, err)
 	})
 }

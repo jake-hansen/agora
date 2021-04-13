@@ -10,6 +10,10 @@ api:
     # value is set to 'myroot', then the new registed endpoint will be
     # /myroot/v1/example.
     root:
+  # This is the domain name the API is running on. This is used for things
+  # such as setting cookies, so it is important to include this value. Do not
+  # include the protocol or port. For example: mywebsite.com would be appropriate.
+  domain:
   cors:
     # This sets how long the results fo a preflight request can be cached.
     # Values should be in human readable format. For example '30m', '1h',
@@ -20,14 +24,19 @@ api:
       allowed:
 # This is the environment the application should run in. This controls
 # various things but mainly logging levels. Valid values for this property
-# are 'dev' or 'prod'.
+# are 'dev', 'prod', or 'staging'.
 environment:
 jwtservice:
   # This is the duration of the JWT token that is issued when using the 
   # built in authentication service. Values should be in human readable
   # format. For example '30m', '1h', or '1d', meaning 30 minutes, 1 hour,
   # and 1 day, respectively.
-  duration: 
+  duration:
+  # This is the duration of the refresh JWT token that is issued when using the
+  # built in authentication service. Values should be in human readable
+  # format. For example '30m', '1h', or '1d', meaning 30 minutes, 1 hour,
+  # and 1 day, respectively.
+  refreshduration:
   # Issuer value to be set within signed JWTs.
   issuer:
   # Key to use to sign JWTs.
