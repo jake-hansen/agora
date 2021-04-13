@@ -15,3 +15,7 @@
 # vendor/
 #
 /bin
+
+# Config file if placed in root directory
+/config.yaml
+
