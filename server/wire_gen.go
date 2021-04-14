@@ -9,6 +9,7 @@ import (
 	"github.com/jake-hansen/agora/api/handlers"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
 	"github.com/jake-hansen/agora/api/handlers/healthhandler"
+	"github.com/jake-hansen/agora/api/handlers/invitehandler"
 	"github.com/jake-hansen/agora/api/handlers/meetinghandler"
 	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
@@ -17,6 +18,7 @@ import (
 	"github.com/jake-hansen/agora/api/middleware/corsmiddleware"
 	"github.com/jake-hansen/agora/api/validator"
 	"github.com/jake-hansen/agora/database"
+	"github.com/jake-hansen/agora/database/repositories/inviterepo"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
 	"github.com/jake-hansen/agora/database/repositories/refreshtokenrepo"
@@ -35,6 +37,7 @@ import (
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/refreshtokenservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
+	"github.com/jake-hansen/agora/services/simpleinviteservice"
 	"github.com/jake-hansen/agora/services/userservice"
 	"github.com/spf13/viper"
 )
@@ -80,7 +83,10 @@ func Build(db *database.Manager, v *viper.Viper, log2 *log.Log) (*Server, error)
 	healthService := healthservice.Provide(schemaMigrationRepo)
 	healthHandler := healthhandler.Provide(healthService)
 	meetingHandler := meetinghandler.Provide(authMiddleware, meetingPlatformService, oAuthInfoService)
-	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler, healthHandler, meetingHandler)
+	inviteRepo := inviterepo.Provide(db)
+	simpleInviteService := simpleinviteservice.Provide(inviteRepo)
+	inviteHandler := invitehandler.Provide(simpleInviteService, authMiddleware, userService, meetingPlatformService, oAuthInfoService)
+	v4 := handlers.ProvideAllProductionHandlers(authHandler, userHandler, meetingPlatformHandler, healthHandler, meetingHandler, inviteHandler)
 	handlerManager := handlers2.ProvideHandlerManager(v4)
 	v5 := validator.ProvideCustomValidationFuncs()
 	validatorConfig := validator.Cfg(v5)
