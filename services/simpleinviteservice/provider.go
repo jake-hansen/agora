@@ -5,9 +5,12 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
-func Provide(inviteRepo domain.InviteRepository) *SimpleInviteService {
+func Provide(inviteRepo domain.InviteRepository, meetingService domain.MeetingPlatformService, oauthService domain.OAuthInfoService, userService domain.UserService) *SimpleInviteService {
 	return &SimpleInviteService{
-		inviteRepo: inviteRepo,
+		inviteRepo:     inviteRepo,
+		meetingService: meetingService,
+		oauthService:   oauthService,
+		userService:    userService,
 	}
 }
 

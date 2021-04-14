@@ -5,10 +5,22 @@ import (
 	"time"
 )
 
+type InviteRequest struct {
+	MeetingID string
+	InviterID uint
+	InviteeUsername string
+	MeetingPlatformID uint
+}
+
 type Invite struct {
 	gorm.Model
 	MeetingID string
-	MeetingEndTime time.Time
+	MeetingStartTime time.Time
+	MeetingDuration int
+	MeetingTitle string
+	MeetingDescription string
+	MeetingPlatformID uint
+	MeetingJoinURL string
 	InviterID uint
 	InviteeID uint
 }
@@ -21,6 +33,6 @@ type InviteRepository interface {
 }
 
 type InviteService interface {
-	SendInvite(invite *Invite) (uint, error)
+	SendInvite(invite *InviteRequest) (uint, error)
 	GetAllReceivedInvites(userID uint) ([]*Invite, error)
 }

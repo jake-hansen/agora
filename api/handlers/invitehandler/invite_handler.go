@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jake-hansen/agora/adapter"
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
@@ -51,12 +52,17 @@ func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		inviteGroup.POST("", i.SendInvite)
 	}
+	
+	userGroup := parentGroup.Group("/users")
+	{
+		userGroup.GET("/me/invites", i.GetInvites)
+	}
 
 	return nil
 }
 
 func (i *InviteHandler) SendInvite(c *gin.Context) {
-	var invite dto.Invite
+	var invite dto.InviteRequest
 	err := c.ShouldBind(&invite)
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
@@ -69,44 +75,14 @@ func (i *InviteHandler) SendInvite(c *gin.Context) {
 		return
 	}
 
-	// Validate platform
-	platform := i.meetingPlatformValidator(c, invite.MeetingPlatform)
-	if platform == nil {
+	if user.ID != invite.InviterID {
+		err = errors.New("inviter ID not same as authenticated user ID")
+		apiErr := api.NewAPIError(http.StatusBadRequest, err, "cannot send invite for different user")
+		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
 		return
 	}
 
-	// Validate meeting exists
-	oauth, err := (*i.OAuthService).GetOAuthInfo(user.ID, platform)
-	if err != nil {
-		_ = c.Error(err).SetType(gin.ErrorTypePublic)
-		return
-	}
-
-	meeting, err := platform.Actions.GetMeeting(*oauth, invite.MeetingID)
-	if err != nil {
-		err = i.platformErrorConverter(err)
-		if errors.Is(err, common.ErrNotFound) {
-			err = api.NewAPIError(http.StatusNotFound, err, "the requested meeting was not found")
-		}
-		_ = c.Error(err).SetType(gin.ErrorTypePublic)
-		return
-	}
-
-	// Validate invitee exists
-	invitee, err := (*i.UserService).GetByUsername(invite.Invitee)
-	if err != nil {
-		return
-	}
-
-	// Create invite
-	domainInvite := &domain.Invite{
-		MeetingID:      invite.MeetingID,
-		MeetingEndTime: meeting.StartTime.Add(meeting.Duration),
-		InviterID:      invite.InviterID,
-		InviteeID:      invitee.ID,
-	}
-
-	inviteID, err := (*i.InviteService).SendInvite(domainInvite)
+	inviteID, err := (*i.InviteService).SendInvite(adapter.InviteRequestDTOToDomain(&invite))
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
@@ -115,4 +91,17 @@ func (i *InviteHandler) SendInvite(c *gin.Context) {
 	resource := dto.Resource{ID: int(inviteID)}
 
 	c.JSON(http.StatusCreated, resource)
+}
+
+func (i *InviteHandler) GetInvites(c *gin.Context)  {
+	user, err := i.AuthMiddleware.GetUser(c)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	_, err = (*i.InviteService).GetAllReceivedInvites(user.ID)
+	if err != nil {
+		return 
+	}
 }
