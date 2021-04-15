@@ -110,15 +110,36 @@ func (i *InviteHandler) SendInvite(c *gin.Context) {
 }
 
 func (i *InviteHandler) GetInvites(c *gin.Context)  {
+	inviteType := c.Query("type")
+	if inviteType != "sent" {
+		if inviteType != "received" {
+			err := errors.New("unknown type query")
+			apiErr := api.NewAPIError(http.StatusBadRequest, err, "'type' query must be either 'sent' or 'received'")
+			_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
+			return
+		}
+	}
+
 	user, err := i.AuthMiddleware.GetUser(c)
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
 
-	invites, err := (*i.InviteService).GetAllReceivedInvites(user.ID)
-	if err != nil {
-		return 
+	var invites []*domain.Invite
+
+	if inviteType == "sent" {
+		invites, err = (*i.InviteService).GetAllSentInvites(user.ID)
+		if err != nil {
+			return
+		}
+	}
+
+	if inviteType == "received" {
+		invites, err = (*i.InviteService).GetAllReceivedInvites(user.ID)
+		if err != nil {
+			return
+		}
 	}
 
 	var dtoInvites []*dto.Invite

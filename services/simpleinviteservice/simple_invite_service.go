@@ -59,3 +59,11 @@ func (s *SimpleInviteService) GetAllReceivedInvites(userID uint) ([]*domain.Invi
 	return invites, nil
 }
 
+func (s *SimpleInviteService) GetAllSentInvites(userID uint) ([]*domain.Invite, error) {
+	invites, err := s.inviteRepo.GetAllByInviter(userID)
+	if err != nil {
+		return nil, err
+	}
+	return invites, nil
+}
+

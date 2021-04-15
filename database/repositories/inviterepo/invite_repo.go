@@ -40,6 +40,14 @@ func (i *InviteRepo) GetAllByInvitee(inviteeID uint) ([]*domain.Invite, error) {
 	return invites, nil
 }
 
+func (i *InviteRepo) GetAllByInviter(inviteeID uint) ([]*domain.Invite, error) {
+	var invites []*domain.Invite
+	if err := i.DB.Where("inviter_id = ?", inviteeID).Find(&invites).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving invites by inviter id %d: %w", inviteeID, err)
+	}
+	return invites, nil
+}
+
 func (i *InviteRepo) Delete(ID uint) error {
 	if err := i.DB.Delete(&domain.Invite{}, ID).Error; err != nil {
 		return fmt.Errorf("error deleting invite with id %d: %w", ID, err)

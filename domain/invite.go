@@ -42,10 +42,12 @@ type InviteRepository interface {
 	Create(invite *Invite) (uint, error)
 	GetByID(ID uint) (*Invite, error)
 	GetAllByInvitee(inviteeID uint) ([]*Invite, error)
+	GetAllByInviter(inviteeID uint) ([]*Invite, error)
 	Delete(ID uint) error
 }
 
 type InviteService interface {
 	SendInvite(invite *InviteRequest) (uint, error)
 	GetAllReceivedInvites(userID uint) ([]*Invite, error)
+	GetAllSentInvites(userID uint) ([]*Invite, error)
 }
