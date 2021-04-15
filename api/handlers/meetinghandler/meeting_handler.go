@@ -62,7 +62,7 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 		meetingHandlerGroup.POST("/:id/platforms/:platform/meetings", m.CreateMeeting)
 		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings", m.GetMeetings)
 		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings/:id", m.GetMeeting)
-		meetingHandlerGroup.DELETE("/:id/platforms/:platform/meetings/:id", m.DeleteMeeting)
+		meetingHandlerGroup.DELETE("/:userid/platforms/:platform/meetings/:id", m.DeleteMeeting)
 	}
 
 	return nil
