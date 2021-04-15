@@ -4,7 +4,7 @@ type Invite struct {
 	ID			      uint `json:"id"`
 	MeetingPlatformID uint `json:"meeting_platform" binding:"required"`
 	InviterID uint `json:"inviter_id" binding:"required"`
-	InviteeID uint `json:"invitee" binding:"required"`
+	Invitee User `json:"invitee" binding:"required"`
 	Meeting Meeting `json:"meeting"`
 }
 

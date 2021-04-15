@@ -146,7 +146,14 @@ func (i *InviteHandler) GetInvites(c *gin.Context)  {
 
 	var dtoInvites []*dto.Invite
 	for _, invite := range invites {
-		dtoInvites = append(dtoInvites, adapter.InviteDomainToDTO(invite))
+		dtoInvite := adapter.InviteDomainToDTO(invite)
+		invitee, _ := (*i.UserService).GetByID(invite.InviteeID)
+		dtoInvite.Invitee = dto.User{
+			Firstname: invitee.Firstname,
+			Lastname:  invitee.Lastname,
+			Username:  invitee.Username,
+		}
+		dtoInvites = append(dtoInvites, dtoInvite)
 	}
 
 	c.JSON(http.StatusOK, dtoInvites)

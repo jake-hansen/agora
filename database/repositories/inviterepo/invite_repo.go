@@ -38,16 +38,16 @@ func (i *InviteRepo) GetByID(ID uint) (*domain.Invite, error) {
 
 func (i *InviteRepo) GetAllByInvitee(inviteeID uint) ([]*domain.Invite, error) {
 	var invites []*domain.Invite
-	if err := i.DB.Where("invitee_id = ? & deleted_at IS NULL", inviteeID).Find(&invites).Error; err != nil {
+	if err := i.DB.Where("invitee_id = ? AND deleted_at IS NULL", inviteeID).Find(&invites).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving invites by invitee id %d: %w", inviteeID, err)
 	}
 	return invites, nil
 }
 
-func (i *InviteRepo) GetAllByInviter(inviteeID uint) ([]*domain.Invite, error) {
+func (i *InviteRepo) GetAllByInviter(inviterID uint) ([]*domain.Invite, error) {
 	var invites []*domain.Invite
-	if err := i.DB.Where("inviter_id = ? & deleted_at IS NULL", inviteeID).Find(&invites).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving invites by inviter id %d: %w", inviteeID, err)
+	if err := i.DB.Where("inviter_id = ? AND deleted_at IS NULL", inviterID).Find(&invites).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving invites by inviter id %d: %w", inviterID, err)
 	}
 	return invites, nil
 }

@@ -11,7 +11,6 @@ func InviteDomainToDTO(invite *domain.Invite) *dto.Invite {
 		ID: invite.ID,
 		MeetingPlatformID: invite.MeetingPlatformID,
 		InviterID:       invite.InviterID,
-		InviteeID:       invite.InviteeID,
 		Meeting:         dto.Meeting{
 			ID:          invite.MeetingID,
 			Title:       invite.MeetingTitle,
