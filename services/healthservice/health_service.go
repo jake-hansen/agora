@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var schemaVersion = 8
+var schemaVersion = 9
 
 // HealthService is a service which processes information about the application's health.
 type HealthService struct {

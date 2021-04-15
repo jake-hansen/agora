@@ -31,7 +31,7 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 
-		h := userhandler.Provide(userService)
+		h := userhandler.Provide(userService, nil)
 		_ = h.Register(router.Group("test"))
 
 		payloadBuf := new(bytes.Buffer)
@@ -56,7 +56,7 @@ func TestUserHandler_RegisterUser(t *testing.T) {
 		router := gin.Default()
 		router.Use(middleware.PublicErrorHandler())
 
-		h := userhandler.Provide(userService)
+		h := userhandler.Provide(userService, nil)
 		_ = h.Register(router.Group("test"))
 
 		creds := &dto.Credentials{}

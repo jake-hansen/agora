@@ -3,9 +3,10 @@ package meetinghandler
 import (
 	"errors"
 	"fmt"
-	"github.com/jake-hansen/agora/platforms/common"
 	"net/http"
 	"strconv"
+
+	"github.com/jake-hansen/agora/platforms/common"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -58,10 +59,10 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup := parentGroup.Group("users")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
-		meetingHandlerGroup.POST("/me/platforms/:platform/meetings", m.CreateMeeting)
-		meetingHandlerGroup.GET("/me/platforms/:platform/meetings", m.GetMeetings)
-		meetingHandlerGroup.GET("/me/platforms/:platform/meetings/:id", m.GetMeeting)
-		meetingHandlerGroup.DELETE("/me/platforms/:platform/meetings/:id", m.DeleteMeeting)
+		meetingHandlerGroup.POST("/:id/platforms/:platform/meetings", m.CreateMeeting)
+		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings", m.GetMeetings)
+		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings/:id", m.GetMeeting)
+		meetingHandlerGroup.DELETE("/:id/platforms/:platform/meetings/:id", m.DeleteMeeting)
 	}
 
 	return nil

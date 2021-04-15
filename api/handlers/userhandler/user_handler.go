@@ -2,6 +2,7 @@ package userhandler
 
 import (
 	"errors"
+	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,7 @@ import (
 // UserHandler is the handler that manages operations on Users for the API.
 type UserHandler struct {
 	UserService *domain.UserService
+	AuthMiddleware *authmiddleware.AuthMiddleware
 }
 
 // Register creates one endpoint to manage Users.
@@ -23,6 +25,7 @@ func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	userGroup := parentGroup.Group("users")
 	{
 		userGroup.POST("", u.RegisterUser)
+		userGroup.GET("/:id", u.GetUser)
 	}
 	return nil
 }
@@ -54,4 +57,23 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 		resource := &dto.Resource{ID: int(createdUserID)}
 		c.JSON(http.StatusCreated, resource)
 	}
+}
+
+func (u *UserHandler) GetUser(c *gin.Context) {
+	userID := c.Param("id")
+
+	if userID != "me" {
+		err := errors.New("cannot get info about other users")
+		apiError := api.NewAPIError(http.StatusBadRequest, err, "cannot get info about other users")
+		_ = c.Error(apiError).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	user, err := (*u.AuthMiddleware).GetUser(c)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	c.JSON(http.StatusOK, adapter.UserDomainToDTO(user))
 }

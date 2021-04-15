@@ -4,10 +4,12 @@ import (
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
 	"github.com/jake-hansen/agora/api/handlers/healthhandler"
+	"github.com/jake-hansen/agora/api/handlers/invitehandler"
 	"github.com/jake-hansen/agora/api/handlers/meetinghandler"
 	"github.com/jake-hansen/agora/api/handlers/meetingplatformhandler"
 	"github.com/jake-hansen/agora/api/handlers/userhandler"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
+	"github.com/jake-hansen/agora/database/repositories/inviterepo"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
 	"github.com/jake-hansen/agora/database/repositories/refreshtokenrepo"
@@ -22,6 +24,7 @@ import (
 	"github.com/jake-hansen/agora/services/oauthinfoservice"
 	"github.com/jake-hansen/agora/services/refreshtokenservice"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
+	"github.com/jake-hansen/agora/services/simpleinviteservice"
 	"github.com/jake-hansen/agora/services/userservice"
 )
 
@@ -30,7 +33,8 @@ func ProvideAllProductionHandlers(auth *authhandler.AuthHandler,
 		user *userhandler.UserHandler,
 		meetingProvider *meetingplatformhandler.MeetingPlatformHandler,
 		healthHandler *healthhandler.HealthHandler,
-		meetingHandler *meetinghandler.MeetingHandler) *[]handlers.Handler {
+		meetingHandler *meetinghandler.MeetingHandler,
+		inviteHandler *invitehandler.InviteHandler) *[]handlers.Handler {
 
 	var handlers []handlers.Handler
 
@@ -39,6 +43,7 @@ func ProvideAllProductionHandlers(auth *authhandler.AuthHandler,
 	handlers = append(handlers, meetingProvider)
 	handlers = append(handlers, healthHandler)
 	handlers = append(handlers, meetingHandler)
+	handlers = append(handlers, inviteHandler)
 
 	return &handlers
 }
@@ -51,14 +56,16 @@ var (
 		userservice.ProviderProductionSet,
 		healthservice.ProviderProductionSet,
 		cookieservice.ProviderSet,
-		refreshtokenservice.ProviderProductionSet)
+		refreshtokenservice.ProviderProductionSet,
+		simpleinviteservice.ProviderProductionSet)
 
 	repos = wire.NewSet(meetingplatformrepo.ProviderSet,
 		platforms.ProviderSet,
 		userrepo.ProviderProductionSet,
 		oauthinforepo.ProviderSet,
 		schemamigrationrepo.ProviderProductionSet,
-		refreshtokenrepo.ProviderSet)
+		refreshtokenrepo.ProviderSet,
+		inviterepo.ProviderSet)
 
 	middleware = wire.NewSet(authmiddleware.Provide,
 		authmiddleware.ProvideAuthorizationHeaderParser)
@@ -67,7 +74,8 @@ var (
 		userhandler.Provide,
 		meetingplatformhandler.Provide,
 		healthhandler.Provide,
-		meetinghandler.Provide)
+		meetinghandler.Provide,
+		invitehandler.Provide)
 
 	// ProviderProductionSet provides all handlers for production.
 	ProviderProductionSet = wire.NewSet(ProvideAllProductionHandlers, repos, services, middleware, handlersSet)

@@ -42,6 +42,10 @@ func (u *UserService) Delete(ID uint) error {
 	return u.repo.Delete(ID)
 }
 
+func (u *UserService) GetByUsername(username string) (*domain.User, error) {
+	return u.repo.GetByUsername(username)
+}
+
 // Validate validates the given credentials by comparing the given plaintext password
 // with the hashed password in the repository for the given username. If the credentials
 // are valid, the User is returned. Otherwise, an error is returned with a nil User.
