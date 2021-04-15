@@ -2,6 +2,7 @@ package userrepo
 
 import (
 	"fmt"
+	"github.com/jake-hansen/agora/database/repositories"
 
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
@@ -36,7 +37,7 @@ func (u *UserRepository) GetByUsername(username string) (*domain.User, error) {
 	// Need to put constraint on username to ensure it is unique
 	user := new(domain.User)
 	if err := u.DB.Where("username = ?", username).First(user).Error; err != nil {
-		return nil, fmt.Errorf("error retrieving user by username %s: %w", username, err)
+		return nil, repositories.NewNotFoundError(repositories.DATABASE_ACTION_RETRIEVE, "user", username, "by username")
 	}
 	return user, nil
 }

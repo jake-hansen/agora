@@ -7,10 +7,11 @@ import (
 )
 
 // MeetingPlatformDomainToDTO converts the given MeetingPlatform from domain representation to DTO representation.
-func MeetingPlatformDomainToDTO(meetingProvider domain.MeetingPlatform) *dto.MeetingPlatform {
+func MeetingPlatformDomainToDTO(meetingPlatform domain.MeetingPlatform) *dto.MeetingPlatform {
 	convertedMeetingProvider := &dto.MeetingPlatform{
-		Name:        meetingProvider.Name,
-		RedirectURL: meetingProvider.OAuth.Config.AuthCodeURL("", oauth2.AccessTypeOffline),
+		ID:          meetingPlatform.ID,
+		Name:        meetingPlatform.Name,
+		RedirectURL: meetingPlatform.OAuth.Config.AuthCodeURL("", oauth2.AccessTypeOffline),
 	}
 	return convertedMeetingProvider
 }
