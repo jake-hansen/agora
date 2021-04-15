@@ -3,8 +3,10 @@ package common
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/jake-hansen/agora/domain"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -113,13 +115,40 @@ func GetMeetings(platformName string, client *http.Client, endpoint string, oaut
 	}
 	defer CloseBody(res)
 
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != successCode {
 		return NewAPIError(platformName, "retrieve meetings", res.StatusCode)
 	}
 
 	err = json.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
 		return NewResponseDecodingError(paginatedURL.String(), err)
+	}
+
+	return nil
+}
+
+func DeleteMeeting(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, result interface{}, successCode int, meetingID string) error {
+	req, err := CreateRequest(http.MethodDelete, endpoint, nil, oauth)
+	if err != nil {
+		return NewRequestCreationError(endpoint, err)
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return NewRequestExecutionError(endpoint, err)
+	}
+	defer CloseBody(res)
+
+	if res.StatusCode != successCode{
+		if res.StatusCode == http.StatusNotFound {
+			return NewNotFoundError("meeting", meetingID, "user", strconv.Itoa(int(oauth.UserID)))
+		}
+		return NewAPIError(platformName, "delete meeting", res.StatusCode)
+	}
+
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil && !errors.Is(err, io.EOF){
+		return NewResponseDecodingError(endpoint, err)
 	}
 
 	return nil

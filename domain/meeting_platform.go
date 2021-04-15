@@ -30,6 +30,7 @@ type MeetingPlatformActions interface {
 	CreateMeeting(oauth OAuthInfo, meeting *Meeting) (*Meeting, error)
 	GetMeetings(oauth OAuthInfo, pageReq PageRequest) (*Page, error)
 	GetMeeting(oauth OAuthInfo, meetingID string) (*Meeting, error)
+	DeleteMeeting(oauth OAuthInfo, meetingID string) error
 }
 
 // MeetingPlatformRepository stores information about MeetingPlatforms.

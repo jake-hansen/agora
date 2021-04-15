@@ -25,7 +25,7 @@ func NewWebex() *WebexActions {
 	}}
 }
 
-func (w WebexActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meeting) (*domain.Meeting, error) {
+func (w *WebexActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meeting) (*domain.Meeting, error) {
 	url := "/meetings"
 
 	webexMeeting := webexadapter.DomainMeetingToWebexMeeting(*meeting)
@@ -39,7 +39,7 @@ func (w WebexActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meet
 	return webexadapter.WebexMeetingToDomainMeeting(meetingResponse), nil
 }
 
-func (w WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRequest) (*domain.Page, error) {
+func (w *WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRequest) (*domain.Page, error) {
 	reqURL := "/meetings"
 
 	var meetings webexdomain.MeetingList
@@ -51,7 +51,7 @@ func (w WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageReq
 	return webexadapter.WebexMeetingListToDomainMeetingPage(meetings), nil
 }
 
-func (w WebexActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
+func (w *WebexActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
 	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 
 	var meeting webexdomain.Meeting
@@ -61,4 +61,11 @@ func (w WebexActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*dom
 	}
 
 	return webexadapter.WebexMeetingToDomainMeeting(meeting), nil
+}
+
+func (w *WebexActions) DeleteMeeting(oauth domain.OAuthInfo, meetingID string) error {
+	reqURL := "/meetings/" + url.QueryEscape(meetingID)
+
+	err := common.DeleteMeeting("Webex", w.Client, BaseURLV1+reqURL, oauth, nil, http.StatusNoContent, meetingID)
+	return err
 }
