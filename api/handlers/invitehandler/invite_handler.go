@@ -89,6 +89,7 @@ func (i *InviteHandler) SendInvite(c *gin.Context) {
 	if err != nil {
 		var notFoundError repositories.NotFoundError
 		var meetingNotFoundError common.NotFoundError
+		var duplicateEntry repositories.DuplicateEntryError
 
 		if errors.As(err, &simpleinviteservice.InviterSameAsInviteeErr{}) {
 			err = api.NewAPIError(http.StatusBadRequest, err, "inviter cannot be invitee")
@@ -96,6 +97,8 @@ func (i *InviteHandler) SendInvite(c *gin.Context) {
 			err = api.NewAPIError(http.StatusBadRequest, err, fmt.Sprintf("'%s' was not found", notFoundError.Value))
 		} else if errors.As(err, &meetingNotFoundError) {
 			err = api.NewAPIError(http.StatusBadRequest, err, fmt.Sprintf("meeting with id %s not found", invite.MeetingID))
+		} else if errors.As(err, &duplicateEntry) {
+			err = api.NewAPIError(http.StatusBadRequest, err, fmt.Sprintf("cannot create %s that already exists", duplicateEntry.EntityType))
 		}
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return

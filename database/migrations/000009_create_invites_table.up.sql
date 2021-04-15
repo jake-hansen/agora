@@ -12,6 +12,12 @@ create table if not exists invites (
     meeting_description text null,
     meeting_platform_id int not null,
     meeting_join_url text not null,
+    constraint invites_pk unique (
+        invitee_id,
+        inviter_id,
+        meeting_id,
+        meeting_platform_id
+    ),
     constraint invites_meeting_platforms_id_fk foreign key (meeting_platform_id) references meeting_platforms (id) on update cascade on delete cascade,
     constraint invites_users_id_fk foreign key (inviter_id) references users (id) on update cascade on delete cascade,
     constraint invites_users_id_fk_2 foreign key (invitee_id) references users (id) on update cascade on delete cascade

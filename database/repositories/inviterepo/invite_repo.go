@@ -1,7 +1,10 @@
 package inviterepo
 
 import (
+	"errors"
 	"fmt"
+	"github.com/go-sql-driver/mysql"
+	"github.com/jake-hansen/agora/database/repositories"
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
 )
@@ -12,6 +15,10 @@ type InviteRepo struct {
 
 func (i *InviteRepo) Create(invite *domain.Invite) (uint, error) {
 	if err := i.DB.Create(&invite).Error; err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			return 0, repositories.NewDuplicateEntryError(repositories.DATABASE_ACTION_CREATE, "invite", "", "")
+		}
 		return 0, fmt.Errorf("error creating invite: %w", err)
 	}
 	return invite.ID, nil

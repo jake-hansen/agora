@@ -54,5 +54,25 @@ func NewNotFoundError(action string, entityType string, entityValue string, enti
 	}
 }
 
+type DuplicateEntryError struct {
+	EntityType string
+}
+
+func (d DuplicateEntryError) Error() string {
+	return fmt.Sprintf("a(n) %s already exists that is considered unique for the provided fields", d.EntityType)
+}
+
+func NewDuplicateEntryError(action string, entityType string, entityValue string, entityField string) DatabaseError {
+	return DatabaseError{
+		DatabaseAction: action,
+		EntityType:     entityType,
+		EntityValue:    entityValue,
+		EntityField:    entityField,
+		NestedError:    DuplicateEntryError{
+			EntityType: entityType,
+		},
+	}
+}
+
 
 
