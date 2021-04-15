@@ -8,6 +8,7 @@ import (
 
 func InviteDomainToDTO(invite *domain.Invite) *dto.Invite {
 	dtoInvite := &dto.Invite{
+		ID: invite.ID,
 		MeetingPlatformID: invite.MeetingPlatformID,
 		InviterID:       invite.InviterID,
 		InviteeID:       invite.InviteeID,

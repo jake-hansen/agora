@@ -7,6 +7,7 @@ import (
 	"github.com/jake-hansen/agora/database/repositories"
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
+	"strconv"
 )
 
 type InviteRepo struct {
@@ -27,6 +28,9 @@ func (i *InviteRepo) Create(invite *domain.Invite) (uint, error) {
 func (i *InviteRepo) GetByID(ID uint) (*domain.Invite, error) {
 	invite := new(domain.Invite)
 	if err := i.DB.First(invite, ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, repositories.NewNotFoundError("delete", "invite", strconv.Itoa(int(ID)), "by id")
+		}
 		return nil, fmt.Errorf("error retrieving invite with id %d: %w", ID, err)
 	}
 	return invite, nil
@@ -50,6 +54,9 @@ func (i *InviteRepo) GetAllByInviter(inviteeID uint) ([]*domain.Invite, error) {
 
 func (i *InviteRepo) Delete(ID uint) error {
 	if err := i.DB.Delete(&domain.Invite{}, ID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return repositories.NewNotFoundError("delete", "invite", strconv.Itoa(int(ID)), "by id")
+		}
 		return fmt.Errorf("error deleting invite with id %d: %w", ID, err)
 	}
 	return nil

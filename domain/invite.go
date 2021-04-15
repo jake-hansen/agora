@@ -50,4 +50,6 @@ type InviteService interface {
 	SendInvite(invite *InviteRequest) (uint, error)
 	GetAllReceivedInvites(userID uint) ([]*Invite, error)
 	GetAllSentInvites(userID uint) ([]*Invite, error)
+	GetInvite(inviteID uint) (*Invite, error)
+	DeleteInvite(inviteID uint) error
 }

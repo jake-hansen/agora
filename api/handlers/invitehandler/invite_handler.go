@@ -13,6 +13,7 @@ import (
 	"github.com/jake-hansen/agora/platforms/common"
 	"github.com/jake-hansen/agora/services/simpleinviteservice"
 	"net/http"
+	"strconv"
 )
 
 type InviteHandler struct {
@@ -53,6 +54,7 @@ func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 	inviteGroup.Use(i.AuthMiddleware.HandleAuth())
 	{
 		inviteGroup.POST("", i.SendInvite)
+		inviteGroup.DELETE("/:id", i.DeleteInvite)
 	}
 	
 	userGroup := parentGroup.Group("/users")
@@ -148,4 +150,45 @@ func (i *InviteHandler) GetInvites(c *gin.Context)  {
 	}
 
 	c.JSON(http.StatusOK, dtoInvites)
+}
+
+func (i *InviteHandler) DeleteInvite(c *gin.Context)  {
+	inviteIDStr := c.Param("id")
+	inviteID, err := strconv.Atoi(inviteIDStr)
+	if err != nil {
+		apiErr := api.NewAPIError(http.StatusBadRequest, err, "invite id must be a parsable integer")
+		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	user, err := i.AuthMiddleware.GetUser(c)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	invite, err := (*i.InviteService).GetInvite(uint(inviteID))
+	if err != nil {
+		var notFoundErr repositories.NotFoundError
+		if  errors.As(err, &notFoundErr){
+			err = api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("invite with id %s not found", inviteIDStr))
+		}
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	if invite.InviterID != user.ID {
+		err = errors.New("cannot delete invite created by another user")
+		apiErr := api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("invite with id %s not found", inviteIDStr))
+		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	err = (*i.InviteService).DeleteInvite(uint(inviteID))
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

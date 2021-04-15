@@ -67,3 +67,12 @@ func (s *SimpleInviteService) GetAllSentInvites(userID uint) ([]*domain.Invite, 
 	return invites, nil
 }
 
+func (s *SimpleInviteService) DeleteInvite(inviteID uint) error {
+	return s.inviteRepo.Delete(inviteID)
+}
+
+func (s *SimpleInviteService) GetInvite(inviteID uint) (*domain.Invite, error) {
+	return s.inviteRepo.GetByID(inviteID)
+}
+
+
