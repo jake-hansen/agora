@@ -12,6 +12,15 @@ type SimpleInviteService struct {
 }
 
 func (s *SimpleInviteService) SendInvite(invite *domain.InviteRequest) (uint, error) {
+	invitee, err := s.userService.GetByUsername(invite.InviteeUsername)
+	if err != nil {
+		return 0, err
+	}
+
+	if invitee.ID == invite.InviterID {
+		return 0, NewInviterSameAsInviteeErr()
+	}
+
 	platform, err := s.meetingService.GetByID(invite.MeetingPlatformID)
 	if err != nil {
 		return 0, err
@@ -23,11 +32,6 @@ func (s *SimpleInviteService) SendInvite(invite *domain.InviteRequest) (uint, er
 	}
 
 	meeting, err := platform.Actions.GetMeeting(*oauth, invite.MeetingID)
-	if err != nil {
-		return 0, err
-	}
-
-	invitee, err := s.userService.GetByUsername(invite.InviteeUsername)
 	if err != nil {
 		return 0, err
 	}

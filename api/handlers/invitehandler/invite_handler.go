@@ -8,8 +8,10 @@ import (
 	"github.com/jake-hansen/agora/api"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
+	"github.com/jake-hansen/agora/database/repositories"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/platforms/common"
+	"github.com/jake-hansen/agora/services/simpleinviteservice"
 	"net/http"
 )
 
@@ -85,6 +87,16 @@ func (i *InviteHandler) SendInvite(c *gin.Context) {
 
 	inviteID, err := (*i.InviteService).SendInvite(adapter.InviteRequestDTOToDomain(&invite))
 	if err != nil {
+		var notFoundError repositories.NotFoundError
+		var meetingNotFoundError common.NotFoundError
+
+		if errors.As(err, &simpleinviteservice.InviterSameAsInviteeErr{}) {
+			err = api.NewAPIError(http.StatusBadRequest, err, "inviter cannot be invitee")
+		} else if errors.As(err, &notFoundError) {
+			err = api.NewAPIError(http.StatusBadRequest, err, fmt.Sprintf("'%s' was not found", notFoundError.Value))
+		} else if errors.As(err, &meetingNotFoundError) {
+			err = api.NewAPIError(http.StatusBadRequest, err, fmt.Sprintf("meeting with id %s not found", invite.MeetingID))
+		}
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
