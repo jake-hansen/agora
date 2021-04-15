@@ -1,9 +1,12 @@
 package domain
 
 import (
+	"database/sql/driver"
 	"gorm.io/gorm"
 	"time"
 )
+
+type MeetingDuration time.Duration
 
 type InviteRequest struct {
 	MeetingID string
@@ -16,13 +19,23 @@ type Invite struct {
 	gorm.Model
 	MeetingID string
 	MeetingStartTime time.Time
-	MeetingDuration int
+	MeetingDuration MeetingDuration
 	MeetingTitle string
 	MeetingDescription string
 	MeetingPlatformID uint
 	MeetingJoinURL string
 	InviterID uint
 	InviteeID uint
+}
+
+func (m *MeetingDuration) Scan(src interface{}) error {
+	var duration time.Duration = time.Duration(src.(int64))
+	*m = MeetingDuration(time.Minute * duration)
+	return nil
+}
+
+func (m MeetingDuration) Value() (driver.Value, error) {
+	return time.Duration(m).Minutes(), nil
 }
 
 type InviteRepository interface {

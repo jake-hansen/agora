@@ -58,9 +58,9 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup := parentGroup.Group("users")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
-		meetingHandlerGroup.POST("/me/platforms/:platform/meetings", m.CreateMeeting)
-		meetingHandlerGroup.GET("/me/platforms/:platform/meetings", m.GetMeetings)
-		meetingHandlerGroup.GET("/me/platforms/:platform/meetings/:id", m.GetMeeting)
+		meetingHandlerGroup.POST("/:id/platforms/:platform/meetings", m.CreateMeeting)
+		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings", m.GetMeetings)
+		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings/:id", m.GetMeeting)
 	}
 
 	return nil

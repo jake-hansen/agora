@@ -35,11 +35,11 @@ func (s *SimpleInviteService) SendInvite(invite *domain.InviteRequest) (uint, er
 	domainInvite := &domain.Invite{
 		MeetingID:          meeting.ID,
 		MeetingStartTime:   meeting.StartTime,
-		MeetingDuration: 	int(meeting.Duration.Minutes()),
+		MeetingDuration:    domain.MeetingDuration(meeting.Duration),
 		MeetingTitle:       meeting.Title,
 		MeetingDescription: meeting.Description,
 		MeetingPlatformID:  platform.ID,
-		MeetingJoinURL: 	meeting.JoinURL,
+		MeetingJoinURL:     meeting.JoinURL,
 		InviterID:          invite.InviterID,
 		InviteeID:          invitee.ID,
 	}

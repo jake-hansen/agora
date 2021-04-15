@@ -2,6 +2,7 @@ package dto
 
 // User represents information about a userrepo.
 type User struct {
+	ID		  uint   `json:"id,omitempty"`
 	Firstname string `json:"firstname,omitempty" binding:"required"`
 	Lastname  string `json:"lastname,omitempty" binding:"required"`
 	Username  string `json:"username,omitempty" binding:"required"`

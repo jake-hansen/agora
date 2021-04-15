@@ -54,8 +54,9 @@ func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 	}
 	
 	userGroup := parentGroup.Group("/users")
+	userGroup.Use(i.AuthMiddleware.HandleAuth())
 	{
-		userGroup.GET("/me/invites", i.GetInvites)
+		userGroup.GET("/:id/invites", i.GetInvites)
 	}
 
 	return nil
@@ -100,8 +101,15 @@ func (i *InviteHandler) GetInvites(c *gin.Context)  {
 		return
 	}
 
-	_, err = (*i.InviteService).GetAllReceivedInvites(user.ID)
+	invites, err := (*i.InviteService).GetAllReceivedInvites(user.ID)
 	if err != nil {
 		return 
 	}
+
+	var dtoInvites []*dto.Invite
+	for _, invite := range invites {
+		dtoInvites = append(dtoInvites, adapter.InviteDomainToDTO(invite))
+	}
+
+	c.JSON(http.StatusOK, dtoInvites)
 }

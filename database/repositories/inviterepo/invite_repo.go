@@ -27,7 +27,7 @@ func (i *InviteRepo) GetByID(ID uint) (*domain.Invite, error) {
 
 func (i *InviteRepo) GetAllByInvitee(inviteeID uint) ([]*domain.Invite, error) {
 	var invites []*domain.Invite
-	if err := i.DB.Where("invitee_id = ?", inviteeID).Find(invites).Error; err != nil {
+	if err := i.DB.Where("invitee_id = ?", inviteeID).Find(&invites).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving invites by invitee id %d: %w", inviteeID, err)
 	}
 	return invites, nil
