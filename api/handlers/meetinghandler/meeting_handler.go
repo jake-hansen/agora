@@ -3,9 +3,10 @@ package meetinghandler
 import (
 	"errors"
 	"fmt"
-	"github.com/jake-hansen/agora/platforms/common"
 	"net/http"
 	"strconv"
+
+	"github.com/jake-hansen/agora/platforms/common"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -61,6 +62,7 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 		meetingHandlerGroup.POST("/:id/platforms/:platform/meetings", m.CreateMeeting)
 		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings", m.GetMeetings)
 		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings/:id", m.GetMeeting)
+		meetingHandlerGroup.DELETE("/:userid/platforms/:platform/meetings/:id", m.DeleteMeeting)
 	}
 
 	return nil
@@ -213,4 +215,38 @@ func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, adapter.MeetingDomainToDTO(meeting))
+}
+
+func (m *MeetingHandler) DeleteMeeting(c *gin.Context) {
+	platformName := c.Param("platform")
+	meetingID := c.Param("id")
+
+	platform := m.meetingPlatformValidator(c, platformName)
+	if platform == nil {
+		return
+	}
+
+	user := m.getUser(c)
+	if user == nil {
+		return
+	}
+
+	oauth, err := (*m.OAuthService).GetOAuthInfo(user.ID, platform)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	err = platform.Actions.DeleteMeeting(*oauth, meetingID)
+	if err != nil {
+		var notFoundErr common.NotFoundError
+
+		if errors.Is(err, notFoundErr) {
+			err = api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("meeting with id %s not found", meetingID))
+		}
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }
