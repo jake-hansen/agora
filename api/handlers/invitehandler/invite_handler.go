@@ -227,7 +227,7 @@ func (i *InviteHandler) GetInvite(c *gin.Context) {
 		return
 	}
 
-	if invite.InviterID != user.ID {
+	if invite.InviterID != user.ID || invite.InviteeID != user.ID {
 		err = errors.New("cannot get invite created by another user")
 		apiErr := api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("invite with id %s not found", inviteIDParam))
 		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
