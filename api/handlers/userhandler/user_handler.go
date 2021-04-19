@@ -26,6 +26,7 @@ func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		userGroup.POST("", u.RegisterUser)
 		userGroup.GET("/:id", u.GetUser)
+		userGroup.GET("/", u.SearchUsers)
 	}
 	return nil
 }
@@ -76,4 +77,21 @@ func (u *UserHandler) GetUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, adapter.UserDomainToDTO(user))
+}
+
+func (u *UserHandler) SearchUsers(c *gin.Context) {
+	_ = c.Query("username")
+
+	users, err := (*u.UserService).GetAll()
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	var userList []*dto.User
+	for _, user := range(users) {
+		userList = append(userList, adapter.UserDomainToDTO(user))
+	}
+
+	c.JSON(http.StatusOK, userList)
 }
