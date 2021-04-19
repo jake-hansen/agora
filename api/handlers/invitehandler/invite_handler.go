@@ -210,6 +210,12 @@ func (i *InviteHandler) GetInvite(c *gin.Context) {
 		return
 	}
 
+	user, err := i.AuthMiddleware.GetUser(c)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
 	invite, err := (*i.InviteService).GetInvite(uint(inviteID))
 	if err != nil {
 		var notFoundErr repositories.NotFoundError
@@ -218,6 +224,13 @@ func (i *InviteHandler) GetInvite(c *gin.Context) {
 			return
 		}
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	if invite.InviterID != user.ID {
+		err = errors.New("cannot get invite created by another user")
+		apiErr := api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("invite with id %s not found", inviteIDParam))
+		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
 		return
 	}
 
