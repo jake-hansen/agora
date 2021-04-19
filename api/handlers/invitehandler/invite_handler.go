@@ -55,6 +55,7 @@ func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		inviteGroup.POST("", i.SendInvite)
 		inviteGroup.DELETE("/:id", i.DeleteInvite)
+		inviteGroup.GET("/:id", i.GetInvite)
 	}
 	
 	userGroup := parentGroup.Group("/users")
@@ -198,4 +199,49 @@ func (i *InviteHandler) DeleteInvite(c *gin.Context)  {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func (i *InviteHandler) GetInvite(c *gin.Context) {
+	inviteIDParam := c.Param("id")
+	inviteID, err := strconv.Atoi(inviteIDParam)
+	if err != nil {
+		apiErr := api.NewAPIError(http.StatusBadRequest, err, "could not parse invite id")
+		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	user, err := i.AuthMiddleware.GetUser(c)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	invite, err := (*i.InviteService).GetInvite(uint(inviteID))
+	if err != nil {
+		var notFoundErr repositories.NotFoundError
+		if errors.As(err, &notFoundErr) {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	if invite.InviterID != user.ID || invite.InviteeID != user.ID {
+		err = errors.New("cannot get invite created by another user")
+		apiErr := api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("invite with id %s not found", inviteIDParam))
+		_ = c.Error(apiErr).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	invitee, _ := (*i.UserService).GetByID(invite.InviteeID)
+
+	dtoInvite := adapter.InviteDomainToDTO(invite)
+	dtoInvite.Invitee = dto.User{
+		Firstname: invitee.Firstname,
+		Lastname:  invitee.Lastname,
+		Username:  invitee.Username,
+	}
+
+	c.JSON(http.StatusOK, dtoInvite)
 }
