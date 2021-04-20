@@ -26,7 +26,7 @@ func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		userGroup.POST("", u.RegisterUser)
 		userGroup.GET("/:id", u.GetUser)
-		userGroup.GET("/", u.SearchUsers)
+		userGroup.GET("", u.SearchUsers)
 	}
 	return nil
 }
