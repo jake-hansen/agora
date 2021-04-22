@@ -22,6 +22,7 @@ type MeetingHandler struct {
 	AuthMiddleware  *authmiddleware.AuthMiddleware
 	PlatformService *domain.MeetingPlatformService
 	OAuthService    *domain.OAuthInfoService
+	InviteService	*domain.InviteService
 }
 
 func (m *MeetingHandler) meetingPlatformValidator(c *gin.Context, platformName string) *domain.MeetingPlatform {
@@ -244,6 +245,12 @@ func (m *MeetingHandler) DeleteMeeting(c *gin.Context) {
 		if errors.Is(err, notFoundErr) {
 			err = api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("meeting with id %s not found", meetingID))
 		}
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	err = (*m.InviteService).DeleteAllInvitesByMeetingID(meetingID)
+	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}

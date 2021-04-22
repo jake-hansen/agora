@@ -23,10 +23,12 @@ type UserHandler struct {
 // / (POST) - Register new user
 func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	userGroup := parentGroup.Group("users")
+	authenticatedUserGroup := parentGroup.Group("users")
+	authenticatedUserGroup.Use(u.AuthMiddleware.HandleAuth())
 	{
 		userGroup.POST("", u.RegisterUser)
 		userGroup.GET("/:id", u.GetUser)
-		userGroup.GET("", u.SearchUsers)
+		authenticatedUserGroup.GET("", u.SearchUsers)
 	}
 	return nil
 }
