@@ -62,3 +62,12 @@ func (i *InviteRepo) Delete(ID uint) error {
 	return nil
 }
 
+func (i *InviteRepo) DeleteAllByMeetingID(meetingID string) error {
+	if err := i.DB.Unscoped().Delete(&domain.Invite{}, "meeting_id = ?", meetingID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return repositories.NewNotFoundError("delete", "invite", meetingID, "by meeting id")
+		}
+		return fmt.Errorf("error deleting invites with meeting id %s: %w", meetingID, err)
+	}
+	return nil
+}

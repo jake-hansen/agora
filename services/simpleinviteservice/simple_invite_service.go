@@ -75,4 +75,7 @@ func (s *SimpleInviteService) GetInvite(inviteID uint) (*domain.Invite, error) {
 	return s.inviteRepo.GetByID(inviteID)
 }
 
+func (s *SimpleInviteService) DeleteAllInvitesByMeetingID(meetingID string) error {
+	return s.inviteRepo.DeleteAllByMeetingID(meetingID)
+}
 

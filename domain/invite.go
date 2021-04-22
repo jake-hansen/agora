@@ -43,6 +43,7 @@ type InviteRepository interface {
 	GetByID(ID uint) (*Invite, error)
 	GetAllByInvitee(inviteeID uint) ([]*Invite, error)
 	GetAllByInviter(inviteeID uint) ([]*Invite, error)
+	DeleteAllByMeetingID(meetingID string) error
 	Delete(ID uint) error
 }
 
@@ -52,4 +53,5 @@ type InviteService interface {
 	GetAllSentInvites(userID uint) ([]*Invite, error)
 	GetInvite(inviteID uint) (*Invite, error)
 	DeleteInvite(inviteID uint) error
+	DeleteAllInvitesByMeetingID(meetingID string) error
 }
