@@ -27,7 +27,7 @@ func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	authenticatedUserGroup.Use(u.AuthMiddleware.HandleAuth())
 	{
 		userGroup.POST("", u.RegisterUser)
-		userGroup.GET("/:id", u.GetUser)
+		userGroup.GET("/:userid", u.GetUser)
 		authenticatedUserGroup.GET("", u.SearchUsers)
 	}
 	return nil
@@ -63,7 +63,7 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 }
 
 func (u *UserHandler) GetUser(c *gin.Context) {
-	userID := c.Param("id")
+	userID := c.Param("userid")
 
 	if userID != "me" {
 		err := errors.New("cannot get info about other users")

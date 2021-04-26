@@ -28,7 +28,7 @@ func (m *MeetingPlatformHandler) Register(parentGroup *gin.RouterGroup) error {
 	userHandlerGroup := parentGroup.Group("users")
 	userHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
-		userHandlerGroup.GET("/:id/platforms", m.GetAllAuth)
+		userHandlerGroup.GET("/:userid/platforms", m.GetAllAuth)
 	}
 	meetingHandlerGroup := parentGroup.Group("platforms")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
