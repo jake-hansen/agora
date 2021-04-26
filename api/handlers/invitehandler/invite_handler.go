@@ -54,14 +54,14 @@ func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 	inviteGroup.Use(i.AuthMiddleware.HandleAuth())
 	{
 		inviteGroup.POST("", i.SendInvite)
-		inviteGroup.DELETE("/:id", i.DeleteInvite)
-		inviteGroup.GET("/:id", i.GetInvite)
+		inviteGroup.DELETE("/:inviteid", i.DeleteInvite)
+		inviteGroup.GET("/:inviteid", i.GetInvite)
 	}
 	
 	userGroup := parentGroup.Group("/users")
 	userGroup.Use(i.AuthMiddleware.HandleAuth())
 	{
-		userGroup.GET("/:id/invites", i.GetInvites)
+		userGroup.GET("/:userid/invites", i.GetInvites)
 	}
 
 	return nil
@@ -161,7 +161,7 @@ func (i *InviteHandler) GetInvites(c *gin.Context)  {
 }
 
 func (i *InviteHandler) DeleteInvite(c *gin.Context)  {
-	inviteIDStr := c.Param("id")
+	inviteIDStr := c.Param("inviteid")
 	inviteID, err := strconv.Atoi(inviteIDStr)
 	if err != nil {
 		apiErr := api.NewAPIError(http.StatusBadRequest, err, "invite id must be a parsable integer")
@@ -202,7 +202,7 @@ func (i *InviteHandler) DeleteInvite(c *gin.Context)  {
 }
 
 func (i *InviteHandler) GetInvite(c *gin.Context) {
-	inviteIDParam := c.Param("id")
+	inviteIDParam := c.Param("inviteid")
 	inviteID, err := strconv.Atoi(inviteIDParam)
 	if err != nil {
 		apiErr := api.NewAPIError(http.StatusBadRequest, err, "could not parse invite id")

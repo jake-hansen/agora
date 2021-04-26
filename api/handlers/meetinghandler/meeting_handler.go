@@ -60,10 +60,10 @@ func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup := parentGroup.Group("users")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
-		meetingHandlerGroup.POST("/:id/platforms/:platform/meetings", m.CreateMeeting)
-		meetingHandlerGroup.GET("/:id/platforms/:platform/meetings", m.GetMeetings)
-		meetingHandlerGroup.GET("/:userid/platforms/:platform/meetings/:id", m.GetMeeting)
-		meetingHandlerGroup.DELETE("/:userid/platforms/:platform/meetings/:id", m.DeleteMeeting)
+		meetingHandlerGroup.POST("/:userid/platforms/:platform/meetings", m.CreateMeeting)
+		meetingHandlerGroup.GET("/:userid/platforms/:platform/meetings", m.GetMeetings)
+		meetingHandlerGroup.GET("/:userid/platforms/:platform/meetings/:meetingid", m.GetMeeting)
+		meetingHandlerGroup.DELETE("/:userid/platforms/:platform/meetings/:meetingid", m.DeleteMeeting)
 	}
 
 	return nil
@@ -187,7 +187,7 @@ func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 // GetMeeting gets a single meeting
 func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
-	meetingID := c.Param("id")
+	meetingID := c.Param("meetingid")
 
 	platform := m.meetingPlatformValidator(c, platformName)
 	if platform == nil {
@@ -220,7 +220,7 @@ func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 
 func (m *MeetingHandler) DeleteMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
-	meetingID := c.Param("id")
+	meetingID := c.Param("meetingid")
 
 	platform := m.meetingPlatformValidator(c, platformName)
 	if platform == nil {
