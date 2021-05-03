@@ -2,6 +2,7 @@ package platforms
 
 import (
 	"fmt"
+
 	"github.com/jake-hansen/agora/platforms/webex"
 
 	"github.com/google/wire"
@@ -24,7 +25,7 @@ func Cfg(v *viper.Viper, name string) *Config {
 	return &c
 }
 
-// Provide returns ConfiguredPlatforms for the application using the provided ZoomActions and Viper.
+// Provide returns ConfiguredPlatforms for the application using the provided ZoomActions, WebexActions, and Viper.
 func Provide(zoomActions *zoom.ZoomActions, webexActions *webex.WebexActions, v *viper.Viper) domain.ConfiguredPlatforms {
 	var platforms []*domain.MeetingPlatform
 

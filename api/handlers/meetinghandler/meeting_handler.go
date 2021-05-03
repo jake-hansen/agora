@@ -3,9 +3,10 @@ package meetinghandler
 import (
 	"errors"
 	"fmt"
-	"github.com/jake-hansen/agora/platforms/common"
 	"net/http"
 	"strconv"
+
+	"github.com/jake-hansen/agora/platforms/common"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -21,6 +22,7 @@ type MeetingHandler struct {
 	AuthMiddleware  *authmiddleware.AuthMiddleware
 	PlatformService *domain.MeetingPlatformService
 	OAuthService    *domain.OAuthInfoService
+	InviteService   *domain.InviteService
 }
 
 func (m *MeetingHandler) meetingPlatformValidator(c *gin.Context, platformName string) *domain.MeetingPlatform {
@@ -50,17 +52,20 @@ func (m *MeetingHandler) validateHelper(err error) error {
 	return err
 }
 
-// Register creates 3 endpoints to manage meetings
-// /me/platforms/:platform/meetings (GET) - retrieves all meetings for the authenticated user on the specified platform
-// /me/platforms/:platform/meetings (POST) - creates a new meeting for the authenticated user on the specified platform
-// /me/platforms/:platform/meetings/:id (GET) - retrieves the specified meeting for the authenticated user on the specified platform
+// Register creates 4 endpoints to manage meetings
+//
+// /:userid/platforms/:platform/meetings            (GET)    - GetMeetings
+// /:userid/platforms/:platform/meetings            (POST)   - CreateMeeting
+// /:userid/platforms/:platform/meetings/:meetingid (GET)    - GetMeeting
+// /:userid/platforms/:platform/meetings/:meetingid (DELETE) - DeleteMeeting
 func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup := parentGroup.Group("users")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
-		meetingHandlerGroup.POST("/me/platforms/:platform/meetings", m.CreateMeeting)
-		meetingHandlerGroup.GET("/me/platforms/:platform/meetings", m.GetMeetings)
-		meetingHandlerGroup.GET("/me/platforms/:platform/meetings/:id", m.GetMeeting)
+		meetingHandlerGroup.POST("/:userid/platforms/:platform/meetings", m.CreateMeeting)
+		meetingHandlerGroup.GET("/:userid/platforms/:platform/meetings", m.GetMeetings)
+		meetingHandlerGroup.GET("/:userid/platforms/:platform/meetings/:meetingid", m.GetMeeting)
+		meetingHandlerGroup.DELETE("/:userid/platforms/:platform/meetings/:meetingid", m.DeleteMeeting)
 	}
 
 	return nil
@@ -81,7 +86,7 @@ func (m *MeetingHandler) platformErrorConverter(err error) error {
 	return apiErr
 }
 
-// CreateMeeting creates a meeting
+// CreateMeeting creates a meeting.
 func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
 
@@ -136,7 +141,7 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	c.JSON(http.StatusCreated, adapter.MeetingDomainToDTO(createdMeeting))
 }
 
-// GetMeeting gets all meetings
+// GetMeetings gets all meetings.
 func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	platformName := c.Param("platform")
 	pageSize := c.Query("page_size")
@@ -181,10 +186,10 @@ func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	c.JSON(http.StatusOK, adapter.MeetingPageDomainToDTO(meetings))
 }
 
-// GetMeeting gets a single meeting
+// GetMeeting gets a single meeting.
 func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
-	meetingID := c.Param("id")
+	meetingID := c.Param("meetingid")
 
 	platform := m.meetingPlatformValidator(c, platformName)
 	if platform == nil {
@@ -213,4 +218,45 @@ func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, adapter.MeetingDomainToDTO(meeting))
+}
+
+// DeleteMeeting deletes a meeting.
+func (m *MeetingHandler) DeleteMeeting(c *gin.Context) {
+	platformName := c.Param("platform")
+	meetingID := c.Param("meetingid")
+
+	platform := m.meetingPlatformValidator(c, platformName)
+	if platform == nil {
+		return
+	}
+
+	user := m.getUser(c)
+	if user == nil {
+		return
+	}
+
+	oauth, err := (*m.OAuthService).GetOAuthInfo(user.ID, platform)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	err = platform.Actions.DeleteMeeting(*oauth, meetingID)
+	if err != nil {
+		var notFoundErr common.NotFoundError
+
+		if errors.Is(err, notFoundErr) {
+			err = api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("meeting with id %s not found", meetingID))
+		}
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	err = (*m.InviteService).DeleteAllInvitesByMeetingID(meetingID)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

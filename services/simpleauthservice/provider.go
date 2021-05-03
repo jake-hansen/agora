@@ -6,12 +6,11 @@ import (
 	"github.com/jake-hansen/agora/services/jwtservice"
 )
 
-// Provide returns a new SimpleAuthService which uses the given JWTService for generating and validating
-// JWTs.
+// Provide returns a new SimpleAuthService configured with the provided JWTService, UserService, and RefreshTokenService.
 func Provide(jwtService jwtservice.JWTService, userService domain.UserService, refreshTokenService domain.RefreshTokenService) *SimpleAuthService {
 	return &SimpleAuthService{
-		jwtService: jwtService,
-		userService: userService,
+		jwtService:          jwtService,
+		userService:         userService,
 		refreshTokenService: refreshTokenService,
 	}
 }

@@ -5,10 +5,12 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
-func Provide(authMiddleware *authmiddleware.AuthMiddleware, meetingProviderService domain.MeetingPlatformService, oauthService domain.OAuthInfoService) *MeetingHandler {
+// Provide returns a MeetingHandler configured with the provided AuthMiddleware, MeetingPlatformService, OAuthInfoService, and InviteService.
+func Provide(authMiddleware *authmiddleware.AuthMiddleware, meetingProviderService domain.MeetingPlatformService, oauthService domain.OAuthInfoService, inviteService domain.InviteService) *MeetingHandler {
 	return &MeetingHandler{
 		AuthMiddleware:  authMiddleware,
 		PlatformService: &meetingProviderService,
-		OAuthService: &oauthService,
+		OAuthService:    &oauthService,
+		InviteService:   &inviteService,
 	}
 }

@@ -2,6 +2,7 @@ package schemamigrationrepo
 
 import (
 	"fmt"
+
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
 )

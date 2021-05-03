@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/jake-hansen/agora/api"
-	"net/http"
 )
 
 // APIErrorJSON represents an error message.

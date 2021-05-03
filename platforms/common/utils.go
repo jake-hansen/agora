@@ -3,11 +3,14 @@ package common
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"github.com/jake-hansen/agora/domain"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
+
+	"github.com/jake-hansen/agora/domain"
 )
 
 // CreateRequest is a helper function that creates a request to be sent to a platform API. This function appends
@@ -36,7 +39,7 @@ func CloseBody(res *http.Response) error {
 	return err
 }
 
-// CreateMeeting creates a meeting
+// CreateMeeting creates a meeting.
 func CreateMeeting(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, meeting interface{}, result interface{}, successCode int) error {
 	req, err := CreateRequest(http.MethodPost, endpoint, meeting, oauth)
 	if err != nil {
@@ -49,7 +52,7 @@ func CreateMeeting(platformName string, client *http.Client, endpoint string, oa
 	}
 	defer CloseBody(res)
 
-	if res.StatusCode != successCode{
+	if res.StatusCode != successCode {
 		return NewAPIError(platformName, "create meeting", res.StatusCode)
 	}
 
@@ -61,6 +64,7 @@ func CreateMeeting(platformName string, client *http.Client, endpoint string, oa
 	return nil
 }
 
+// GetMeeting gets a meeting.
 func GetMeeting(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, meetingID string, result interface{}, successCode int) error {
 	req, err := CreateRequest(http.MethodGet, endpoint, nil, oauth)
 	if err != nil {
@@ -88,8 +92,11 @@ func GetMeeting(platformName string, client *http.Client, endpoint string, oauth
 	return nil
 }
 
+// AddPagination is a function that takes a URL, adds information to it to get a specific page,
+// and returns the URL
 type AddPagination func(url url.URL) url.URL
 
+// GetMeetings gets all meetings.
 func GetMeetings(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, paginationFunc AddPagination, result interface{}, successCode int) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -113,13 +120,41 @@ func GetMeetings(platformName string, client *http.Client, endpoint string, oaut
 	}
 	defer CloseBody(res)
 
-	if res.StatusCode != http.StatusOK {
+	if res.StatusCode != successCode {
 		return NewAPIError(platformName, "retrieve meetings", res.StatusCode)
 	}
 
 	err = json.NewDecoder(res.Body).Decode(&result)
 	if err != nil {
 		return NewResponseDecodingError(paginatedURL.String(), err)
+	}
+
+	return nil
+}
+
+// DeleteMeeting deletes a meeting.
+func DeleteMeeting(platformName string, client *http.Client, endpoint string, oauth domain.OAuthInfo, result interface{}, successCode int, meetingID string) error {
+	req, err := CreateRequest(http.MethodDelete, endpoint, nil, oauth)
+	if err != nil {
+		return NewRequestCreationError(endpoint, err)
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
+		return NewRequestExecutionError(endpoint, err)
+	}
+	defer CloseBody(res)
+
+	if res.StatusCode != successCode {
+		if res.StatusCode == http.StatusNotFound {
+			return NewNotFoundError("meeting", meetingID, "user", strconv.Itoa(int(oauth.UserID)))
+		}
+		return NewAPIError(platformName, "delete meeting", res.StatusCode)
+	}
+
+	err = json.NewDecoder(res.Body).Decode(&result)
+	if err != nil && !errors.Is(err, io.EOF) {
+		return NewResponseDecodingError(endpoint, err)
 	}
 
 	return nil

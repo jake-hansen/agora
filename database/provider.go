@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/log"

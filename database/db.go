@@ -3,8 +3,9 @@ package database
 import (
 	"context"
 	"fmt"
-	"github.com/jake-hansen/agora/log"
 	"time"
+
+	"github.com/jake-hansen/agora/log"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/spf13/viper"
@@ -19,7 +20,7 @@ type Config struct {
 	MaxIdleConns    int
 	ConnMaxLifetime time.Duration
 	dialector       *gorm.Dialector
-	Logger			*log.Log
+	Logger          *log.Log
 }
 
 // Manager manages a connection to a database.

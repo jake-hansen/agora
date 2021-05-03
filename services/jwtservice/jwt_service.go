@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	USAGE_AUTH = "auth"
+	USAGE_AUTH    = "auth"
 	USAGE_REFRESH = "refresh"
 )
 
@@ -27,9 +27,9 @@ type JWTService interface {
 
 // Config contains the parameters for configuring a JWTService.
 type Config struct {
-	Issuer     string
-	SigningKey string
-	Duration   time.Duration
+	Issuer          string
+	SigningKey      string
+	Duration        time.Duration
 	RefreshDuration time.Duration
 }
 
@@ -38,7 +38,7 @@ type JWTServiceImpl struct {
 	config Config
 }
 
-// GenerateToken creates a JWT for the specified User and returns the token as a string.
+// GenerateToken creates a JWT for the specified User and returns the token.
 func (j *JWTServiceImpl) GenerateAuthToken(user domain.User) (*domain.AuthToken, error) {
 	now := time.Now()
 	expiry := now.Add(j.config.Duration)
@@ -52,7 +52,7 @@ func (j *JWTServiceImpl) GenerateAuthToken(user domain.User) (*domain.AuthToken,
 			Subject:   user.Username,
 		},
 		UserID: user.ID,
-		Usage: USAGE_AUTH,
+		Usage:  USAGE_AUTH,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -63,14 +63,15 @@ func (j *JWTServiceImpl) GenerateAuthToken(user domain.User) (*domain.AuthToken,
 	}
 
 	domainToken := &domain.AuthToken{
-		Value:   domain.TokenValue(t),
-		Expires: expiry,
+		Value:     domain.TokenValue(t),
+		Expires:   expiry,
 		JWTClaims: *claims,
 	}
 
 	return domainToken, nil
 }
 
+// GenerateRefreshToken creates a Refresh JWT for the specified User and returns the token.
 func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain.AuthToken, parentToken *domain.RefreshToken) (*domain.RefreshToken, error) {
 	now := time.Now()
 
@@ -105,11 +106,11 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 			NotBefore: now.Unix(),
 			Subject:   user.Username,
 		},
-		UserID:        user.ID,
-		AuthTokenHash: authSHA,
+		UserID:          user.ID,
+		AuthTokenHash:   authSHA,
 		ParentTokenHash: parentRefreshSHA,
-		Nonce: nonce,
-		Usage: USAGE_REFRESH,
+		Nonce:           nonce,
+		Usage:           USAGE_REFRESH,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -124,15 +125,15 @@ func (j *JWTServiceImpl) GenerateRefreshToken(user domain.User, authToken domain
 		ExpiresAt:       newExpiry,
 		ParentTokenHash: parentRefreshSHA,
 		TokenNonceHash:  nonceSHA,
-		UserID: user.ID,
-		JWTClaims: *claims,
+		UserID:          user.ID,
+		JWTClaims:       *claims,
 	}
 
 	return domainToken, nil
 }
 
-// ValidateToken validates the given token string. If the token is valid, the token string is return as a jwt.Token.
-// Otherwise, a nil token is returned along with an error.
+// ValidateAuthToken validates the given TokenValue as an AuthToken. If the token is valid, the token is returned as
+// an AuthToken. Otherwise, a nil token is returned along with an error.
 func (j *JWTServiceImpl) ValidateAuthToken(token domain.TokenValue) (domain.AuthToken, error) {
 	var claims *domain.AuthClaims
 	_, err := jwt.ParseWithClaims(string(token), &domain.AuthClaims{}, func(token *jwt.Token) (interface{}, error) {
@@ -161,6 +162,8 @@ func (j *JWTServiceImpl) ValidateAuthToken(token domain.TokenValue) (domain.Auth
 	return returnToken, err
 }
 
+// ValidateRefreshToken validates the given TokenValue as a RefreshToken. If the token is valid, the token is returned as
+// a RefreshToken. Otherwise, a nil token is returned along with an error.
 func (j *JWTServiceImpl) ValidateRefreshToken(token domain.TokenValue) (domain.RefreshToken, error) {
 	var claims *domain.RefreshClaims
 	_, err := jwt.ParseWithClaims(string(token), &domain.RefreshClaims{}, func(token *jwt.Token) (interface{}, error) {

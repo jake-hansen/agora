@@ -3,6 +3,8 @@ package meetingplatformhandler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/adapter"
 	"github.com/jake-hansen/agora/api"
@@ -10,25 +12,25 @@ import (
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/domain"
 	"golang.org/x/oauth2"
-	"net/http"
 )
 
 // MeetingPlatformHandler is the handler that manages operations on MeetingPlatforms for the API.
 type MeetingPlatformHandler struct {
 	AuthMiddleware  *authmiddleware.AuthMiddleware
 	PlatformService *domain.MeetingPlatformService
-	OAuthService	*domain.OAuthInfoService
+	OAuthService    *domain.OAuthInfoService
 }
 
-// Register creates three endpoints to manage Health.
-// / 			  (GET)  - Gets all available MeetingPlatforms
-// :platform/auth (POST) - Attempts to authenticate to the specified MeetingPlatform
-// :platform/auth (GET)	 - Attempts to get the Auth for the specified MeetingPlatform
+// Register creates 4 endpoints to manage MeetingPlatforms.
+// / 			      (GET)  - Gets all available MeetingPlatforms
+// /:platform/auth    (POST) - Attempts to authenticate to the specified MeetingPlatform
+// /:platform/auth    (GET)  - Attempts to get the Auth for the specified MeetingPlatform
+// /:userid/platforms (GET)  - GetAllAuth
 func (m *MeetingPlatformHandler) Register(parentGroup *gin.RouterGroup) error {
 	userHandlerGroup := parentGroup.Group("users")
 	userHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
 	{
-		userHandlerGroup.GET("/me/platforms", m.GetAllAuth)
+		userHandlerGroup.GET("/:userid/platforms", m.GetAllAuth)
 	}
 	meetingHandlerGroup := parentGroup.Group("platforms")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())

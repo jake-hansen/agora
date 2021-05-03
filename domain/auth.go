@@ -4,9 +4,10 @@ import (
 	"crypto/sha256"
 	"database/sql/driver"
 	"encoding/hex"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
-	"time"
 )
 
 // Auth contains the credentials needed to begin the authentication process.
@@ -31,18 +32,21 @@ type AuthService interface {
 
 type TokenValue string
 
+// AuthToken represents a JWT used for authentication.
 type AuthToken struct {
-	Value TokenValue
-	Expires time.Time
-	JWTClaims	AuthClaims
+	Value     TokenValue
+	Expires   time.Time
+	JWTClaims AuthClaims
 }
 
+// AuthClaims are the claims that are part of an AuthToken.
 type AuthClaims struct {
 	jwt.StandardClaims
-	UserID	uint	`json:"user_id"`
-	Usage 	string	`json:"usage"`
+	UserID uint   `json:"user_id"`
+	Usage  string `json:"usage"`
 }
 
+// RefreshToken represents a JWT used for refreshing AuthTokens.
 type RefreshToken struct {
 	gorm.Model
 	Value           TokenValue `gorm:"column:token_hash"`
@@ -51,18 +55,20 @@ type RefreshToken struct {
 	ParentTokenHash string
 	UserID          uint
 	Revoked         bool
-	JWTClaims       RefreshClaims	`gorm:"-"`
+	JWTClaims       RefreshClaims `gorm:"-"`
 }
 
+// RefreshClaims are the claims that are part of a RefreshToken.
 type RefreshClaims struct {
 	jwt.StandardClaims
-	UserID uint	`json:"user_id"`
-	AuthTokenHash string	`json:"auth_token_hash"`
-	ParentTokenHash string	`json:"parent_token_hash"`
-	Nonce	string	`json:"nonce"`
-	Usage 	string	`json:"usage"`
+	UserID          uint   `json:"user_id"`
+	AuthTokenHash   string `json:"auth_token_hash"`
+	ParentTokenHash string `json:"parent_token_hash"`
+	Nonce           string `json:"nonce"`
+	Usage           string `json:"usage"`
 }
 
+// Hash returns the hash of the RefreshToken's Value.
 func (r RefreshToken) Hash() string {
 	return r.Value.hash()
 }
@@ -88,6 +94,7 @@ func (r *TokenValue) Scan(src interface{}) error {
 	return nil
 }
 
+// RefreshTokenRepository stores information about RefreshTokens.
 type RefreshTokenRepository interface {
 	Create(token RefreshToken) (uint, error)
 	GetAll() ([]*RefreshToken, error)
@@ -97,6 +104,7 @@ type RefreshTokenRepository interface {
 	Delete(ID uint) error
 }
 
+// RefreshTokenService manages operations on RefreshTokens.
 type RefreshTokenService interface {
 	SaveNewRefreshToken(token RefreshToken) (uint, error)
 	ReplaceRefreshToken(token RefreshToken) error
@@ -104,6 +112,7 @@ type RefreshTokenService interface {
 	RevokeLatestRefreshTokenByNonce(token RefreshToken) error
 }
 
+// TokenSet is a set containing an AuthToken and RefreshToken.
 type TokenSet struct {
 	Auth    AuthToken
 	Refresh RefreshToken

@@ -58,12 +58,13 @@ type UserRepository interface {
 	Delete(ID uint) error
 }
 
-// UserService manages processesing information about a User.
+// UserService manages processing information about a User.
 type UserService interface {
 	Register(user *User) (uint, error)
 	Validate(credentials *Credentials) (*User, error)
 	GetAll() ([]*User, error)
 	GetByID(ID uint) (*User, error)
+	GetByUsername(username string) (*User, error)
 	Update(user *User) error
 	Delete(ID uint) error
 }

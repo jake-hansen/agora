@@ -1,5 +1,6 @@
 package webexdomain
 
+// Meeting represents a meeting.
 type Meeting struct {
 	ID        string `json:"id,omitempty"`
 	Title     string `json:"title"`
@@ -12,6 +13,7 @@ type Meeting struct {
 	SendEmail bool   `json:"sendEmail"`
 }
 
+// MeetingList represents a list of meetings.
 type MeetingList struct {
 	Items []*Meeting `json:"items"`
 }

@@ -20,10 +20,10 @@ func UserDTOToDomain(user *dto.User) *domain.User {
 // Note that the returned representation will NEVER contain the password hash.
 func UserDomainToDTO(user *domain.User) *dto.User {
 	resultUser := &dto.User{
+		ID:        user.ID,
 		Firstname: user.Firstname,
 		Lastname:  user.Lastname,
 		Username:  user.Username,
-		Password:  "",
 	}
 	return resultUser
 }

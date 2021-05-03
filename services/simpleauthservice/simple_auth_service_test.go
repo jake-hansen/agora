@@ -2,9 +2,10 @@ package simpleauthservice_test
 
 import (
 	"errors"
-	"github.com/jake-hansen/agora/services/mocks/refreshtokenservicemock"
 	"testing"
 	"time"
+
+	"github.com/jake-hansen/agora/services/mocks/refreshtokenservicemock"
 
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
