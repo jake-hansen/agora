@@ -1,12 +1,13 @@
 package middleware
 
 import (
-	"github.com/gin-contrib/zap"
+	"time"
+
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/google/wire"
 	"github.com/jake-hansen/agora/api/middleware/corsmiddleware"
 	"github.com/jake-hansen/agora/log"
-	"time"
 )
 
 // ProvideAllProductionMiddleware provides all the middleware that will be used in production.
