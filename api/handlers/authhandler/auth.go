@@ -2,11 +2,12 @@ package authhandler
 
 import (
 	"errors"
+	"net/http"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"github.com/jake-hansen/agora/services/simpleauthservice"
-	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -18,14 +19,15 @@ import (
 
 // AuthHandler is the handler that manages authentication for the API.
 type AuthHandler struct {
-	AuthService *domain.AuthService
-	CookieService *domain.CookieService
-	AuthMiddleware  *authmiddleware.AuthMiddleware
+	AuthService    *domain.AuthService
+	CookieService  *domain.CookieService
+	AuthMiddleware *authmiddleware.AuthMiddleware
 }
 
-// Register creates two endpoints to handle login and logout functionality.
-// / (POST) - 	Login
-// / (DELETE) - Logout
+// Register creates three endpoints to handle login, logout, and refresh functionality.
+// / 		(POST)   - Login
+// / 		(DELETE) - Logout
+// /refresh (POST)   - Refresh
 func (a *AuthHandler) Register(parentGroup *gin.RouterGroup) error {
 	authGroup := parentGroup.Group("auth")
 	{
@@ -89,6 +91,7 @@ func (a *AuthHandler) Logout(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// Refresh attempts to preform a refresh for a user's auth token.
 func (a *AuthHandler) Refresh(c *gin.Context) {
 	refreshTokenCookie, err := c.Cookie("refresh")
 	if err != nil {

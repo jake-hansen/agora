@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/api/dto"
 	"github.com/jake-hansen/agora/api/handlers/authhandler"
@@ -13,10 +18,6 @@ import (
 	"github.com/jake-hansen/agora/services/mocks/cookieservicemock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 var domainMockCredentials = domain.Auth{
@@ -26,11 +27,11 @@ var domainMockCredentials = domain.Auth{
 	},
 }
 var domainMockToken = domain.TokenSet{
-	Auth:    domain.AuthToken{
-		Value:   "test-token",
+	Auth: domain.AuthToken{
+		Value: "test-token",
 	},
 	Refresh: domain.RefreshToken{
-		Value:   "test-token",
+		Value: "test-token",
 	},
 }
 

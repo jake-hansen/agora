@@ -5,7 +5,7 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
-// Provide provides a new UserHandler containing the given UserService.
+// Provide provides a new UserHandler containing the given UserService and AuthMiddleware.
 func Provide(userService domain.UserService, authMiddleware *authmiddleware.AuthMiddleware) *UserHandler {
 	return &UserHandler{
 		UserService:    &userService,
