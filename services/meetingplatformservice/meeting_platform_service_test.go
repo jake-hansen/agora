@@ -1,17 +1,18 @@
- package meetingplatformservice_test
+package meetingplatformservice_test
 
 import (
 	"errors"
+	"testing"
+
 	"github.com/jake-hansen/agora/database/repositories/mocks/meetingplatformrepomock"
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/meetingplatformservice"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"testing"
 )
 
 var mockMeetingPlatform = domain.MeetingPlatform{
-	Name:  "mock meeting provider",
+	Name: "mock meeting provider",
 }
 
 var mockConfiguredPlatforms = []*domain.MeetingPlatform{&mockMeetingPlatform}

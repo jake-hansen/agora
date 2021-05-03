@@ -2,21 +2,21 @@ package simpleauthservice
 
 import (
 	"errors"
+
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/services/jwtservice"
 )
 
 // SimpleAuthService is an AuthenticationService which authenticates credentials based on a username
-// and password combination. SimpleAuthService uses a JWT as a token which is not stored or persisted
-// in any way. It is up to the consumer to reauthenticate upon JWT expiry to ensure continued access.
+// and password combination. SimpleAuthService issues AuthTokens and RefreshTokens which can be used
+// in combination to persist a session.
 type SimpleAuthService struct {
 	jwtService          jwtservice.JWTService
 	userService         domain.UserService
 	refreshTokenService domain.RefreshTokenService
 }
 
-// IsAuthenticated determines whether the given Auth is authenticated. An Auth struct is considered authenticated
-// if the contained JWT is valid.
+// IsAuthenticated determines whether the given TokenValue is a valid AuthToken.
 func (s *SimpleAuthService) IsAuthenticated(token domain.TokenValue) (bool, error) {
 	_, err := s.jwtService.ValidateAuthToken(token)
 	if err != nil {
@@ -25,7 +25,7 @@ func (s *SimpleAuthService) IsAuthenticated(token domain.TokenValue) (bool, erro
 	return true, nil
 }
 
-// Authenticate attempts to authenticate the given Auth. If authenticated, returns a AuthToken. Otherwise,
+// Authenticate attempts to authenticate the given Auth. If authenticated, returns a TokenSet. Otherwise,
 // an error is returned.
 func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, error) {
 	// Validate credentials with database
@@ -54,6 +54,8 @@ func (s *SimpleAuthService) Authenticate(auth domain.Auth) (*domain.TokenSet, er
 	}
 }
 
+// RefreshToken attempts to refresh a user's auth token provided that the given TokenValue
+// is a valid RefreshToken.
 func (s *SimpleAuthService) RefreshToken(token domain.TokenValue) (*domain.TokenSet, error) {
 	parsedToken, err := s.jwtService.ValidateRefreshToken(token)
 	if err != nil {
@@ -100,7 +102,7 @@ func (s *SimpleAuthService) RefreshToken(token domain.TokenValue) (*domain.Token
 	return newTokenSet, nil
 }
 
-// Deauthenticate is not implemented since JWTs are not persisted in a database.
+// Deauthenticate revokes the provided RefreshToken.
 func (s *SimpleAuthService) Deauthenticate(token domain.TokenValue) error {
 	parsedToken, err := s.jwtService.ValidateRefreshToken(token)
 	if err != nil {

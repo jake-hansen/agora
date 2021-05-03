@@ -3,15 +3,16 @@ package meetingplatformservice
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/jake-hansen/agora/domain"
 	"golang.org/x/oauth2"
-	"strings"
 )
 
 // MeetingPlatformService manages processing information for MeetingPlatforms as well
 // as OAuth authentication for MeetingPlatforms.
 type MeetingPlatformService struct {
-	dbRepo 				domain.MeetingPlatformRepository
+	dbRepo              domain.MeetingPlatformRepository
 	configuredPlatforms map[string]*domain.MeetingPlatform
 }
 
@@ -102,7 +103,7 @@ func (m *MeetingPlatformService) RefreshOAuthToken(ctx context.Context, token *o
 func (m *MeetingPlatformService) combine(platform *domain.MeetingPlatform) (*domain.MeetingPlatform, error) {
 	p := m.configuredPlatforms[strings.ToLower(platform.Name)]
 	if p == nil {
-		return nil,fmt.Errorf("meeting platform with name %s is not configured", platform.Name)
+		return nil, fmt.Errorf("meeting platform with name %s is not configured", platform.Name)
 	} else {
 		p.Model = platform.Model
 		return p, nil

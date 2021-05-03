@@ -5,6 +5,7 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
+// Provide returns a SimpleInviteService configured with the provided InviteRepository, MeetingPlatformService, and OAuthInfoService.
 func Provide(inviteRepo domain.InviteRepository, meetingService domain.MeetingPlatformService, oauthService domain.OAuthInfoService, userService domain.UserService) *SimpleInviteService {
 	return &SimpleInviteService{
 		inviteRepo:     inviteRepo,

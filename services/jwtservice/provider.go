@@ -21,9 +21,9 @@ func Cfg(v *viper.Viper) (*Config, error) {
 	}
 
 	cfg := &Config{
-		Issuer:     v.GetString("jwtservice.issuer"),
-		SigningKey: v.GetString("jwtservice.signingkey"),
-		Duration:   dur,
+		Issuer:          v.GetString("jwtservice.issuer"),
+		SigningKey:      v.GetString("jwtservice.signingkey"),
+		Duration:        dur,
 		RefreshDuration: refreshDur,
 	}
 
