@@ -27,15 +27,15 @@ func Cfg(v *viper.Viper) *zap.Config {
 }
 
 func productionZapConfig() *zap.Config {
-	return &zap.Config {
+	return &zap.Config{
 		Level:       zap.NewAtomicLevelAt(zap.InfoLevel),
 		Development: false,
 		Sampling: &zap.SamplingConfig{
 			Initial:    100,
 			Thereafter: 100,
 		},
-		Encoding:         "json",
-		EncoderConfig:    zapcore.EncoderConfig {
+		Encoding: "json",
+		EncoderConfig: zapcore.EncoderConfig{
 			MessageKey:  "message",
 			LevelKey:    "level",
 			EncodeLevel: zapcore.LowercaseLevelEncoder,
