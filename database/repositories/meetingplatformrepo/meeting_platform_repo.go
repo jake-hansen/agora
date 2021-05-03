@@ -2,6 +2,7 @@ package meetingplatformrepo
 
 import (
 	"fmt"
+
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
 )
@@ -52,7 +53,7 @@ func (m *MeetingPlatformRepo) GetByPlatformName(providerName string) (*domain.Me
 // in order to find the existing record in the database.
 func (m *MeetingPlatformRepo) Update(meetingProvider *domain.MeetingPlatform) error {
 	if err := m.DB.Model(meetingProvider).Updates(domain.MeetingPlatform{
-		Name:  meetingProvider.Name,
+		Name: meetingProvider.Name,
 	}).Error; err != nil {
 		return fmt.Errorf("error updating meeting provider with id %d: %w", meetingProvider.ID, err)
 	}
@@ -66,4 +67,3 @@ func (m *MeetingPlatformRepo) Delete(ID uint) error {
 	}
 	return nil
 }
-

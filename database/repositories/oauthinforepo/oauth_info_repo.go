@@ -2,6 +2,7 @@ package oauthinforepo
 
 import (
 	"fmt"
+
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
 )
@@ -9,7 +10,7 @@ import (
 // OAuthInfoRepo is a repository that holds information about OAuthInfos
 // backed by a database.
 type OAuthInfoRepo struct {
-	DB	*gorm.DB
+	DB *gorm.DB
 }
 
 // Create creates the given OAuthInfo in the database.
@@ -65,8 +66,8 @@ func (o *OAuthInfoRepo) Update(oauthToken *domain.OAuthInfo) error {
 		MeetingPlatformID: oauthToken.MeetingPlatformID,
 		AccessToken:       oauthToken.AccessToken,
 		RefreshToken:      oauthToken.RefreshToken,
-		TokenType: 		   oauthToken.TokenType,
-		Expiry: 		   oauthToken.Expiry,
+		TokenType:         oauthToken.TokenType,
+		Expiry:            oauthToken.Expiry,
 	}).Error; err != nil {
 		return fmt.Errorf("error updating OAuthInfo with ID %d: %w", oauthToken.ID, err)
 	}
@@ -85,10 +86,8 @@ func (o *OAuthInfoRepo) Delete(ID uint) error {
 func (o *OAuthInfoRepo) GetByUserIDAndMeetingPlatformID(userID uint, meetingPlatformID uint) (*domain.OAuthInfo, error) {
 	oauthToken := new(domain.OAuthInfo)
 
-	if err := o.DB.First(oauthToken,"user_id = ? AND meeting_platform_id = ?", userID, meetingPlatformID).Error; err != nil {
+	if err := o.DB.First(oauthToken, "user_id = ? AND meeting_platform_id = ?", userID, meetingPlatformID).Error; err != nil {
 		return nil, fmt.Errorf("error finding OAuthInfo for user id %d with meeting platform id %d: %w", userID, meetingPlatformID, err)
 	}
 	return oauthToken, nil
 }
-
-

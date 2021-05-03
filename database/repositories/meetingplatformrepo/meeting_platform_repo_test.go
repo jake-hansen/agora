@@ -2,6 +2,10 @@ package meetingplatformrepo_test
 
 import (
 	"errors"
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/meetingplatformrepo"
@@ -10,9 +14,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
-	"regexp"
-	"testing"
-	"time"
 )
 
 var mockMeetingPlatform = domain.MeetingPlatform{
@@ -21,7 +22,7 @@ var mockMeetingPlatform = domain.MeetingPlatform{
 		UpdatedAt: time.Now(),
 		DeletedAt: gorm.DeletedAt{},
 	},
-	Name:  "really awesome meeting platform",
+	Name: "really awesome meeting platform",
 }
 
 type Suite struct {
@@ -30,7 +31,7 @@ type Suite struct {
 	repo domain.MeetingPlatformRepository
 }
 
-func (s *Suite) SetupTest()  {
+func (s *Suite) SetupTest() {
 	manager, _, err := database.BuildTest(database.Config{})
 	s.Require().NoError(err)
 
@@ -126,7 +127,7 @@ func (s *Suite) TestMeetingProviderRepo_GetAll() {
 	})
 }
 
-func (s *Suite)TestMeetingProviderRepo_GetByID() {
+func (s *Suite) TestMeetingProviderRepo_GetByID() {
 	getSQL := "SELECT * FROM `meeting_platforms` WHERE `meeting_platforms`.`id` = ? AND " +
 		"`meeting_platforms`.`deleted_at` IS NULL ORDER BY `meeting_platforms`.`id` LIMIT 1"
 
@@ -214,6 +215,6 @@ func (s *Suite) TestMeetingProviderRepo_Update() {
 	})
 }
 
-func TestMeetingProviderRepoSuite(t *testing.T)  {
+func TestMeetingProviderRepoSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
 }
