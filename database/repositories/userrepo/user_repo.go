@@ -2,6 +2,7 @@ package userrepo
 
 import (
 	"fmt"
+
 	"github.com/jake-hansen/agora/database/repositories"
 
 	"github.com/jake-hansen/agora/domain"

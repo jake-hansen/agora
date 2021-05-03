@@ -23,7 +23,7 @@ func ScheduledMeetingDTOToDomain(meeting *dto.Meeting) *domain.Meeting {
 	return domainMeeting
 }
 
-// InstantMeetingDTOToDomain conversts the given instant Meeting from DTO representation to domain representation.
+// InstantMeetingDTOToDomain converts the given instant Meeting from DTO representation to domain representation.
 func InstantMeetingDTOToDomain(meeting *dto.InstantMeeting) *domain.Meeting {
 	domainMeeting := &domain.Meeting{
 		Title:       meeting.Title,

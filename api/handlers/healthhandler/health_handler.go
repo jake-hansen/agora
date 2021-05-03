@@ -1,10 +1,11 @@
 package healthhandler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/adapter"
 	"github.com/jake-hansen/agora/domain"
-	"net/http"
 )
 
 // HealthHandler is the handler that manages operations on Health for the API.
@@ -37,4 +38,3 @@ func (h *HealthHandler) GetHealth(c *gin.Context) {
 		}
 	}
 }
-

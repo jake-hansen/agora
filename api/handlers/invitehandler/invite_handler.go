@@ -3,6 +3,9 @@ package invitehandler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jake-hansen/agora/adapter"
 	"github.com/jake-hansen/agora/api"
@@ -12,16 +15,15 @@ import (
 	"github.com/jake-hansen/agora/domain"
 	"github.com/jake-hansen/agora/platforms/common"
 	"github.com/jake-hansen/agora/services/simpleinviteservice"
-	"net/http"
-	"strconv"
 )
 
+// InviteHandler is the handler that manages Invites.
 type InviteHandler struct {
-	InviteService *domain.InviteService
-	AuthMiddleware *authmiddleware.AuthMiddleware
-	UserService *domain.UserService
+	InviteService   *domain.InviteService
+	AuthMiddleware  *authmiddleware.AuthMiddleware
+	UserService     *domain.UserService
 	PlatformService *domain.MeetingPlatformService
-	OAuthService *domain.OAuthInfoService
+	OAuthService    *domain.OAuthInfoService
 }
 
 func (i *InviteHandler) platformErrorConverter(err error) error {
@@ -49,6 +51,11 @@ func (i *InviteHandler) meetingPlatformValidator(c *gin.Context, platformName st
 	return platform
 }
 
+// Register creates 4 endpoints to handle invite functionality.
+// / 		        (POST)   - SendInvite
+// /:inviteid       (DELETE) - DeleteInvite
+// /:inviteid       (GET)    - GetInvite
+// /:userid/invites (GET)    - GetInvites
 func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 	inviteGroup := parentGroup.Group("/invites")
 	inviteGroup.Use(i.AuthMiddleware.HandleAuth())
@@ -57,7 +64,7 @@ func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 		inviteGroup.DELETE("/:inviteid", i.DeleteInvite)
 		inviteGroup.GET("/:inviteid", i.GetInvite)
 	}
-	
+
 	userGroup := parentGroup.Group("/users")
 	userGroup.Use(i.AuthMiddleware.HandleAuth())
 	{
@@ -67,6 +74,7 @@ func (i *InviteHandler) Register(parentGroup *gin.RouterGroup) error {
 	return nil
 }
 
+// SendInvite creates a new invite.
 func (i *InviteHandler) SendInvite(c *gin.Context) {
 	var invite dto.InviteRequest
 	err := c.ShouldBind(&invite)
@@ -112,7 +120,8 @@ func (i *InviteHandler) SendInvite(c *gin.Context) {
 	c.JSON(http.StatusCreated, resource)
 }
 
-func (i *InviteHandler) GetInvites(c *gin.Context)  {
+// GetInvites gets a collection of invites for a user.
+func (i *InviteHandler) GetInvites(c *gin.Context) {
 	inviteType := c.Query("type")
 	if inviteType != "sent" {
 		if inviteType != "received" {
@@ -160,7 +169,8 @@ func (i *InviteHandler) GetInvites(c *gin.Context)  {
 	c.JSON(http.StatusOK, dtoInvites)
 }
 
-func (i *InviteHandler) DeleteInvite(c *gin.Context)  {
+// DeleteInvite deletes the specified invite.
+func (i *InviteHandler) DeleteInvite(c *gin.Context) {
 	inviteIDStr := c.Param("inviteid")
 	inviteID, err := strconv.Atoi(inviteIDStr)
 	if err != nil {
@@ -178,7 +188,7 @@ func (i *InviteHandler) DeleteInvite(c *gin.Context)  {
 	invite, err := (*i.InviteService).GetInvite(uint(inviteID))
 	if err != nil {
 		var notFoundErr repositories.NotFoundError
-		if  errors.As(err, &notFoundErr){
+		if errors.As(err, &notFoundErr) {
 			err = api.NewAPIError(http.StatusNotFound, err, fmt.Sprintf("invite with id %s not found", inviteIDStr))
 		}
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
@@ -201,6 +211,7 @@ func (i *InviteHandler) DeleteInvite(c *gin.Context)  {
 	c.Status(http.StatusNoContent)
 }
 
+// GetInvite gets a requested invite.
 func (i *InviteHandler) GetInvite(c *gin.Context) {
 	inviteIDParam := c.Param("inviteid")
 	inviteID, err := strconv.Atoi(inviteIDParam)

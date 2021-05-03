@@ -2,8 +2,9 @@ package userhandler
 
 import (
 	"errors"
-	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 	"net/http"
+
+	"github.com/jake-hansen/agora/api/middleware/authmiddleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -15,12 +16,14 @@ import (
 
 // UserHandler is the handler that manages operations on Users for the API.
 type UserHandler struct {
-	UserService *domain.UserService
+	UserService    *domain.UserService
 	AuthMiddleware *authmiddleware.AuthMiddleware
 }
 
-// Register creates one endpoint to manage Users.
-// / (POST) - Register new user
+// Register creates 3 endpoints to manage Users.
+// /        (POST) - RegisterUser
+// /        (GET)  - GetAllUsers
+// /:userid (GET)  - GetUser
 func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	userGroup := parentGroup.Group("users")
 	authenticatedUserGroup := parentGroup.Group("users")
@@ -28,7 +31,7 @@ func (u *UserHandler) Register(parentGroup *gin.RouterGroup) error {
 	{
 		userGroup.POST("", u.RegisterUser)
 		userGroup.GET("/:userid", u.GetUser)
-		authenticatedUserGroup.GET("", u.SearchUsers)
+		authenticatedUserGroup.GET("", u.GetAllUsers)
 	}
 	return nil
 }
@@ -62,6 +65,7 @@ func (u *UserHandler) RegisterUser(c *gin.Context) {
 	}
 }
 
+// GetUser gets a user.
 func (u *UserHandler) GetUser(c *gin.Context) {
 	userID := c.Param("userid")
 
@@ -81,9 +85,8 @@ func (u *UserHandler) GetUser(c *gin.Context) {
 	c.JSON(http.StatusOK, adapter.UserDomainToDTO(user))
 }
 
-func (u *UserHandler) SearchUsers(c *gin.Context) {
-	_ = c.Query("username")
-
+// GetAllUsers gets all users.
+func (u *UserHandler) GetAllUsers(c *gin.Context) {
 	users, err := (*u.UserService).GetAll()
 	if err != nil {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
@@ -91,7 +94,7 @@ func (u *UserHandler) SearchUsers(c *gin.Context) {
 	}
 
 	var userList []*dto.User
-	for _, user := range(users) {
+	for _, user := range users {
 		userList = append(userList, adapter.UserDomainToDTO(user))
 	}
 

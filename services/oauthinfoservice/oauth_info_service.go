@@ -2,14 +2,15 @@ package oauthinfoservice
 
 import (
 	"context"
+
 	"github.com/jake-hansen/agora/domain"
 	"golang.org/x/oauth2"
 )
 
 // OAuthInfoService processes information about OAuthInfos.
 type OAuthInfoService struct {
-	platformService	domain.MeetingPlatformService
-	repo 			domain.OAuthInfoRepository
+	platformService domain.MeetingPlatformService
+	repo            domain.OAuthInfoRepository
 }
 
 // CreateOAuthInfo creates an OAuthInfo in the repository by exchanging the given authorization with the MeetingPlatform.
@@ -71,6 +72,8 @@ func (o *OAuthInfoService) GetOAuthInfo(userID uint, platform *domain.MeetingPla
 	}
 }
 
+// GetAllAuthenticatedPlatforms gets all MeetingPlatforms a User with the provided userID has authenticated
+// with.
 func (o *OAuthInfoService) GetAllAuthenticatedPlatforms(userID uint) ([]*domain.MeetingPlatform, error) {
 	oauthInfos, err := o.repo.GetAllByUserID(userID)
 	if err != nil {
@@ -93,9 +96,9 @@ func (o *OAuthInfoService) GetAllAuthenticatedPlatforms(userID uint) ([]*domain.
 
 func restoreToken(oauthInfo *domain.OAuthInfo) oauth2.Token {
 	return oauth2.Token{
-		AccessToken: oauthInfo.AccessToken,
+		AccessToken:  oauthInfo.AccessToken,
 		RefreshToken: oauthInfo.RefreshToken,
-		Expiry: oauthInfo.Expiry,
-		TokenType: oauthInfo.TokenType,
+		Expiry:       oauthInfo.Expiry,
+		TokenType:    oauthInfo.TokenType,
 	}
 }

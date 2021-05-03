@@ -89,10 +89,10 @@ func (z *ZoomActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*dom
 	return zoomadapter.ZoomMeetingToDomainMeeting(meeting), nil
 }
 
+// DeleteMeeting deletes a meeting.
 func (z *ZoomActions) DeleteMeeting(oauth domain.OAuthInfo, meetingID string) error {
 	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 
 	err := common.DeleteMeeting("Webex", z.Client, BaseURLV2+reqURL, oauth, nil, http.StatusNoContent, meetingID)
 	return err
 }
-

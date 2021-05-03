@@ -18,5 +18,3 @@ func NewRefreshTokenReuseError() RefreshTokenReuse {
 func (r RefreshTokenReuse) Error() string {
 	return "the refresh token was reused"
 }
-
-

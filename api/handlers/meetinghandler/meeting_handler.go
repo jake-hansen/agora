@@ -22,7 +22,7 @@ type MeetingHandler struct {
 	AuthMiddleware  *authmiddleware.AuthMiddleware
 	PlatformService *domain.MeetingPlatformService
 	OAuthService    *domain.OAuthInfoService
-	InviteService	*domain.InviteService
+	InviteService   *domain.InviteService
 }
 
 func (m *MeetingHandler) meetingPlatformValidator(c *gin.Context, platformName string) *domain.MeetingPlatform {
@@ -52,10 +52,12 @@ func (m *MeetingHandler) validateHelper(err error) error {
 	return err
 }
 
-// Register creates 3 endpoints to manage meetings
-// /me/platforms/:platform/meetings (GET) - retrieves all meetings for the authenticated user on the specified platform
-// /me/platforms/:platform/meetings (POST) - creates a new meeting for the authenticated user on the specified platform
-// /me/platforms/:platform/meetings/:id (GET) - retrieves the specified meeting for the authenticated user on the specified platform
+// Register creates 4 endpoints to manage meetings
+//
+// /:userid/platforms/:platform/meetings            (GET)    - GetMeetings
+// /:userid/platforms/:platform/meetings            (POST)   - CreateMeeting
+// /:userid/platforms/:platform/meetings/:meetingid (GET)    - GetMeeting
+// /:userid/platforms/:platform/meetings/:meetingid (DELETE) - DeleteMeeting
 func (m *MeetingHandler) Register(parentGroup *gin.RouterGroup) error {
 	meetingHandlerGroup := parentGroup.Group("users")
 	meetingHandlerGroup.Use(m.AuthMiddleware.HandleAuth())
@@ -84,7 +86,7 @@ func (m *MeetingHandler) platformErrorConverter(err error) error {
 	return apiErr
 }
 
-// CreateMeeting creates a meeting
+// CreateMeeting creates a meeting.
 func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
 
@@ -139,7 +141,7 @@ func (m *MeetingHandler) CreateMeeting(c *gin.Context) {
 	c.JSON(http.StatusCreated, adapter.MeetingDomainToDTO(createdMeeting))
 }
 
-// GetMeeting gets all meetings
+// GetMeetings gets all meetings.
 func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	platformName := c.Param("platform")
 	pageSize := c.Query("page_size")
@@ -184,7 +186,7 @@ func (m *MeetingHandler) GetMeetings(c *gin.Context) {
 	c.JSON(http.StatusOK, adapter.MeetingPageDomainToDTO(meetings))
 }
 
-// GetMeeting gets a single meeting
+// GetMeeting gets a single meeting.
 func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
 	meetingID := c.Param("meetingid")
@@ -218,6 +220,7 @@ func (m *MeetingHandler) GetMeeting(c *gin.Context) {
 	c.JSON(http.StatusOK, adapter.MeetingDomainToDTO(meeting))
 }
 
+// DeleteMeeting deletes a meeting.
 func (m *MeetingHandler) DeleteMeeting(c *gin.Context) {
 	platformName := c.Param("platform")
 	meetingID := c.Param("meetingid")

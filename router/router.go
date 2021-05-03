@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+
 	"github.com/jake-hansen/agora/api/validator"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ type Config struct {
 	Middleware     []gin.HandlerFunc
 	HandlerManager *handlers.HandlerManager
 	RootEndpoint   string
-	Validator	   *validator.Validator
+	Validator      *validator.Validator
 }
 
 // Router contains the engine and Config for routing requests.

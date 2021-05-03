@@ -15,16 +15,19 @@ const (
 	BaseURLV1 = "https://webexapis.com/v1"
 )
 
+// WebexActions contains actions that can be performed on the Webex API.
 type WebexActions struct {
 	Client *http.Client
 }
 
+// NewWebex returns a WebexActions configured with a default http.Client.
 func NewWebex() *WebexActions {
 	return &WebexActions{Client: &http.Client{
 		Timeout: time.Minute,
 	}}
 }
 
+// CreateMeeting creates a meeting.
 func (w *WebexActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Meeting) (*domain.Meeting, error) {
 	url := "/meetings"
 
@@ -39,6 +42,7 @@ func (w *WebexActions) CreateMeeting(oauth domain.OAuthInfo, meeting *domain.Mee
 	return webexadapter.WebexMeetingToDomainMeeting(meetingResponse), nil
 }
 
+// GetMeetings gets all meetings for a user.
 func (w *WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRequest) (*domain.Page, error) {
 	reqURL := "/meetings"
 
@@ -51,6 +55,7 @@ func (w *WebexActions) GetMeetings(oauth domain.OAuthInfo, pageReq domain.PageRe
 	return webexadapter.WebexMeetingListToDomainMeetingPage(meetings), nil
 }
 
+// GetMeeting gets a meeting.
 func (w *WebexActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*domain.Meeting, error) {
 	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 
@@ -63,6 +68,7 @@ func (w *WebexActions) GetMeeting(oauth domain.OAuthInfo, meetingID string) (*do
 	return webexadapter.WebexMeetingToDomainMeeting(meeting), nil
 }
 
+// DeleteMeeting deletes a meeting.
 func (w *WebexActions) DeleteMeeting(oauth domain.OAuthInfo, meetingID string) error {
 	reqURL := "/meetings/" + url.QueryEscape(meetingID)
 

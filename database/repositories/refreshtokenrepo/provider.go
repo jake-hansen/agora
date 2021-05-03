@@ -6,6 +6,7 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
+// Provide returns a RefreshTokenRepo configured with the provided Manager.
 func Provide(manager *database.Manager) *RefreshTokenRepo {
 	return &RefreshTokenRepo{DB: manager.DB}
 }

@@ -3,11 +3,12 @@ package healthservice
 import (
 	"errors"
 	"fmt"
+
 	"github.com/jake-hansen/agora/domain"
 	"gorm.io/gorm"
 )
 
-var schemaVersion = 9
+var schemaVersion = 10
 
 // HealthService is a service which processes information about the application's health.
 type HealthService struct {
@@ -55,4 +56,3 @@ func (h *HealthService) backwardsCompatibleVersionHealthCheck(neededVersion int)
 		return health, nil
 	}
 }
-

@@ -57,7 +57,8 @@ database:
   port:
   # Name of the database or schema to use.
   name:
-# Configuration details for meeting platforms.
+# Configuration details for meeting platforms. Each configured platform should
+# follow the Zoom example below.
 platforms:
   zoom:
     oauth:

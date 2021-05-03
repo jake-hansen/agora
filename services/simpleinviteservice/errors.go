@@ -1,6 +1,6 @@
 package simpleinviteservice
 
-type InviterSameAsInviteeErr struct {}
+type InviterSameAsInviteeErr struct{}
 
 func NewInviterSameAsInviteeErr() InviterSameAsInviteeErr {
 	return InviterSameAsInviteeErr{}
@@ -9,4 +9,3 @@ func NewInviterSameAsInviteeErr() InviterSameAsInviteeErr {
 func (i InviterSameAsInviteeErr) Error() string {
 	return "inviter cannot be the invitee"
 }
-

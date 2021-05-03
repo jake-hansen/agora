@@ -6,6 +6,7 @@ import (
 	"github.com/jake-hansen/agora/domain"
 )
 
+// Provide returns an InviteRepo configured with the provided Manager.
 func Provide(manager *database.Manager) *InviteRepo {
 	return &InviteRepo{DB: manager.DB}
 }

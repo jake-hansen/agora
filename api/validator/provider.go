@@ -27,6 +27,6 @@ func ProvideCustomValidationFuncs() []CustomValidationFunc {
 }
 
 var (
-	// ProviderSet provides a Validator
+	// ProviderSet provides a Validator.
 	ProviderSet = wire.NewSet(Provide, Cfg, ProvideCustomValidationFuncs)
 )

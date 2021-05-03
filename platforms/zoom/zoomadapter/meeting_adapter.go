@@ -8,6 +8,7 @@ import (
 	"github.com/jake-hansen/agora/platforms/zoom/zoomdomain"
 )
 
+// DomainMeetingToZoomMeeting converts a Meeting from domain representation to Zoom representation.
 func DomainMeetingToZoomMeeting(meeting domain.Meeting) *zoomdomain.Meeting {
 	durationMinutes := meeting.Duration.Round(time.Minute)
 	gmt := meeting.StartTime.Format(time.RFC3339)
@@ -22,6 +23,7 @@ func DomainMeetingToZoomMeeting(meeting domain.Meeting) *zoomdomain.Meeting {
 	return zoom
 }
 
+// ZoomMeetingToDomainMeeting converts a meeting from Zoom representation to domain representation.
 func ZoomMeetingToDomainMeeting(meeting zoomdomain.Meeting) *domain.Meeting {
 	parsedTime, _ := time.Parse(time.RFC3339, meeting.StartTime)
 
@@ -37,6 +39,7 @@ func ZoomMeetingToDomainMeeting(meeting zoomdomain.Meeting) *domain.Meeting {
 	return domainMeeting
 }
 
+// ZoomMeetingListToDomainMeetingPage converts a MeetingList to a Page.
 func ZoomMeetingListToDomainMeetingPage(meetingList zoomdomain.MeetingList) *domain.Page {
 	var meetings []interface{}
 	for _, meeting := range meetingList.Meetings {

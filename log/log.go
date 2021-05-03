@@ -13,7 +13,7 @@ type Log struct {
 func NewLog(cfg *zap.Config) (*Log, error) {
 	logger, err := cfg.Build()
 	if err != nil {
-		return nil,  err
+		return nil, err
 	}
 
 	return &Log{logger}, nil

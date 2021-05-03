@@ -7,6 +7,7 @@ import (
 	"github.com/jake-hansen/agora/platforms/webex/webexdomain"
 )
 
+// DomainMeetingToWebexMeeting converts a Meeting from domain representation to Webex representation.
 func DomainMeetingToWebexMeeting(meeting domain.Meeting) *webexdomain.Meeting {
 	if meeting.Type == domain.TypeInstant {
 		meeting.StartTime = time.Now().Add(time.Second * 30)
@@ -33,6 +34,7 @@ func DomainMeetingToWebexMeeting(meeting domain.Meeting) *webexdomain.Meeting {
 	return webex
 }
 
+// WebexMeetingToDomainMeeting converts a Meeting from Webex representation to domain representation.
 func WebexMeetingToDomainMeeting(meeting webexdomain.Meeting) *domain.Meeting {
 	startTime, _ := time.Parse(time.RFC3339, meeting.Start)
 	endTime, _ := time.Parse(time.RFC3339, meeting.End)
@@ -51,6 +53,7 @@ func WebexMeetingToDomainMeeting(meeting webexdomain.Meeting) *domain.Meeting {
 	return domainMeeting
 }
 
+// WebexMeetingListToDomainMeetingPage converts a MeetingList to a Page.
 func WebexMeetingListToDomainMeetingPage(meetingList webexdomain.MeetingList) *domain.Page {
 	size := len(meetingList.Items)
 	var meetings []interface{}
@@ -61,7 +64,7 @@ func WebexMeetingListToDomainMeetingPage(meetingList webexdomain.MeetingList) *d
 	page := &domain.Page{
 		PageCount:         0,
 		PageNumber:        1,
-		PageSize: 		   size,
+		PageSize:          size,
 		TotalRecords:      size,
 		NextPageToken:     "",
 		PreviousPageToken: "",

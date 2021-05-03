@@ -11,6 +11,7 @@ const (
 	TypeRecurrenceMonthly = 3
 )
 
+// Meeting represents a meeting.
 type Meeting struct {
 	ID          int         `json:"id"`
 	Topic       string      `json:"topic"`
@@ -53,6 +54,7 @@ type Settings struct {
 	AutoRecording    string `json:"auto_recording"`
 }
 
+// MeetingList represents a list of Meetings.
 type MeetingList struct {
 	PageCount     int        `json:"page_count"`
 	PageNumber    int        `json:"page_number"`

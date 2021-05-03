@@ -3,6 +3,10 @@ package oauthinforepo_test
 import (
 	"database/sql/driver"
 	"errors"
+	"regexp"
+	"testing"
+	"time"
+
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jake-hansen/agora/database"
 	"github.com/jake-hansen/agora/database/repositories/oauthinforepo"
@@ -11,13 +15,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
-	"regexp"
-	"testing"
-	"time"
 )
 
 var mockOAuthInfo = domain.OAuthInfo{
-	Model:             gorm.Model{
+	Model: gorm.Model{
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		DeletedAt: gorm.DeletedAt{},
@@ -26,8 +27,8 @@ var mockOAuthInfo = domain.OAuthInfo{
 	MeetingPlatformID: uint(123456),
 	AccessToken:       "random-access-token",
 	RefreshToken:      "random-refresh-token",
-	TokenType:		   "bearer",
-	Expiry: 		   time.Now().Add(1 * time.Hour),
+	TokenType:         "bearer",
+	Expiry:            time.Now().Add(1 * time.Hour),
 }
 
 var columnNames = []string{"id", "created_at", "updated_at", "deleted_at", "user_id", "meeting_platform_id", "access_token", "refresh_token", "token_type", "expiry"}
@@ -217,7 +218,7 @@ func (s *Suite) TestOAuthInfoRepo_GetByID() {
 
 		require.NoError(t, err)
 		assert.Equal(t, &mockOAuthInfo, oauthinfo)
-})
+	})
 
 	s.T().Run("failure", func(t *testing.T) {
 		defer assert.NoError(t, s.mock.ExpectationsWereMet())

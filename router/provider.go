@@ -15,7 +15,7 @@ func Cfg(v *viper.Viper, middleware []gin.HandlerFunc, handlerManager *handlers.
 		Middleware:     middleware,
 		HandlerManager: handlerManager,
 		RootEndpoint:   v.GetString("api.endpoints.root"),
-		Validator: 		validator,
+		Validator:      validator,
 	}
 
 	return cfg, nil
